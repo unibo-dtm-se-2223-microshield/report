@@ -1,10 +1,25 @@
-title: Project work template
-description: A starter template for Software Engineering project work!
+title: "MicroShield"
+description: "Embedded C Firewall Engine & Python MLOps Fleet Orchestrator"
 remote_theme: pmarsceill/just-the-docs
 color_scheme: "light"
 search_enabled: true
+
+# Base URL settings for GitHub Pages deployment
+url: "https://unibo-dtm-se-2223-microshield.github.io"
+baseurl: "/report"
+
+# Quick links displayed in the upper navigation bar
+aux_links:
+  "Software Artifact":
+    - "https://github.com/unibo-dtm-se-2223-microshield/artifact"
+  "Report Repository":
+    - "https://github.com/unibo-dtm-se-2223-microshield/report"
+
+heading_anchors: true
+
 plugins:
   - jekyll-remote-theme
+
 defaults:
   - scope:
       path: ""
