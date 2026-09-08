@@ -10,13 +10,13 @@ nav_order: 2
 
 The accelerated digital transformation of modern industrial environments—conceptualized under Industry 4.0 and Cyber-Physical Systems (CPS)—relies on pervasive connectivity among physical operational technologies (OT), distributed field sensing nodes, and central supervisory computing platforms [1], [2]. In manufacturing plants, energy distribution grids, and smart infrastructure, low-power microcontrollers (MCUs) serve as the fundamental execution layer for data acquisition, physical actuation, and real-time fieldbus networking [2]. However, this widespread connectivity has dismantled the traditional security model based on the physical isolation of air-gapped networks [1].
 
-Industrial IoT (IIoT) edge nodes are continuously exposed to network-level cyber threats, ranging from volumetric Denial of Service (DoS/DDoS) floods to stealthy network probing, ARP/DNS cache poisoning, and unauthorized payload injection [1], [2]. While high-end enterprise servers and cloud infrastructure defend boundaries using multi-layered firewalls and deep packet inspection (DPI) engines, field-level sensing and control devices remain unprotected [2].
+Industrial IoT (IIoT) edge nodes are continuously exposed to network-level cyber threats, ranging from volumetric Denial of Service (DoS/DDoS) floods to stealthy network probing, ARP/DNS cache poisoning, and unauthorized payload injection [1], [2]. While high-end enterprise servers and cloud infrastructure defend boundaries using multi-layered intrusion detection systems (IDS) and deep packet inspection (DPI) engines, field-level sensing and control devices remain unprotected [2].
 
 Microcontroller platforms, such as the ARM Cortex-M architecture, operate under strict computational and hardware constraints:
 - **Stringent Memory Boundaries:** Static RAM (SRAM) is typically constrained to tens or hundreds of kilobytes (e.g., 192 KB on the STM32F407 family), alongside limited non-volatile Flash storage (e.g., 1024 KB).
 - **Absence of Virtual Memory Architecture:** These microcontrollers lack a hardware Memory Management Unit (MMU), executing firmware bare-metal or on top of lightweight real-time kernels such as FreeRTOS.
 - **Prohibition of Dynamic Heap Allocation:** Mission-critical and safety-regulated firmware standards (e.g., MISRA C) strictly deprecate dynamic heap management (`malloc`, `free`) to prevent runtime non-determinism, memory exhaustion, and catastrophic heap fragmentation.
-- **Deterministic Latency Constraints:** Hard real-time control loops demand predictable, bounded execution times. A defensive monitoring routine that introduces variable execution jitter directly compromises physical system stability.
+- **Ultra-Low-Power and Deterministic Latency Constraints:** Edge sensing devices often run on energy-harvesting or battery-backed profiles requiring aggressive sleep modes. Defensive monitoring routines must be computationally lightweight and execute in bounded, deterministic time (O(depth)) without introducing operational jitter or depleting thermal and power budgets.
 
 Consequently, standard intrusion detection agents cannot run on bare-metal or RTOS-level microcontrollers. When adversaries target industrial field networks, edge nodes experience resource starvation, firmware lockups, or remote hijacking, jeopardizing human safety and operational continuity [1], [2].
 
@@ -34,7 +34,7 @@ Regulatory frameworks are enforcing mandatory security-by-design standards acros
 Deploying field microcontrollers without embedded defense mechanisms introduces immediate legal, operational, and commercial exposure for equipment vendors and industrial facility operators.
 
 ### 1.2.2 Quantifiable Economic Impact & Downtime Mitigation
-In modern automated manufacturing, unplanned industrial downtime costs between $10,000 and $250,000 per hour depending on plant throughput. A single compromised field sensor emitting malformed traffic on an industrial fieldbus (such as Modbus/TCP) can cascade into an emergency shutdown of a programmable logic controller (PLC) [2]. Furthermore, industrial insurers increasingly require documented technical security controls before issuing cyber insurance policies. Incorporating deterministic packet filtering at the MCU level lowers underwriting risk profiles, leading directly to reduced insurance premiums.
+In modern automated manufacturing, unplanned industrial downtime costs between $10,000 and $250,000 per hour depending on plant throughput. A single compromised field sensor emitting malformed traffic on an industrial fieldbus (such as Modbus/TCP) can cascade into an emergency shutdown of a programmable logic controller (PLC) [2]. Furthermore, industrial insurers increasingly require documented technical security controls before issuing cyber insurance policies. Incorporating deterministic packet inspection at the MCU level lowers underwriting risk profiles, leading directly to reduced insurance premiums.
 
 ---
 
@@ -48,7 +48,7 @@ To establish the contribution of MicroShield, its architectural boundary is cont
 | **Operating System** | **Exein Core** | Embedded Linux (Kernel / eBPF) | Intercepts system calls and network sockets via kernel eBPF probes. Requires an MMU, multi-core gigahertz processors, and megabytes of RAM. | Differentiating. MicroShield addresses the operational space below Linux, targeting bare-metal and RTOS platforms where eBPF cannot execute. |
 | **Network Gateway** | **Snort / Suricata / Zeek** | Enterprise Servers / Edge Gateways [2] | Deep packet inspection over complex protocols. Requires gigabytes of system memory, complex runtime engines, and high computational power [1], [2]. | Differentiating. MicroShield brings line-rate, bounded packet validation directly inside the endpoint microcontroller boundary before payload ingestion. |
 
-MicroShield bridges the operational gap between hardware-level Root-of-Trust primitives and high-level Linux/gateway security software, providing an autonomous, deterministic packet firewall inside ultra-constrained field nodes.
+MicroShield bridges the operational gap between hardware-level Root-of-Trust primitives and high-level Linux/gateway security software, providing an autonomous, deterministic intrusion detection system inside ultra-constrained field nodes.
 
 ---
 
@@ -57,11 +57,11 @@ MicroShield bridges the operational gap between hardware-level Root-of-Trust pri
 MicroShield is architected as a **heterogeneous multi-platform software system** composed of two complementary subsystems:
 
 1. **The Edge Runtime Tier (MicroShield C-Engine):**
-   - **Form Factor:** Static, portable C99 software library.
+   - **Form Factor:** Static, portable C99 software library optimized for ultra-low-power embedded targets.
    - **Target Environment:** Embedded microcontrollers (validated on the STMicroelectronics STM32 Nucleo-F407RE board featuring an ARM Cortex-M4 core running at 168 MHz).
    - **Operational Mode:** Fast Path inline packet inspection for communication peripherals (UART, SPI, Ethernet).
-   - **Algorithmic Engine:** Transpiled Decision Tree classifier. The classification graph is compiled into nested conditional statements and static lookup tables, guaranteeing a bounded execution time of $O(\text{depth})$ and zero dynamic heap allocation.
-   - **Explainability (XAI):** Rather than returning an opaque classification score, the engine outputs the exact rule identifier and feature threshold that triggered the event, providing immediate explainability for every firewall decision.
+   - **Algorithmic Engine:** Transpiled Decision Tree classifier. The classification graph is compiled into nested conditional statements and static lookup tables, guaranteeing a bounded execution time of O(depth) and zero dynamic heap allocation.
+   - **Explainability (XAI):** Rather than returning an opaque classification score, the engine outputs the exact rule identifier and feature threshold that triggered the anomaly, providing immediate explainability for every detection event.
 
 2. **The Supervisory Management Tier (MicroShield Fleet Orchestrator):**
    - **Form Factor:** Python 3 orchestration suite and interactive web dashboard.
@@ -73,7 +73,7 @@ MicroShield is architected as a **heterogeneous multi-platform software system**
 
 The operational interaction between the deterministic edge engine and the supervisory management tier is depicted in the following architectural model:
 
-![MicroShield High-Level Conceptual Architecture](pictures/conceptual_architecture.png)
+![MicroShield High-Level Conceptual Architecture](../../pictures/conceptual_architecture.png)
 
 The edge engine inspects inbound frames on the fast path. If a frame is classified as benign, it is passed immediately to the core firmware application without latency penalties. When an anomalous or ambiguous packet is intercepted, the edge engine isolates the threat, enforces rate-limiting policies, and dispatches a compact telemetry record over a dedicated serial channel to the Python fleet orchestrator. The supervisory tier processes telemetry, detects concept drift, incorporates human-in-the-loop validation, and drives the automated retraining pipeline.
 
