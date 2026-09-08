@@ -1,0 +1,76 @@
+@startuml conceptual_architecture
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName Arial
+skinparam roundcorner 8
+skinparam shadowing false
+
+skinparam state {
+    BackgroundColor #F8F9FA
+    BorderColor #2B2D42
+    ArrowColor #2B2D42
+    FontColor #2B2D42
+}
+
+skinparam note {
+    BackgroundColor #EDF2F4
+    BorderColor #8D99AE
+    FontColor #2B2D42
+}
+
+title MicroShield - High-Level Conceptual Architecture & Data Flow
+
+[*] --> InboundTraffic : Network Packet
+
+state "Fast Path: Edge Firmware (MCU)" as MCU {
+    state "Packet Interception" as InboundTraffic
+    state "Feature Extraction Engine" as Extractor
+    state "Transpiled Decision Tree" as Classifier
+    state "Forward to Core App" as AppForward
+    state "Deterministic Rule Matching" as Evaluate
+    
+    InboundTraffic --> Extractor : Raw Frame
+    Extractor --> Classifier : Real-time Features
+    Classifier --> Evaluate : Path Traversal
+    
+    Evaluate --> AppForward : [Classification == BENIGN]
+    AppForward --> [*]
+}
+
+state "Slow Path: Python MLOps Platform" as Cloud {
+    state "UART / Serial Ingestion" as UART
+    state "Telemetry & Anomaly Buffer" as Buffer
+    state "Concept Drift Detector" as DriftMonitor
+    state "Active Learning & Supervision" as HITL
+    state "Model Retraining Pipeline" as Retrainer
+    state "C-Header Transpiler" as Transpiler
+    state "Automated CI/CD Validation" as CI
+    
+    Evaluate --> UART : [Classification == ANOMALY / AMBIGUOUS]\nStructured Telemetry Frame
+    UART --> Buffer : Parse & Store
+    
+    Buffer --> DriftMonitor : Automated Monitoring
+    Buffer --> HITL : Manual Inspection\n(Zanni Giorgioni)
+    
+    DriftMonitor --> Retrainer : [Drift Threshold Exceeded]
+    HITL --> Retrainer : [New Verified Signatures]
+    
+    Retrainer --> Transpiler : Optimized Tree (scikit-learn)
+    Transpiler --> CI : Generated C Source Code
+    CI --> [*] : Verified Firmware Artifact\n(Release Deployment)
+}
+
+note right of Evaluate
+  <b>Deterministic Execution</b>
+  • Execution bound: O(depth)
+  • Zero dynamic allocation (no malloc)
+  • Rule ID logged for explainability (XAI)
+end note
+
+note bottom of DriftMonitor
+  <b>Retraining Triggers</b>
+  1. Ambiguous packet ratio > 5%
+  2. Expert operator zero-day labeling
+  3. Formal CI gate before OTA dispatch
+end note
+
+@enduml
