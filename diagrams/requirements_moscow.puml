@@ -1,6 +1,8 @@
 @startuml requirements_moscow
+skinparam dpi 160
 skinparam backgroundColor #FFFFFF
 skinparam defaultFontName Arial
+skinparam defaultFontSize 13
 skinparam roundcorner 8
 skinparam shadowing false
 
@@ -9,18 +11,21 @@ skinparam package {
     BorderColor #2B2D42
     FontColor #2B2D42
     FontStyle bold
+    FontSize 14
 }
 
 skinparam card {
     BackgroundColor #EDF2F4
     BorderColor #8D99AE
     FontColor #2B2D42
+    FontSize 12
 }
 
 skinparam actor {
     BackgroundColor #F8F9FA
     BorderColor #2B2D42
     FontColor #2B2D42
+    FontSize 13
 }
 
 title MicroShield - Requirements Prioritization & Architectural Boundaries (MoSCoW)
@@ -33,9 +38,9 @@ package "MUST HAVE (Core Operational Foundation)" as MUST {
     card "FR-01: Line-rate Packet Interception (UART/SPI/MAC)" as M1
     card "FR-02: Deterministic Feature Extraction" as M2
     card "FR-03: Transpiled Decision Tree Evaluation (C99)" as M3
-    card "NFR-01: Bounded Execution Latency (O(depth) <= 50 µs)" as M4
+    card "NFR-01: Bounded Latency (O(depth) <= 50 µs @ 168 MHz)" as M4
     card "NFR-02: Zero Dynamic Allocation (No malloc / Heap-less)" as M5
-    card "NFR-03: Computational & Energy Transparency (< 1% CPU overhead)" as M6
+    card "NFR-03: Energy & Computational Transparency (< 1% CPU)" as M6
 }
 
 package "SHOULD HAVE (Supervisory MLOps & Resilience)" as SHOULD {
@@ -43,7 +48,7 @@ package "SHOULD HAVE (Supervisory MLOps & Resilience)" as SHOULD {
     card "FR-05: Concept Drift Monitoring (> 5% Ambiguity Trigger)" as S2
     card "FR-06: Automated C-Header Transpiler Pipeline" as S3
     card "NFR-04: Intrinsic Explainability (XAI Rule & Threshold ID)" as S4
-    card "NFR-05: Out-of-Band Telemetry Integrity (CRC/HMAC Framing)" as S5
+    card "NFR-05: Diagnostic Channel Integrity (CRC32 Framing)" as S5
 }
 
 package "COULD HAVE (Visualization & Tooling)" as COULD {

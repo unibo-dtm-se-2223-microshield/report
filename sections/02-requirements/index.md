@@ -40,32 +40,20 @@ Functional requirements specify the operational capabilities and state transform
 
 ## 2.3 Non-Functional Requirements (NFR) & Quality Attributes
 
-Non-functional requirements define the operational qualities, performance bounds, and safety attributes of the system.
-
-### 2.3.1 Principle of Computational & Energy Transparency
-In mission-critical embedded control systems, a security monitor must adhere to the principle of transparent execution: its operational presence must never perturb the deterministic schedule or the thermal/energy budget of the primary industrial process:
+Non-functional requirements define the operational qualities, performance bounds, and safety attributes of the system, governed by the principle of computational and energy transparency:
 
 Δt_IDS << T_loop   and   E_IDS << E_core
 
 Where Δt_IDS represents the worst-case inspection latency, T_loop denotes the period of the primary sensing and actuation loop, E_IDS is the energy consumed per packet inspection, and E_core is the operational power budget of the primary application.
 
-* NFR-01: Deterministic Real-Time Latency (Computational Transparency)
-  * Worst-Case Execution Time (WCET): The packet classification routine shall exhibit an asymptotic time complexity strictly bounded by O(depth), where depth represents the maximum depth of the decision tree.
-  * Latency Ceiling: On an ARM Cortex-M4 microcontroller running at 168 MHz, the total inspection time per packet shall not exceed 50 microseconds (Δt_IDS <= 50 µs), ensuring that execution jitter introduced into the primary control cycle remains below 5%.
-* NFR-02: Ultra-Low-Power Operation (Energy Transparency)
-  * Event-Driven Execution: The edge runtime library shall operate strictly under an interrupt-driven model, executing zero active polling loops (while spinlocks) during idle intervals.
-  * Sleep Mode Preservation: The edge library shall permit the microcontroller core to remain in deep sleep (Sleep/Stop modes) until awakened by a peripheral receive interrupt (ISR).
-  * CPU Budget: The complete feature extraction and tree traversal routine shall execute in fewer than 500 clock cycles per frame, confining the energy overhead (E_IDS) to less than 1% of the node's total operational power budget.
-* NFR-03: Zero Dynamic Memory Allocation (Heapless Architecture)
-  * Heap Prohibition: The edge library shall execute zero calls to dynamic memory managers (malloc, calloc, realloc, free), eliminating runtime non-determinism and catastrophic heap fragmentation.
-  * Static Footprint: The entire edge runtime shall consume less than 16 KB of non-volatile Flash memory (program code and static decision tables) and less than 4 KB of Static RAM (SRAM) for internal ring buffers.
-  * Coding Standards: The C99 codebase shall comply with safety-critical embedded coding standards (MISRA C:2012 guidelines).
-* NFR-04: Intrinsic Explainability (Explainable AI - XAI)
-  * Every classification decision emitted by the edge engine shall output the internal Rule Identifier (Rule ID) and the specific feature index responsible for the leaf traversal. Black-box inference models (e.g., deep neural networks) are strictly excluded from the edge runtime.
-* NFR-05: Diagnostic Channel Integrity & Security
-  * The out-of-band telemetry frames dispatched over serial links shall incorporate frame integrity validation (CRC32 checksum) to detect and reject packet corruption or injection attempts on the supervisory bus.
-* NFR-06: Software Engineering & Code Quality Standards
-  * The Python supervisory ecosystem shall enforce strict static type checking via PEP 484 and PEP 526 annotations validated through mypy, docstring documentation following PEP 257, and automated formatting compliance with black and flake8.
+| Requirement ID | Quality Attribute | Quantitative Metric & Deterministic Bound | Verification Method |
+| :--- | :--- | :--- | :--- |
+| NFR-01 | Real-Time Latency | Worst-Case Execution Time (WCET) bounded by O(depth). Total per-packet inspection time <= 50 µs on ARM Cortex-M4 at 168 MHz; jitter introduced into core loop < 5%. | Hardware DWT cycle counter profiling and oscilloscope GPIO toggling. |
+| NFR-02 | Ultra-Low-Power | 100% interrupt-driven execution (zero active polling loops). Preservation of deep sleep states (Sleep/Stop). Traversal budget <= 500 CPU cycles; energy overhead < 1% of node power budget. | Current shunt measurement with digital storage oscilloscope across low-power transitions. |
+| NFR-03 | Heapless Memory | Zero dynamic heap allocation (malloc, calloc, free prohibited). Flash memory footprint <= 16 KB; Static RAM (SRAM) <= 4 KB. Compliance with MISRA C:2012 safety guidelines. | Linker map file analysis and static analysis with gcc flags (-Wstack-usage, -Wbad-function-cast). |
+| NFR-04 | Intrinsic XAI | Output of deterministic Rule ID and split feature index for every leaf decision. Complete exclusion of black-box opaque models. | Unit tests asserting returned Rule IDs against offline decision tree traversal traces. |
+| NFR-05 | Telemetry Security | Out-of-band serial telemetry frames protected via CRC32 frame checksum to guarantee diagnostic data integrity against line noise or tampering. | Fault-injection testing introducing corrupted serial frames and asserting frame rejection. |
+| NFR-06 | Code Quality | Python supervisory suite strictly typed under PEP 484 and PEP 526 validated via mypy; documentation matching PEP 257; linting with black and flake8. | Automated CI pipeline gate enforcing zero type errors and zero linter warnings. |
 
 ---
 
@@ -107,9 +95,9 @@ In formal systems engineering, defining what a system must not do is as critical
 
 ## 2.6 Requirements Traceability & Visual Hierarchy
 
-The relationship between the formalized requirements, the MoSCoW classification boundaries, and the target operational personas is mapped in the following architectural model:
+The relationship between the formalized requirements, the MoSCoW classification boundaries, and the target operational personas is mapped in the following architectural model (click image to expand to full resolution):
 
-![MicroShield Requirements Breakdown & MoSCoW Hierarchy](../../pictures/requirements_moscow.png)
+[![MicroShield Requirements Breakdown & MoSCoW Hierarchy](../../pictures/requirements_moscow.png)](../../pictures/requirements_moscow.png)
 
 ### Persona Alignment
 - Taddeo Pallabà (Firmware Engineer): Governed by the Must Have tier. Enforces static memory boundaries (no malloc), predictable cycle budgets (<= 500 cycles), and hard real-time latency ceilings (<= 50 µs) to safeguard core application stability.
