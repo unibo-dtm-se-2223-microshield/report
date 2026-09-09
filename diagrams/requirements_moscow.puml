@@ -1,0 +1,64 @@
+@startuml requirements_moscow
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName Arial
+skinparam roundcorner 8
+skinparam shadowing false
+
+skinparam package {
+    BackgroundColor #F8F9FA
+    BorderColor #2B2D42
+    FontColor #2B2D42
+    FontStyle bold
+}
+
+skinparam card {
+    BackgroundColor #EDF2F4
+    BorderColor #8D99AE
+    FontColor #2B2D42
+}
+
+skinparam actor {
+    BackgroundColor #F8F9FA
+    BorderColor #2B2D42
+    FontColor #2B2D42
+}
+
+title MicroShield - Requirements Prioritization & Architectural Boundaries (MoSCoW)
+
+actor "Taddeo Pallabà\n(Firmware Engineer)" as Taddeo
+actor "Zanni Giorgioni\n(OT Security Engineer)" as Zanni
+actor "Lentina Gigi\n(Plant Manager)" as Lentina
+
+package "MUST HAVE (Core Operational Foundation)" as MUST {
+    card "FR-01: Line-rate Packet Interception (UART/SPI/MAC)" as M1
+    card "FR-02: Deterministic Feature Extraction" as M2
+    card "FR-03: Transpiled Decision Tree Evaluation (C99)" as M3
+    card "NFR-01: Bounded Execution Latency (O(depth) <= 50 µs)" as M4
+    card "NFR-02: Zero Dynamic Allocation (No malloc / Heap-less)" as M5
+    card "NFR-03: Computational & Energy Transparency (< 1% CPU overhead)" as M6
+}
+
+package "SHOULD HAVE (Supervisory MLOps & Resilience)" as SHOULD {
+    card "FR-04: Serial Telemetry Frame Dispatch" as S1
+    card "FR-05: Concept Drift Monitoring (> 5% Ambiguity Trigger)" as S2
+    card "FR-06: Automated C-Header Transpiler Pipeline" as S3
+    card "NFR-04: Intrinsic Explainability (XAI Rule & Threshold ID)" as S4
+    card "NFR-05: Out-of-Band Telemetry Integrity (CRC/HMAC Framing)" as S5
+}
+
+package "COULD HAVE (Visualization & Tooling)" as COULD {
+    card "FR-07: Interactive Multi-tab Web Dashboard (Dash/Plotly)" as C1
+    card "FR-08: Synthetic Telemetry Stream Generator" as C2
+    card "NFR-06: Formal Audit Trail for CRA / NIS 2 Compliance" as C3
+}
+
+package "WON'T HAVE (Negative Requirements / Architectural Exclusions)" as WONT {
+    card "NR-01: On-Chip Model Training\n(Deliberately excluded: avoids CPU starvation & battery drain)" as W1
+    card "NR-02: Hardware Payload Decryption\n(Delegated to application stack / transport layer)" as W2
+}
+
+Taddeo --> MUST : Enforces Determinism\n& Zero-Heap Boundaries
+Zanni --> SHOULD : Supervises Drift\n& Decision Rules
+Lentina --> COULD : Verifies Metrics\n& Audit Posture
+
+@enduml
