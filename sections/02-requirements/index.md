@@ -42,7 +42,11 @@ Functional requirements specify the operational capabilities and state transform
 
 Non-functional requirements define the operational qualities, performance bounds, and safety attributes of the system, governed by the principle of computational and energy transparency:
 
-Δt_IDS << T_loop   and   E_IDS << E_core
+<div align="center" style="font-size: 1.2em; margin: 1.2em 0; letter-spacing: 0.5px;">
+  <i>&Delta;t</i><sub>IDS</sub> &ll; <i>T</i><sub>loop</sub> 
+  &emsp;&emsp;<b>&amp;</b>&emsp;&emsp; 
+  <i>E</i><sub>IDS</sub> &ll; <i>E</i><sub>core</sub>
+</div>
 
 Where Δt_IDS represents the worst-case inspection latency, T_loop denotes the period of the primary sensing and actuation loop, E_IDS is the energy consumed per packet inspection, and E_core is the operational power budget of the primary application.
 

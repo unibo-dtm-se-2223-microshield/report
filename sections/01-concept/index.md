@@ -73,7 +73,7 @@ MicroShield is architected as a **heterogeneous multi-platform software system**
 
 The operational interaction between the deterministic edge engine and the supervisory management tier is depicted in the following architectural model:
 
-![MicroShield High-Level Conceptual Architecture](../../pictures/conceptual_architecture.png)
+[![MicroShield High-Level Conceptual Architecture](../../pictures/conceptual_architecture.png)](../../pictures/conceptual_architecture.png)
 
 The edge engine inspects inbound frames on the fast path. If a frame is classified as benign, it is passed immediately to the core firmware application without latency penalties. When an anomalous or ambiguous packet is intercepted, the edge engine isolates the threat, enforces rate-limiting policies, and dispatches a compact telemetry record over a dedicated serial channel to the Python fleet orchestrator. The supervisory tier processes telemetry, detects concept drift, incorporates human-in-the-loop validation, and drives the automated retraining pipeline.
 
