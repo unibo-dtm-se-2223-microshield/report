@@ -1,84 +1,56 @@
 @startuml requirements_moscow
-skinparam dpi 180
 skinparam backgroundColor #FFFFFF
 skinparam defaultFontName Arial
-skinparam defaultFontSize 14
-skinparam roundcorner 10
+skinparam defaultFontSize 13
+skinparam roundcorner 8
 skinparam shadowing false
 
-skinparam package {
+skinparam rectangle {
     BackgroundColor #F8F9FA
     BorderColor #2B2D42
+    BorderThickness 1.5
     FontColor #2B2D42
-    FontStyle bold
-    FontSize 16
-}
-
-skinparam card {
-    BackgroundColor #EDF2F4
-    BorderColor #8D99AE
-    FontColor #2B2D42
-    FontSize 13
 }
 
 skinparam actor {
-    BackgroundColor #F8F9FA
+    BackgroundColor #EDF2F4
     BorderColor #2B2D42
+    BorderThickness 1.5
     FontColor #2B2D42
-    FontSize 14
     FontStyle bold
+    FontSize 13
 }
 
 skinparam arrow {
     Color #2B2D42
     FontColor #2B2D42
-    FontSize 12
+    FontSize 11
 }
 
-title MicroShield - Requirements Prioritization & Architectural Boundaries (MoSCoW)
-
-left to right direction
+title <size:16><b>MicroShield - Requirements Prioritization & Architectural Boundaries (MoSCoW)</b></size>\n
 
 actor "Taddeo Pallabà\n(Firmware Engineer)" as Taddeo
 actor "Zanni Giorgioni\n(OT Security Engineer)" as Zanni
+
+rectangle "<b>MUST HAVE (Core Operational Foundation)</b>\n--\n<b>Functional Requirements (FR)</b>\n• <b>FR-01:</b> Line-rate Packet Interception (UART/SPI/MAC)\n• <b>FR-02:</b> Deterministic Feature Extraction\n• <b>FR-03:</b> Transpiled Decision Tree Evaluation (C99)\n• <b>FR-04:</b> Forward Benign & Quarantine Malicious Frames\n--\n<b>Non-Functional Requirements (NFR)</b>\n• <b>NFR-01:</b> Bounded Latency (WCET <= 50 µs @ 168 MHz)\n• <b>NFR-02:</b> Zero Dynamic Allocation (Heap-less C99)\n• <b>NFR-03:</b> Computational & Energy Transparency (< 1% CPU)" as MUST #FFFFFF
+
+rectangle "<b>SHOULD HAVE (Supervisory MLOps & Resilience)</b>\n--\n<b>Functional Requirements (FR)</b>\n• <b>FR-05:</b> Serial Telemetry Frame Dispatch\n• <b>FR-06:</b> Supervisory Queue Ingestion & Ring Buffering\n• <b>FR-07:</b> Concept Drift Monitoring (> 5% Ambiguity Trigger)\n• <b>FR-08:</b> Automated C-Header Transpiler Pipeline\n--\n<b>Non-Functional Requirements (NFR)</b>\n• <b>NFR-04:</b> Intrinsic Explainability (Rule & Threshold ID)\n• <b>NFR-05:</b> Diagnostic Channel Integrity (CRC32 Framing)" as SHOULD #FFFFFF
+
 actor "Lentina Gigi\n(Plant Manager)" as Lentina
 
-package "MUST HAVE (Core Operational Foundation)" as MUST {
-    card "FR-01: Line-rate Packet Interception (UART/SPI/MAC)" as M1
-    card "FR-02: Deterministic Feature Extraction" as M2
-    card "FR-03: Transpiled Decision Tree Evaluation (C99)" as M3
-    card "NFR-01: Bounded Latency (O(depth) <= 50 µs @ 168 MHz)" as M4
-    card "NFR-02: Zero Dynamic Allocation (No malloc / Heap-less)" as M5
-    card "NFR-03: Computational & Energy Transparency (< 1% CPU)" as M6
-}
+rectangle "<b>COULD HAVE (Visualization & Tooling)</b>\n--\n<b>Functional Requirements (FR)</b>\n• <b>FR-09:</b> Interactive Web Dashboard (Dash/Plotly)\n• <b>FR-10:</b> Synthetic Benchmark Playback Harness\n--\n<b>Non-Functional & Regulatory Attributes</b>\n• <b>NFR-06:</b> Strict Typing (PEP 484/526, mypy, black)\n• <b>Compliance:</b> Audit Trail for EU CRA & NIS 2" as COULD #FFFFFF
 
-package "SHOULD HAVE (Supervisory MLOps & Resilience)" as SHOULD {
-    card "FR-04: Serial Telemetry Frame Dispatch" as S1
-    card "FR-05: Concept Drift Monitoring (> 5% Ambiguity Trigger)" as S2
-    card "FR-06: Automated C-Header Transpiler Pipeline" as S3
-    card "NFR-04: Intrinsic Explainability (XAI Rule & Threshold ID)" as S4
-    card "NFR-05: Diagnostic Channel Integrity (CRC32 Framing)" as S5
-}
+rectangle "<b>WON'T HAVE (Architectural Negative Requirements)</b>\n--\n<b>Deliberate Design Exclusions</b>\n• <b>NR-01: On-Chip Model Training</b>\n  <i>Excluded by design: prevents CPU starvation & power drain</i>\n--\n• <b>NR-02: Hardware-Accelerated TLS Decryption</b>\n  <i>Delegated to host network stack / crypto-coprocessor</i>" as WONT #F1F3F5
 
-package "COULD HAVE (Visualization & Tooling)" as COULD {
-    card "FR-07: Interactive Multi-tab Web Dashboard (Dash/Plotly)" as C1
-    card "FR-08: Synthetic Telemetry Stream Generator" as C2
-    card "NFR-06: Formal Audit Trail for CRA / NIS 2 Compliance" as C3
-}
+' Collegamenti attori ai quadranti
+Taddeo -down-> MUST : Enforces Determinism\n& Zero-Heap Limits
+Zanni -down-> SHOULD : Supervises Drift\n& Decision Rules
+Lentina -right-> COULD : Verifies Metrics\n& CRA/NIS 2 Posture
 
-package "WON'T HAVE (Negative Requirements / Deliberate Exclusions)" as WONT {
-    card "NR-01: On-Chip Model Training\n(Deliberately excluded: avoids CPU starvation & battery drain)" as W1
-    card "NR-02: Hardware Payload Decryption\n(Delegated to application stack / transport layer)" as W2
-}
-
-' Layout grid enforcement: 2x2 structure
-MUST -[hidden]down-> SHOULD
-COULD -[hidden]down-> WONT
-MUST -[hidden]right-> COULD
-
-' Actor traceability links
-Taddeo --> MUST : Enforces Determinism\n& Zero-Heap Boundaries
-Zanni --> SHOULD : Supervises Drift\n& Decision Rules
-Lentina --> COULD : Verifies Metrics\n& Audit Posture
+' Vincoli di griglia 2x2
+MUST -[hidden]right-> SHOULD
+MUST -[hidden]down-> COULD
+COULD -[hidden]right-> WONT
+SHOULD -[hidden]down-> WONT
 
 @enduml

@@ -95,14 +95,19 @@ In formal systems engineering, defining what a system must not do is as critical
 
 ## 2.6 Requirements Traceability & Visual Hierarchy
 
-The relationship between the formalized requirements, the MoSCoW classification boundaries, and the target operational personas is mapped in the following architectural model (click image to expand to full resolution):
+The relationship between the formalized requirements, the MoSCoW classification boundaries, and the target operational personas is mapped in the following architectural model (click image to open full resolution):
 
 [![MicroShield Requirements Breakdown & MoSCoW Hierarchy](../../pictures/requirements_moscow.png)](../../pictures/requirements_moscow.png)
 
-### Persona Alignment
-- Taddeo Pallabà (Firmware Engineer): Governed by the Must Have tier. Enforces static memory boundaries (no malloc), predictable cycle budgets (<= 500 cycles), and hard real-time latency ceilings (<= 50 µs) to safeguard core application stability.
-- Zanni Giorgioni (OT Security Engineer): Governed by the Should Have tier. Manages concept drift detection, reviews explainable decision trees (Rule IDs), and supervises automated retraining cycles.
-- Lentina Gigi (Plant Manager): Governed by the Could Have and regulatory compliance tiers. Consumes fleet health dashboards, monitors uptime preservation metrics, and verifies audit trails for CRA/NIS 2 regulatory compliance.
+### Persona Mapping & Operational Requirement Alignment
+
+To ensure traceability from stakeholder objectives to technical implementation, each operational persona is mapped to their governing requirements:
+
+| Target Persona | Operational Role & Context | Aligned MoSCoW Tier | Enforced Requirements | Impact on System Operation |
+| :--- | :--- | :--- | :--- | :--- |
+| **Taddeo Pallabà** | Senior Embedded Firmware Engineer | **MUST HAVE** | FR-01, FR-02, FR-03, FR-04, NFR-01, NFR-02, NFR-03 | Guarantees hard real-time execution bounds (<= 50 µs), static memory boundaries (no malloc), and zero jitter on critical industrial control loops. |
+| **Zanni Giorgioni** | OT Cybersecurity Operations Engineer | **SHOULD HAVE** | FR-05, FR-06, FR-07, FR-08, NFR-04, NFR-05 | Provides transparent incident explainability (Rule IDs), automated concept drift surveillance (> 5%), and secure diagnostic telemetry. |
+| **Lentina Gigi** | Industrial Plant & Compliance Director | **COULD HAVE** & Regulatory | FR-09, FR-10, NFR-06, CRA, NIS 2 | Delivers high-level operational dashboards, empirical benchmark verification, and certified audit trails for regulatory compliance. |
 
 ---
 
@@ -113,4 +118,3 @@ The relationship between the formalized requirements, the MoSCoW classification 
 - [3] M. A. Ferrag, O. Friha, D. Hamouda, L. Maglaras, and H. Janicke, "Edge-IIoTset: A New Comprehensive Realistic Cyber Security Dataset of IoT and IIoT Applications for Centralized and Federated Learning," IEEE Access, vol. 10, pp. 40281–40306, 2022.
 - [4] European Commission, "Proposal for a Regulation on horizontal cybersecurity requirements for products with digital elements (Cyber Resilience Act)," COM(2022) 454 final, Brussels, 2022.
 - [5] European Parliament and Council of the European Union, "Directive (EU) 2022/2555 on measures for a high common level of cybersecurity across the Union (NIS 2 Directive)," Official Journal of the European Union, L 333, pp. 80–152, 2022.
-
