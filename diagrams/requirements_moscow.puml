@@ -1,9 +1,9 @@
 @startuml requirements_moscow
-skinparam dpi 160
+skinparam dpi 180
 skinparam backgroundColor #FFFFFF
 skinparam defaultFontName Arial
-skinparam defaultFontSize 13
-skinparam roundcorner 8
+skinparam defaultFontSize 14
+skinparam roundcorner 10
 skinparam shadowing false
 
 skinparam package {
@@ -11,24 +11,33 @@ skinparam package {
     BorderColor #2B2D42
     FontColor #2B2D42
     FontStyle bold
-    FontSize 14
+    FontSize 16
 }
 
 skinparam card {
     BackgroundColor #EDF2F4
     BorderColor #8D99AE
     FontColor #2B2D42
-    FontSize 12
+    FontSize 13
 }
 
 skinparam actor {
     BackgroundColor #F8F9FA
     BorderColor #2B2D42
     FontColor #2B2D42
-    FontSize 13
+    FontSize 14
+    FontStyle bold
+}
+
+skinparam arrow {
+    Color #2B2D42
+    FontColor #2B2D42
+    FontSize 12
 }
 
 title MicroShield - Requirements Prioritization & Architectural Boundaries (MoSCoW)
+
+left to right direction
 
 actor "Taddeo Pallabà\n(Firmware Engineer)" as Taddeo
 actor "Zanni Giorgioni\n(OT Security Engineer)" as Zanni
@@ -40,7 +49,7 @@ package "MUST HAVE (Core Operational Foundation)" as MUST {
     card "FR-03: Transpiled Decision Tree Evaluation (C99)" as M3
     card "NFR-01: Bounded Latency (O(depth) <= 50 µs @ 168 MHz)" as M4
     card "NFR-02: Zero Dynamic Allocation (No malloc / Heap-less)" as M5
-    card "NFR-03: Energy & Computational Transparency (< 1% CPU)" as M6
+    card "NFR-03: Computational & Energy Transparency (< 1% CPU)" as M6
 }
 
 package "SHOULD HAVE (Supervisory MLOps & Resilience)" as SHOULD {
@@ -57,11 +66,17 @@ package "COULD HAVE (Visualization & Tooling)" as COULD {
     card "NFR-06: Formal Audit Trail for CRA / NIS 2 Compliance" as C3
 }
 
-package "WON'T HAVE (Negative Requirements / Architectural Exclusions)" as WONT {
+package "WON'T HAVE (Negative Requirements / Deliberate Exclusions)" as WONT {
     card "NR-01: On-Chip Model Training\n(Deliberately excluded: avoids CPU starvation & battery drain)" as W1
     card "NR-02: Hardware Payload Decryption\n(Delegated to application stack / transport layer)" as W2
 }
 
+' Layout grid enforcement: 2x2 structure
+MUST -[hidden]down-> SHOULD
+COULD -[hidden]down-> WONT
+MUST -[hidden]right-> COULD
+
+' Actor traceability links
 Taddeo --> MUST : Enforces Determinism\n& Zero-Heap Boundaries
 Zanni --> SHOULD : Supervises Drift\n& Decision Rules
 Lentina --> COULD : Verifies Metrics\n& Audit Posture
