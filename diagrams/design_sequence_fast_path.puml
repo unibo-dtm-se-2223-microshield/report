@@ -1,0 +1,63 @@
+@startuml design_sequence_fast_path
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam roundcorner 6
+skinparam shadowing false
+
+skinparam sequence {
+    ArrowColor #2B2D42
+    ActorBorderColor #2B2D42
+    LifeLineBorderColor #2B2D42
+    LifeLineBackgroundColor #EDF2F4
+    ParticipantBorderColor #2B2D42
+    ParticipantBackgroundColor #F8F9FA
+    ParticipantFontColor #2B2D42
+    ParticipantFontStyle bold
+    BoxBorderColor #8D99AE
+    BoxBackgroundColor #F8F9FA
+}
+
+title <size:14><b>MicroShield - Real-Time Fast Path & Asynchronous Egress</b></size>\n
+
+participant "Ethernet PHY / MAC" as MAC
+participant "RX DMA ISR" as ISR
+participant "Feature Extractor\n(Zero-Copy)" as FE
+participant "Transpiled Tree\n(Static Matrix)" as Tree
+participant "Core App Queue" as App
+participant "TX Serial RingBuffer" as Ring
+participant "Supervisory Host" as Host
+
+== FAST PATH: Deterministic Ingress & Evaluation (<= 50 µs) ==
+MAC -> ISR: Inbound Frame Trigger (Hardware IRQ)
+activate ISR
+ISR -> FE: inspect_frame(const uint8_t *frame, len) [<= 5 µs]
+activate FE
+
+FE -> FE: Compute Delta-T, Length, Flags, Variance [<= 18 µs]
+FE -> Tree: evaluate_vector(FeatureVector_t *vec) [<= 2 µs]
+activate Tree
+
+Tree -> Tree: Traverse Static Array (depth <= 6) [<= 12 µs]
+Tree --> FE: Return ClassificationVerdict_t (Leaf Rule ID)
+deactivate Tree
+
+alt Verdict == BENIGN
+    FE -> App: forward_to_core_pipeline(frame, len) [<= 5 µs]
+    note right of App: Zero jitter induced\non primary loop
+else Verdict == ATTACK or AMBIGUOUS
+    FE -> FE: suppress_payload_forwarding() [<= 2 µs]
+    FE -> Ring: enqueue_telemetry_atomic(alert_record) [<= 4 µs]
+    note right of Ring: Non-blocking static ring buffer\n(Zero heap allocation)
+end
+deactivate FE
+ISR --> MAC: Clear IRQ Flag (Return to Base Thread)
+deactivate ISR
+
+== SLOW PATH: Out-of-Band Telemetry Transmission (Asynchronous) ==
+Ring -> Host: UART DMA / COBS Framed Stream (115200 baud)
+activate Host
+Host -> Host: Parse Telemetry & Check CRC32 Integrity
+deactivate Host
+
+@enduml

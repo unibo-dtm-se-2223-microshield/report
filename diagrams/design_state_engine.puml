@@ -1,0 +1,67 @@
+@startuml design_state_engine
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam roundcorner 6
+skinparam shadowing false
+
+skinparam state {
+    BackgroundColor #F8F9FA
+    BorderColor #2B2D42
+    BorderThickness 1.2
+    FontColor #2B2D42
+    StartColor #2B2D42
+    EndColor #2B2D42
+}
+
+title <size:14><b>MicroShield - Edge Engine Deterministic Finite State Machine</b></size>\n
+
+[*] --> STATE_IDLE_SLEEP
+
+STATE_IDLE_SLEEP: Microcontroller in low-power sleep
+STATE_IDLE_SLEEP: Zero active CPU polling loops
+
+STATE_IDLE_SLEEP --> STATE_FRAME_INGRESS : Peripheral RX Interrupt (ISR)
+
+state STATE_FRAME_INGRESS {
+    STATE_FRAME_INGRESS : Validate minimum payload length
+    STATE_FRAME_INGRESS : Acquire microsecond DWT timestamp
+}
+
+STATE_FRAME_INGRESS --> STATE_FEATURE_EXTRACTION : Buffer valid
+STATE_FRAME_INGRESS --> STATE_IDLE_SLEEP : Malformed runt frame (< 14 bytes)
+
+state STATE_FEATURE_EXTRACTION {
+    STATE_FEATURE_EXTRACTION : Compute inter-arrival delta (Delta-t)
+    STATE_FEATURE_EXTRACTION : Normalize frame size & protocol flags
+    STATE_FEATURE_EXTRACTION : Calculate two-pass payload variance
+}
+
+STATE_FEATURE_EXTRACTION --> STATE_DECISION_EVALUATION : FeatureVector populated
+
+state STATE_DECISION_EVALUATION {
+    STATE_DECISION_EVALUATION : Bounded array index traversal O(depth)
+    STATE_DECISION_EVALUATION : Threshold comparison against static matrix
+    STATE_DECISION_EVALUATION : Resolve leaf Rule ID & Verdict
+}
+
+STATE_DECISION_EVALUATION --> STATE_GATEKEEPING_ACTION
+
+state STATE_GATEKEEPING_ACTION {
+    state "BENIGN Action" as ActBenign : Pass pointer to core firmware queue
+    state "ATTACK Action" as ActAttack : Suppress frame & increment drop count
+    state "AMBIGUOUS Action" as ActAmbig : Suppress frame & mark drift sample
+}
+
+STATE_GATEKEEPING_ACTION --> STATE_TELEMETRY_DISPATCH : Attack or Ambiguous detected
+STATE_GATEKEEPING_ACTION --> STATE_IDLE_SLEEP : Benign frame released
+
+state STATE_TELEMETRY_DISPATCH {
+    STATE_TELEMETRY_DISPATCH : Serialize TelemetryFrame_t
+    STATE_TELEMETRY_DISPATCH : Calculate CRC32 & encode COBS delimiters
+    STATE_TELEMETRY_DISPATCH : Trigger non-blocking UART DMA push
+}
+
+STATE_TELEMETRY_DISPATCH --> STATE_IDLE_SLEEP : Queue updated
+
+@enduml

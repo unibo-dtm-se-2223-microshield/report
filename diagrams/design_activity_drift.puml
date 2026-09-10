@@ -1,0 +1,62 @@
+@startuml design_activity_drift
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam roundcorner 6
+skinparam shadowing false
+
+skinparam activity {
+    BackgroundColor #F8F9FA
+    BorderColor #2B2D42
+    BorderThickness 1.2
+    FontColor #2B2D42
+    DiamondBackgroundColor #EDF2F4
+    DiamondBorderColor #2B2D42
+}
+
+title <size:14><b>MicroShield - Supervisory Drift Surveillance & Transpilation Pipeline</b></size>\n
+
+start
+
+:Receive COBS Telemetry Frame (Serial Ingestion);
+:Validate IEEE 802.3 CRC32 Checksum;
+
+if (CRC32 Checksum Valid?) then (yes)
+    :Deserialize to immutable TelemetryRecord;
+    :Append to Forensic Time-Series Store (SQLite);
+    :Enqueue to Rolling Evaluation Window (Size = N);
+else (no)
+    :Increment Corrupted Frame Counter;
+    stop
+endif
+
+:Compute Rolling Ambiguity Ratio;
+note right
+  Ambiguity Ratio =
+  (Count of AMBIGUOUS frames) / N
+end note
+
+if (Ambiguity Ratio > 5.0%?) then (yes - Concept Drift Detected)
+    :Emit ConceptDriftDetected Domain Event;
+    :Notify Dashboard UI (Visual Alarm);
+    :Ingest Recent Ground-Truth Labeled Batch;
+    :Execute Scikit-Learn DecisionTree Retraining;
+    :Prune Estimator to Depth Limit (Max Depth <= 6);
+    
+    :Invoke AST Transpiler Domain Service;
+    :Generate transpiled_model.h with Static Matrices;
+    :Execute MISRA C / GCC Host Validation Suite;
+    
+    if (Syntax & Test Vectors Match?) then (pass)
+        :Stage New Firmware Header for Deployment;
+        :Log Retraining Audit Event (CRA Compliance);
+    else (fail)
+        :Revert to Fallback Header & Raise Error;
+    endif
+else (no - Model Stable)
+    :Update Real-Time Telemetry Gauges;
+endif
+
+stop
+
+@enduml
