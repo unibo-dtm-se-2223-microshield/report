@@ -22,7 +22,23 @@ skinparam artifact {
     FontSize 11
 }
 
+skinparam rectangle {
+    BackgroundColor #F1F3F5
+    BorderColor #2B2D42
+    BorderThickness 1.5
+    FontColor #2B2D42
+}
+
+skinparam arrow {
+    Color #2B2D42
+    FontColor #2B2D42
+    FontSize 11
+}
+
 title <size:15><b>MicroShield - Distributed Deployment & Physical Infrastructure</b></size>\n
+
+' Requisiti Normativi posizionati in alto al centro
+rectangle "<b>CRA / NIS 2 Regulatory Compliance Boundary</b>\n--\n• Zero Dynamic Heap Allocation (MISRA C:2012)\n• Isolated Diagnostic Telemetry Bus (Out-of-Band)\n• Cryptographic Append-Only Audit Trail (SHA-256)" as Boundary
 
 node "<<device>> Field Operational Network\n(Sensors, Actuators & Industrial PLC)" as FieldNet {
     [Industrial Field Traffic Generator\n(Modbus RTU / Ethernet Frame Source)] as TrafficGen
@@ -34,8 +50,8 @@ node "<<device>> Industrial Edge Node\n(STM32F407VGT6 Microcontroller)" as MCU {
         artifact "libmicroshield.a\n(Inline Data-Link IDS Engine)" as IDSLib
         artifact "transpiled_model.h\n(Static Decision Matrix)" as ModelHeader
         
-        IDSLib ..> ModelHeader : Includes
-        CoreELF ..> IDSLib : Links statically
+        IDSLib ..> ModelHeader : <<includes>>
+        CoreELF ..> IDSLib : <<statically links>>
     }
 }
 
@@ -48,15 +64,14 @@ node "<<device>> Supervisory Operations Station\n(x86_64 Industrial Workstation 
     }
 }
 
-' Canali di comunicazione
+' Canali di comunicazione operativi e diagnostici
 TrafficGen -right-> IDSLib : In-Band Operational Link\n(Ethernet RMII / RS-485)\nInline Interception
 
 IDSLib -down-> DaemonPy : Out-of-Band Diagnostic Link\n(USART / USB-VCP @ 115200 baud)\nFraming: COBS + CRC32
 
-' Confine di sicurezza CRA / NIS 2
-rectangle "<b>CRA / NIS 2 Regulated Endpoint Boundary</b>\n• Zero Dynamic Memory Allocation\n• Isolated Diagnostic Telemetry Bus\n• Cryptographic Incident Audit Trail" as Boundary #F1F3F5
+' Relazioni formali di conformità normativa orientate (..>)
+MCU .up.> Boundary : <<enforces>>\n(Deterministic Latency\n& Zero-Heap)
 
-MCU .up. Boundary
-Workstation .up. Boundary
+Workstation .up.> Boundary : <<enforces>>\n(Forensic Audit Trail\n& Drift Logging)
 
 @enduml
