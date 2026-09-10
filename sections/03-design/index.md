@@ -63,8 +63,8 @@ The functional boundaries and interaction points between the edge and supervisor
 ### 3.1.5 Intrinsic Explainable AI (XAI) Architecture
 
 Unlike black-box machine learning approaches (deep neural networks, support vector machines, or ensemble forests) that require complex, compute-intensive post-hoc explanation frameworks (such as LIME or SHAP), MicroShield delivers native, zero-cost **Intrinsic Explainable AI (XAI)**:
-- **On-Chip Symbolic Attribution:** Each leaf node in the transpiled C99 decision tree is assigned an immutable 16-bit integer identifier (`rule_id`). When the inference engine reaches a terminal leaf, it captures the `rule_id` and the primary feature index responsible for the terminal branch split. This metadata is packed directly into the diagnostic telemetry frame with zero computational overhead.
-- **Supervisory Semantic Decoding:** The Python transpiler generates a companion semantic metadata registry (`rule_dictionary.json`). When the supervisory dashboard receives an anomaly event with `rule_id = 14`, it maps the identifier directly to human-readable symbolic logic (e.g., `"Flagged as ATTACK: byte_variance > 0.45 AND delta_time_us < 120 (Volumetric Flood Pattern)"`). This provides Zanni Giorgioni with instant, deterministic auditability for every automated filtering action without inducing any latency on the microcontroller.
+- On-Chip Symbolic Attribution: Each leaf node in the transpiled C99 decision tree is assigned an immutable 16-bit integer identifier (`rule_id`). When the inference engine reaches a terminal leaf, it captures the `rule_id` and the primary feature index responsible for the terminal branch split. This metadata is packed directly into the diagnostic telemetry frame with zero computational overhead.
+- Supervisory Semantic Decoding: The Python transpiler generates a companion semantic metadata registry (`rule_dictionary.json`). When the supervisory dashboard receives an anomaly event with `rule_id = 14`, it maps the identifier directly to human-readable symbolic logic (e.g., `"Flagged as ATTACK: byte_variance > 0.45 AND delta_time_us < 120 (Volumetric Flood Pattern)"`). This provides Zanni Giorgioni with instant, deterministic auditability for every automated filtering action without inducing any latency on the microcontroller.
 
 ---
 
@@ -93,12 +93,7 @@ The physical allocation of computational tasks is partitioned across two target 
 
 ### 3.2.3 Selection of Edge Diagnostic Physical Interface
 
-The selection of the physical diagnostic link between the edge microcontroller and the supervisory station is governed by cabling distance, protocol autonomy, and noise immunity. 
-
-Among the integrated communication peripherals of the STM32F407:
-- **I2C was rejected** due to its strict master/slave architecture—which prevents the microcontroller from asynchronously pushing emergency alert frames without continuous host polling—as well as its high susceptibility to capacitive bus loading and industrial electromagnetic interference over distances exceeding one meter.
-- **SPI was rejected** due to excessive cabling overhead (requiring independent Chip Select routing per node in multidrop configurations) and its master-clocked topology, which violates autonomous edge alert dispatching.
-- **UART / USART was adopted:** Operating asynchronously in full-duplex mode, UART allows the microcontroller to initiate diagnostic frame transfers autonomously via internal peripheral interrupts and DMA channels. Furthermore, UART interfaces readily translate to USB Virtual COM Ports (VCP) for local testbench workstations, differential RS-485 transceivers for long-span factory floors, or wireless bridge modules (such as industrial BLE, LoRaWAN, or cellular modems) without modifying the edge software driver.
+UART / USART was adopted: operating asynchronously in full-duplex mode, UART allows the microcontroller to initiate diagnostic frame transfers autonomously via internal peripheral interrupts and DMA channels. Furthermore, UART interfaces readily translate to USB Virtual COM Ports (VCP) for local testbench workstations, differential RS-485 transceivers for long-span factory floors, or wireless bridge modules (such as industrial BLE, LoRaWAN, or cellular modems) without modifying the edge software driver. It is preferred over I2C and SPI because I2C enforces a rigid master/slave polling scheme vulnerable to industrial electromagnetic noise over 1 meter, while SPI requires excessive wiring and dedicated chip-select lines per node that hinder autonomous edge-initiated alert pushes.
 
 ### 3.2.4 Open Systems Interconnection (OSI) Stack Placement
 
@@ -254,13 +249,17 @@ The dynamic behavior of MicroShield is defined by two operational execution path
 
 The Fast Path executes on every inbound data-link frame. To safeguard primary industrial control loops (e.g., motor actuation, sensor sampling intervals), the Worst-Case Execution Time (WCET) is strictly bounded:
 
-$$\Delta t_{\text{IDS}} \le 50\ \mu\text{s}$$
+<div align="center" style="font-size: 1.15em; margin: 0.8em 0;">
+  <i>&Delta;t</i><sub>IDS</sub> &le; 50 &mu;s
+</div>
 
 1. Interrupt Ingress (<= 5 µs): Upon complete receipt of a network packet, the peripheral controller triggers a hardware Interrupt Service Routine (ISR). The ISR captures the frame pointer directly from the DMA buffer without memory duplication (zero-copy).
 2. Feature Extraction (<= 18 µs): The statistical extractor processes the frame across pre-allocated circular buffers, extracting normalized length, inter-arrival time delta, protocol control flags, and payload variance.
-3. Decision Tree Evaluation (<= 12 µs): The feature vector traverses the static decision matrix. Because the tree is transpiled with a fixed depth bound (depth <= 6), execution time is strictly deterministic:
+3. Decision Tree Evaluation (<= 12 µs): The feature vector traverses the static decision matrix. Because the tree is transpiled with a fixed depth bound (depth &le; 6), execution time is strictly deterministic:
 
-$$T_{\text{eval}} = \mathcal{O}(\text{depth})$$
+<div align="center" style="font-size: 1.15em; margin: 0.8em 0;">
+  <i>T</i><sub>eval</sub> = <i>O</i>(depth)
+</div>
 
 4. Deterministic Gatekeeping (<= 5 µs): If classified as BENIGN, the frame pointer is passed to the core firmware application queue. If classified as ATTACK or AMBIGUOUS, the payload is suppressed, preventing propagation into the host networking stack.
 5. Telemetry Buffer Staging (<= 4 µs): For non-benign frames, an alert descriptor is copied into a static ring buffer, and the CPU returns to its primary execution thread.
@@ -312,13 +311,13 @@ The operational workflow governing telemetry parsing, drift hypothesis testing, 
 
 Security automation requires verifiable human governance, particularly when operating near classification boundaries or facing novel zero-day exploits:
 
-- **Human-in-the-Loop Triaging for Zanni Giorgioni:** When ambiguous telemetry frames arrive at the supervisory tier, they are staged in a prioritized "Review Queue" within the Dash web dashboard. Zanni Giorgioni inspects the intrinsic XAI explanation (the exact split rule, feature values, and borderline thresholds). Through a dedicated user interface panel, the security analyst can:
+- Human-in-the-Loop Triaging for Zanni Giorgioni: When ambiguous telemetry frames arrive at the supervisory tier, they are staged in a prioritized "Review Queue" within the Dash web dashboard. Zanni Giorgioni inspects the intrinsic XAI explanation (the exact split rule, feature values, and borderline thresholds). Through a dedicated user interface panel, the security analyst can:
   - Validate as Benign: Acknowledge a legitimate operational shift in factory communication protocols.
   - Confirm as Attack: Flag a novel exploit or adversarial evasion attempt.
   The newly labeled sample is committed immediately into the historical retraining corpus, ensuring that the subsequent automated transpilation cycle adapts to the observed industrial environment.
-- **Architectural Mitigation of False Negatives (Undetected Stealth Traffic):** In any inline intrusion detection system, false negatives (malicious packets misclassified as benign) represent a critical operational hazard. MicroShield mitigates this risk through statistical temporal accumulation:
+- Architectural Mitigation of False Negatives (Undetected Stealth Traffic): In any inline intrusion detection system, false negatives (malicious packets misclassified as benign) represent a critical operational hazard. MicroShield mitigates this risk through statistical temporal accumulation:
   - Individual stealth packets engineered to mimic benign feature bounds may evade single-packet split thresholds. However, real-world cyberattacks (e.g., reconnaissance port scans, command injection bursts, Modbus coil brute-forcing) inherently manifest as multi-packet temporal sequences.
-  - Because the feature extractor maintains sliding-window history, persistent attack streams rapidly distort cumulative features (inter-arrival variance $\Delta t$ and payload entropy). Consequently, subsequent packets within the attack sequence are forced into `AMBIGUOUS` or `ATTACK` states.
+  - Because the feature extractor maintains sliding-window history, persistent attack streams rapidly distort cumulative features (inter-arrival variance &Delta;t and payload entropy). Consequently, subsequent packets within the attack sequence are forced into AMBIGUOUS or ATTACK states.
   - Furthermore, periodic offline supervisory audits cross-reference edge drop counts against host application throughput, identifying subtle discrepancies before security posture is compromised.
 
 ---
@@ -331,7 +330,7 @@ Data management across MicroShield is strictly partitioned based on operational 
 
 To eliminate runtime memory fragmentation and prevent non-deterministic allocation latencies, the edge runtime operates with zero dynamic memory calls (`malloc`, `calloc`, `free` are strictly prohibited):
 - Core Coupled Memory (CCM RAM) Allocation: The feature extraction scratchpad and packet interception rings are placed within the 64 KB CCM Data RAM of the STM32F407. Because CCM RAM is directly tied to the D-bus of the Cortex-M4 core, read/write access operates with zero wait-states, completely isolated from peripheral DMA traffic on the main AHB bus matrix.
-- Static Ring Buffers: Intercepted packets and pending telemetry alerts reside in statically sized circular ring buffers sized as powers of two ($2^N$), enabling pointer wraparound calculations via bitwise masking (`index = (index + 1) & (BUFFER_SIZE - 1)`) rather than costly integer division instructions.
+- Static Ring Buffers: Intercepted packets and pending telemetry alerts reside in statically sized circular ring buffers sized as powers of two (2<sup><i>N</i></sup>), enabling pointer wraparound calculations via bitwise masking (`index = (index + 1) & (BUFFER_SIZE - 1)`) rather than costly integer division instructions.
 - Saturation Strategy: If physical serial bandwidth is saturated during a sustained denial-of-service attack, the telemetry ring buffer enforces an overwrite policy on older untransmitted alerts while atomically incrementing a dedicated `dropped_telemetry_frames` counter, ensuring that security monitoring never blocks core industrial control execution.
 
 ### 3.7.2 Supervisory Persistence & Forensic Audit Architecture
@@ -349,7 +348,9 @@ The supervisory tier ingests telemetry records and archives them into an embedde
 Under Article 10 of the EU Cyber Resilience Act and the incident notification mandates of the NIS 2 Directive, cybersecurity monitoring solutions must provide verifiable, tamper-evident logging of security incidents:
 - Append-Only Ledger: Incident records stored in the operational database are protected through cryptographic hash chaining. Each record incorporates a SHA-256 digest computed over its payload concatenated with the SHA-256 digest of the immediately preceding record:
 
-$$\text{Hash}_k = \text{SHA256}(\text{Record}_k \parallel \text{Hash}_{k-1})$$
+<div align="center" style="font-size: 1.15em; margin: 0.8em 0;">
+  Hash<sub><i>k</i></sub> = SHA256(Record<sub><i>k</i></sub> &parallel; Hash<sub><i>k</i>-1</sub>)
+</div>
 
 - Forensic Non-Repudiation: Any retrospective alteration, deletion, or insertion of historical alert records invalidates the cryptographic hash chain, providing verifiable evidence of tampering during statutory regulatory audits.
 

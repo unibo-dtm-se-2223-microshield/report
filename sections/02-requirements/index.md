@@ -50,26 +50,30 @@ Non-functional requirements define the operational qualities, performance bounds
 
 ### 2.3.1 Engineering Derivation of Timing & Deterministic Latency Bounds
 
-The requirement for bounded real-time latency ($NFR-01$) is directly derived from industrial control loop theory:
-- **Control Loop Dynamics ($T_{\text{loop}}$):** Industrial automation systems, motor actuators, and digital control loops typically operate at a baseline frequency of **1 kHz**, corresponding to a period of $T_{\text{loop}} = 1000\ \mu\text{s}$.
-- **Computational Transparency Budget ($\Delta t_{\text{IDS}}$):** To prevent an inline intrusion detection routine from inducing jitter or deadline starvation in the core control task, the maximum inspection overhead is bounded at:
+The requirement for bounded real-time latency (NFR-01) is directly derived from industrial control loop theory:
+- Control Loop Dynamics (<i>T</i><sub>loop</sub>): Industrial automation systems, motor actuators, and digital control loops typically operate at a baseline frequency of 1 kHz, corresponding to a period of <i>T</i><sub>loop</sub> = 1000 &mu;s.
+- Computational Transparency Budget (<i>&Delta;t</i><sub>IDS</sub>): To prevent an inline intrusion detection routine from inducing jitter or deadline starvation in the core control task, the maximum inspection overhead is bounded at:
 
-$$\Delta t_{\text{IDS}} \le 50\ \mu\text{s}$$
+<div align="center" style="font-size: 1.15em; margin: 0.8em 0;">
+  <i>&Delta;t</i><sub>IDS</sub> &le; 50 &mu;s
+</div>
 
-- **Loop Impact Ratio:** This timing ceiling ensures that the IDS consumes at most **5%** of the available 1 kHz loop period ($\frac{50\ \mu\text{s}}{1000\ \mu\text{s}} = 5\%$), leaving the remaining 95% of the CPU schedule fully dedicated to sensor acquisition, physical control math, and actuation.
-- **Cycle Budget on ARM Cortex-M4:** At a nominal clock frequency of 168 MHz ($1\ \text{clock cycle} \approx 5.95\ \text{ns}$), a $50\ \mu\text{s}$ duration provides an absolute ceiling of approximately **8,400 clock cycles**. Given that traversing a transpiled decision tree with bounded depth ($\text{depth} \le 6$) requires $\le 500$ CPU cycles ($\approx 2.98\ \mu\text{s}$), the inspection operates comfortably within interrupt service routine (ISR) slack time, validating the "latency-zero" transparent impact.
+- Loop Impact Ratio: This timing ceiling ensures that the IDS consumes at most 5% of the available 1 kHz loop period (50 &mu;s / 1000 &mu;s = 5%), leaving the remaining 95% of the CPU schedule fully dedicated to sensor acquisition, physical control math, and actuation.
+- Cycle Budget on ARM Cortex-M4: At a nominal clock frequency of 168 MHz (1 clock cycle &approx; 5.95 ns), a 50 &mu;s duration provides an absolute ceiling of approximately 8,400 clock cycles. Given that traversing a transpiled decision tree with bounded depth (depth &le; 6) requires &le; 500 CPU cycles (&approx; 2.98 &mu;s), the inspection operates comfortably within interrupt service routine (ISR) slack time, validating the "latency-zero" transparent impact.
 
 ### 2.3.2 Quantitative Resource & Energy Overhead Ratios
 
 To enforce true "memory-zero" and "energy-zero" constraints, metrics are quantified both in absolute quantities and as relative percentages of the target hardware envelope (STMicroelectronics STM32F407VGT6 with 1024 KB Flash and 192 KB SRAM):
 
-- **Flash Memory Footprint:** $\le 16\text{ KB}$ consumption out of 1024 KB total non-volatile memory $\implies \mathbf{\le 1.56\%}$ program memory utilization.
-- **Static RAM (SRAM) Utilization:** $\le 4\text{ KB}$ out of 192 KB total volatile memory $\implies \mathbf{\le 2.08\%}$ system SRAM utilization. When allocated within the dedicated 64 KB Core Coupled Memory (CCM Data RAM), it occupies $\mathbf{\le 6.25\%}$ of CCM storage, leaving standard multi-layer bus SRAM completely unconstrained.
-- **CPU Time & Energy Overhead:** With a worst-case traversal budget of $\le 500$ CPU cycles per packet, an edge device receiving a continuous industrial stream of 100 packets per second consumes:
+- Flash Memory Footprint: &le; 16 KB consumption out of 1024 KB total non-volatile memory &rarr; <b>&le; 1.56%</b> program memory utilization.
+- Static RAM (SRAM) Utilization: &le; 4 KB out of 192 KB total volatile memory &rarr; <b>&le; 2.08%</b> system SRAM utilization. When allocated within the dedicated 64 KB Core Coupled Memory (CCM Data RAM), it occupies <b>&le; 6.25%</b> of CCM storage, leaving standard multi-layer bus SRAM completely unconstrained.
+- CPU Time & Energy Overhead: With a worst-case traversal budget of &le; 500 CPU cycles per packet, an edge device receiving a continuous industrial stream of 100 packets per second consumes:
 
-$$\text{CPU Overhead} = \frac{100 \times 500\ \text{cycles/s}}{168 \times 10^6\ \text{cycles/s}} \approx 0.0298\% < 0.03\%$$
+<div align="center" style="font-size: 1.15em; margin: 0.8em 0;">
+  CPU Overhead = (100 &times; 500 cycles/s) / (168 &times; 10<sup>6</sup> cycles/s) &approx; 0.0298% &lt; 0.03%
+</div>
 
-This negligible duty cycle guarantees that additional power dissipation is kept well below the **1%** operational threshold ($E_{\text{IDS}} \ll E_{\text{core}}$).
+This negligible duty cycle guarantees that additional power dissipation is kept well below the 1% operational threshold (<i>E</i><sub>IDS</sub> &ll; <i>E</i><sub>core</sub>).
 
 ### 2.3.3 Formal NFR Quality Attribute Matrix
 
@@ -91,13 +95,13 @@ The system architecture is strictly governed by industrial hardware realities an
 ### 2.4.1 Hardware Constraints & the Absence of a Memory Management Unit (MMU)
 
 The target hardware core—the ARM Cortex-M4—imposes fundamental engineering constraints:
-- **Flat Physical Memory Space:** Unlike application processors (e.g., ARM Cortex-A), Cortex-M microcontrollers lack a Memory Management Unit (MMU). Consequently, the processor cannot support virtual memory translation, page swapping, or hardware-enforced process privilege isolation.
-- **Architectural Failure Modes of Dynamic Memory:** In a system without an MMU, dynamic memory allocation (`malloc`) is a critical hazard. Heap fragmentation, memory exhaustion, or dangling pointer dereferences cannot be trapped or isolated within a user space process. Any memory fault triggers an immediate, unrecoverable `HardFault_Handler` exception at the silicon level, instantly halting the CPU and crashing the attached physical machinery.
-- **Engineering Countermeasure:** This constraint directly dictates MicroShield's architecture: all feature extraction buffers, ring queues, and decision trees must be allocated statically at compile time with mathematically proven stack depth boundaries, eliminating memory corruption risks by design.
+- Flat Physical Memory Space: Unlike application processors (e.g., ARM Cortex-A), Cortex-M microcontrollers lack a Memory Management Unit (MMU). Consequently, the processor cannot support virtual memory translation, page swapping, or hardware-enforced process privilege isolation.
+- Architectural Failure Modes of Dynamic Memory: In a system without an MMU, dynamic memory allocation (`malloc`) is a critical hazard. Heap fragmentation, memory exhaustion, or dangling pointer dereferences cannot be trapped or isolated within a user space process. Any memory fault triggers an immediate, unrecoverable `HardFault_Handler` exception at the silicon level, instantly halting the CPU and crashing the attached physical machinery.
+- Engineering Countermeasure: This constraint directly dictates MicroShield's architecture: all feature extraction buffers, ring queues, and decision trees must be allocated statically at compile time with mathematically proven stack depth boundaries, eliminating memory corruption risks by design.
 
 ### 2.4.2 Regulatory Compliance Directives
-- **EU Cyber Resilience Act (CRA):** Requires hardware and software products introduced to the EU market to exhibit security by design throughout their operational lifecycle [4]. MicroShield satisfies CRA Article 10 mandates by providing on-device active packet filtering, tamper detection, and auditable vulnerability telemetry.
-- **Directive (EU) 2022/2555 (NIS 2):** Mandates rigorous operational resilience and incident reporting capabilities for critical infrastructure [5]. MicroShield facilitates compliance by generating cryptographically consistent security audit logs for forensic event reconstruction.
+- EU Cyber Resilience Act (CRA): Requires hardware and software products introduced to the EU market to exhibit security by design throughout their operational lifecycle [4]. MicroShield satisfies CRA Article 10 mandates by providing on-device active packet filtering, tamper detection, and auditable vulnerability telemetry.
+- Directive (EU) 2022/2555 (NIS 2): Mandates rigorous operational resilience and incident reporting capabilities for critical infrastructure [5]. MicroShield facilitates compliance by generating cryptographically consistent security audit logs for forensic event reconstruction.
 
 ---
 
@@ -116,10 +120,10 @@ To balance operational completeness with the project delivery timeframe (100–1
 
 In formal systems engineering, defining what a system must not do is as critical as defining its functional capabilities:
 
-* **NR-01: On-Chip Model Training (Deliberately Excluded):**
-  * *Architectural Rationale:* Training machine learning models involves computing recursive information gain, entropy matrices, or gradient descent steps. Executing training routines on an ARM Cortex-M4 microcontroller would saturate the CPU, consume significant power, and disrupt real-time control loops, violating the core principle of energy transparency ($E_{\text{IDS}} \ll E_{\text{core}}$). Training and optimization belong strictly in the supervisory MLOps tier.
-* **NR-02: Hardware-Accelerated TLS Payload Decryption (Deliberately Excluded):**
-  * *Architectural Rationale:* Transport layer decryption is the exclusive responsibility of the application network stack or dedicated cryptographic co-processors. MicroShield focuses on statistical protocol metadata, packet rates, frame sizes, and unencrypted industrial headers (e.g., Modbus/TCP, MQTT, raw telemetry). Performing full TLS termination within the IDS engine would introduce unviable latency jitter and memory allocation overhead.
+* NR-01: On-Chip Model Training (Deliberately Excluded):
+  * Architectural Rationale: Training machine learning models involves computing recursive information gain, entropy matrices, or gradient descent steps. Executing training routines on an ARM Cortex-M4 microcontroller would saturate the CPU, consume significant power, and disrupt real-time control loops, violating the core principle of energy transparency (<i>E</i><sub>IDS</sub> &ll; <i>E</i><sub>core</sub>). Training and optimization belong strictly in the supervisory MLOps tier.
+* NR-02: Hardware-Accelerated TLS Payload Decryption (Deliberately Excluded):
+  * Architectural Rationale: Transport layer decryption is the exclusive responsibility of the application network stack or dedicated cryptographic co-processors. MicroShield focuses on statistical protocol metadata, packet rates, frame sizes, and unencrypted industrial headers (e.g., Modbus/TCP, MQTT, raw telemetry). Performing full TLS termination within the IDS engine would introduce unviable latency jitter and memory allocation overhead.
 
 ---
 
@@ -135,16 +139,16 @@ To ensure traceability from stakeholder objectives to technical implementation, 
 
 | Target Persona | Operational Role & Context | Aligned MoSCoW Tier | Enforced Requirements | Impact on System Operation |
 | :--- | :--- | :--- | :--- | :--- |
-| **Taddeo Pallabà** | Senior Embedded Firmware Engineer | **MUST HAVE** | FR-01, FR-02, FR-03, FR-04, NFR-01, NFR-02, NFR-03 | Guarantees hard real-time execution bounds (<= 50 µs), static memory boundaries (no malloc), and zero jitter on critical industrial control loops. |
-| **Zanni Giorgioni** | OT Cybersecurity Operations Engineer | **SHOULD HAVE** | FR-05, FR-06, FR-07, FR-08, NFR-04, NFR-05 | Provides transparent incident explainability (Rule IDs), automated concept drift surveillance (> 5%), and secure diagnostic telemetry. |
-| **Lentina Gigi** | Industrial Plant & Compliance Director | **COULD HAVE** & Regulatory | FR-09, FR-10, NFR-06, CRA, NIS 2 | Delivers high-level operational dashboards, empirical benchmark verification, and certified audit trails for regulatory compliance. |
+| Taddeo Pallabà | Senior Embedded Firmware Engineer | MUST HAVE | FR-01, FR-02, FR-03, FR-04, NFR-01, NFR-02, NFR-03 | Guarantees hard real-time execution bounds (<= 50 µs), static memory boundaries (no malloc), and zero jitter on critical industrial control loops. |
+| Zanni Giorgioni | OT Cybersecurity Operations Engineer | SHOULD HAVE | FR-05, FR-06, FR-07, FR-08, NFR-04, NFR-05 | Provides transparent incident explainability (Rule IDs), automated concept drift surveillance (> 5%), and secure diagnostic telemetry. |
+| Lentina Gigi | Industrial Plant & Compliance Director | COULD HAVE & Regulatory | FR-09, FR-10, NFR-06, CRA, NIS 2 | Delivers high-level operational dashboards, empirical benchmark verification, and certified audit trails for regulatory compliance. |
 
 ---
 
 ## 2.7 References
 
-- [1] I. Sommerville, *Software Engineering*, 10th ed. Boston, MA: Pearson, 2016.
-- [2] N. Koroniotis, N. Moustafa, E. Sitnikova, and B. Turnbull, "Towards the Development of Realistic Botnet Dataset in the Internet of Things for Network Forensic Analytics: Bot-IoT Dataset," *Future Generation Computer Systems*, vol. 100, pp. 779–796, 2019.
-- [3] M. A. Ferrag, O. Friha, D. Hamouda, L. Maglaras, and H. Janicke, "Edge-IIoTset: A New Comprehensive Realistic Cyber Security Dataset of IoT and IIoT Applications for Centralized and Federated Learning," *IEEE Access*, vol. 10, pp. 40281–40306, 2022.
+- [1] I. Sommerville, Software Engineering, 10th ed. Boston, MA: Pearson, 2016.
+- [2] N. Koroniotis, N. Moustafa, E. Sitnikova, and B. Turnbull, "Towards the Development of Realistic Botnet Dataset in the Internet of Things for Network Forensic Analytics: Bot-IoT Dataset," Future Generation Computer Systems, vol. 100, pp. 779–796, 2019.
+- [3] M. A. Ferrag, O. Friha, D. Hamouda, L. Maglaras, and H. Janicke, "Edge-IIoTset: A New Comprehensive Realistic Cyber Security Dataset of IoT and IIoT Applications for Centralized and Federated Learning," IEEE Access, vol. 10, pp. 40281–40306, 2022.
 - [4] European Commission, "Proposal for a Regulation on horizontal cybersecurity requirements for products with digital elements (Cyber Resilience Act)," COM(2022) 454 final, Brussels, 2022.
-- [5] European Parliament and Council of the European Union, "Directive (EU) 2022/2555 on measures for a high common level of cybersecurity across the Union (NIS 2 Directive)," *Official Journal of the European Union*, L 333, pp. 80–152, 2022.
+- [5] European Parliament and Council of the European Union, "Directive (EU) 2022/2555 on measures for a high common level of cybersecurity across the Union (NIS 2 Directive)," Official Journal of the European Union, L 333, pp. 80–152, 2022.
