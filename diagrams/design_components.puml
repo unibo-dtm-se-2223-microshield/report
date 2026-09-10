@@ -1,0 +1,78 @@
+@startuml design_components
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName Arial
+skinparam defaultFontSize 12
+skinparam roundcorner 8
+skinparam shadowing false
+
+skinparam package {
+    BackgroundColor #F8F9FA
+    BorderColor #2B2D42
+    BorderThickness 1.5
+    FontColor #2B2D42
+    FontStyle bold
+    FontSize 13
+}
+
+skinparam component {
+    BackgroundColor #EDF2F4
+    BorderColor #8D99AE
+    BorderThickness 1.2
+    FontColor #2B2D42
+    FontSize 12
+}
+
+skinparam interface {
+    BackgroundColor #FFFFFF
+    BorderColor #2B2D42
+    FontColor #2B2D42
+    FontSize 11
+}
+
+title <size:15><b>MicroShield - Dual-Tier Component & Hexagonal Architecture</b></size>\n
+
+package "Edge Runtime Tier (STM32F407 Bare-Metal C99)" as EdgeTier {
+    
+    package "Inbound Adapters" as InAdapters {
+        [Ethernet MAC / UART ISR Driver] as NetDriver
+    }
+
+    package "Hexagonal Domain Core (Zero-Malloc / O(depth))" as CoreHex #FFFFFF {
+        interface "Frame Ingress Port" as IngressPort
+        interface "Gatekeeping Port" as GatePort
+        interface "Telemetry Egress Port" as EgressPort
+
+        [Statistical Feature Extractor\n(Zero-Copy Window)] as FeatExt
+        [Transpiled Decision Logic\n(Static Lookup Matrix)] as TreeEval
+
+        IngressPort -down-> FeatExt
+        FeatExt -right-> TreeEval
+        TreeEval -down-> GatePort
+        TreeEval -right-> EgressPort
+    }
+
+    package "Outbound Adapters" as OutAdapters {
+        [Core Application Input Buffer] as CoreApp
+        [COBS + CRC32 Serial Framing Adapter] as SerialTx
+    }
+
+    NetDriver -down-> IngressPort : Raw Data-Link Frame
+    GatePort -down-> CoreApp : Benign Frame Forward
+    EgressPort -down-> SerialTx : Anomaly / Ambiguity Record
+}
+
+package "Supervisory MLOps Tier (Host Workstation Python 3.11+)" as HostTier {
+    [Serial Ingestion Daemon\n(Non-blocking Ring Buffer)] as IngestDaemon
+    [Concept Drift Analyzer\n(Strategy: Rolling Ambiguity)] as DriftEngine
+    [AST Decision Tree Transpiler\n(scikit-learn to C99 Header)] as Transpiler
+    [Interactive Operations UI\n(Dash / Plotly Service)] as Dashboard
+
+    IngestDaemon -right-> DriftEngine : Ingested AnomalyRecord
+    IngestDaemon -down-> Dashboard : Real-Time Telemetry Stream
+    DriftEngine -down-> Transpiler : Trigger Retraining (> 5% Drift)
+    Transpiler -up-> EgressPort : Deploys transpiled_model.h (Firmware Flash)
+}
+
+SerialTx -down-> IngestDaemon : Out-of-Band UART (115200 baud)
+
+@enduml
