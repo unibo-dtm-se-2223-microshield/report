@@ -1,0 +1,111 @@
+@startuml design_class_diagram
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam roundcorner 6
+skinparam shadowing false
+
+skinparam class {
+    BackgroundColor #F8F9FA
+    BorderColor #2B2D42
+    BorderThickness 1.2
+    FontColor #2B2D42
+    HeaderBackgroundColor #EDF2F4
+}
+
+title <size:14><b>MicroShield - Structural Class & Data Type Model</b></size>\n
+
+package "Edge Runtime Data Layout (C99 Object-Based)" as C_Layout #FFFFFF {
+    class "RawFrame_t <<struct>>" as RawFrame {
+        + uint32_t timestamp_us
+        + uint16_t length
+        + uint8_t payload[1500]
+    }
+
+    class "FeatureVector_t <<struct>>" as FeatureVector {
+        + float32_t norm_length
+        + float32_t delta_time_us
+        + float32_t protocol_flags
+        + float32_t byte_variance
+    }
+
+    class "TelemetryFrame_t <<struct>>" as TelemetryFrame {
+        + uint16_t node_id
+        + uint32_t sequence_id
+        + uint8_t verdict_code
+        + uint16_t rule_id
+        + float32_t features[4]
+        + uint32_t crc32
+    }
+}
+
+package "Supervisory Domain Object Model (Python 3.11+ OOP)" as Py_Model #FFFFFF {
+    
+    class "TelemetryRecord <<dataclass, frozen>>" as TelemetryRecord {
+        + record_id: UUID
+        + node_id: int
+        + timestamp: datetime
+        + verdict: VerdictEnum
+        + rule_id: int
+        + feature_vector: Tuple[float, ...]
+        + is_ambiguous: bool
+    }
+
+    interface "AbstractTelemetryTransport <<ABC>>" as ITransport {
+        + {abstract} open(): void
+        + {abstract} read_frame(): Optional[bytes]
+        + {abstract} close(): void
+    }
+
+    class "SerialTelemetryTransport" as SerialTransport {
+        - port: str
+        - baudrate: int
+        - _serial_handle: Any
+        + open(): void
+        + read_frame(): Optional[bytes]
+        + close(): void
+    }
+
+    interface "AbstractDriftDetector <<Strategy, ABC>>" as IDrift {
+        + {abstract} update(record: TelemetryRecord): void
+        + {abstract} is_drift_detected(): bool
+        + {abstract} get_ambiguity_ratio(): float
+    }
+
+    class "RollingAmbiguityDetector" as RollingDrift {
+        - window_size: int
+        - threshold: float
+        - _history: Deque[bool]
+        + update(record: TelemetryRecord): void
+        + is_drift_detected(): bool
+        + get_ambiguity_ratio(): float
+    }
+
+    class "FleetDriftTracker <<AggregateRoot>>" as FleetTracker {
+        - detector: AbstractDriftDetector
+        - transport: AbstractTelemetryTransport
+        - subscribers: List[Callable]
+        + register_subscriber(callback: Callable): void
+        + process_incoming_stream(): void
+        - notify_drift(): void
+    }
+
+    class "DecisionTreeTranspiler <<DomainService>>" as TranspilerService {
+        - max_depth_limit: int
+        + validate_model(estimator: BaseEstimator): bool
+        + transpile_to_c99_header(estimator: BaseEstimator, output_path: Path): str
+    }
+}
+
+' Relazioni tra componenti
+ITransport <|.. SerialTransport : implements
+IDrift <|.. RollingDrift : implements (Strategy)
+
+FleetTracker o-- ITransport : uses
+FleetTracker o-- IDrift : evaluates via
+
+TelemetryFrame ..> TelemetryRecord : Transformed into (Ingestion)
+RawFrame ..> FeatureVector : Extracted into
+FleetTracker ..> TranspilerService : Triggers on Drift
+
+@enduml

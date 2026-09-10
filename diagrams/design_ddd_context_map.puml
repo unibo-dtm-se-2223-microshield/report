@@ -1,0 +1,54 @@
+@startuml design_ddd_context_map
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName Arial
+skinparam defaultFontSize 12
+skinparam roundcorner 8
+skinparam shadowing false
+
+skinparam package {
+    BackgroundColor #F8F9FA
+    BorderColor #2B2D42
+    BorderThickness 1.5
+    FontColor #2B2D42
+    FontStyle bold
+    FontSize 13
+}
+
+skinparam card {
+    BackgroundColor #EDF2F4
+    BorderColor #8D99AE
+    BorderThickness 1
+    FontColor #2B2D42
+    FontSize 11
+}
+
+title <size:15><b>MicroShield - Domain-Driven Design (DDD) Context Map</b></size>\n
+
+package "Edge Detection Bounded Context\n(Bare-Metal C99 / Hard Real-Time)" as EdgeContext {
+    card "<b>Aggregate Root:</b>\n• DetectionEngine" as AR_Edge
+    card "<b>Value Objects (Immutable):</b>\n• RawFrame (Payload + Meta)\n• FeatureVector (4x float32)\n• ClassificationVerdict (Ternary)\n• RuleDescriptor (Leaf ID + Split)" as VO_Edge
+    card "<b>Domain Events:</b>\n• FrameIntercepted\n• FrameQuarantined\n• TelemetryEmitted" as EV_Edge
+}
+
+package "Supervisory MLOps Bounded Context\n(Workstation Python 3.11+ / Asynchronous)" as MLOpsContext {
+    card "<b>Aggregate Root:</b>\n• FleetDriftTracker" as AR_MLOps
+    card "<b>Entities:</b>\n• AnomalyRecord (UUID, NodeID, Time)" as ENT_MLOps
+    card "<b>Domain Services:</b>\n• ASTTranspilerService\n• DriftEvaluationService" as SRV_MLOps
+    card "<b>Domain Events:</b>\n• ConceptDriftDetected (> 5%)\n• ModelRetrained\n• TranspilationCompleted" as EV_MLOps
+}
+
+package "Compliance & Audit Bounded Context\n(Regulatory / CRA & NIS 2 Governance)" as AuditContext {
+    card "<b>Aggregate Root:</b>\n• IncidentAuditLog" as AR_Audit
+    card "<b>Entities:</b>\n• SecurityIncident (Forensic Log)" as ENT_Audit
+    card "<b>Repository Interface:</b>\n• IForensicEvidenceRepository" as REP_Audit
+    card "<b>Domain Events:</b>\n• IncidentReportGenerated\n• RegulatoryAuditExported" as EV_Audit
+}
+
+' Relazioni formali DDD (Upstream / Downstream, Published Language, Customer/Supplier)
+EdgeContext -right-> MLOpsContext : <b>[U/D]</b> Upstream -> Downstream\n<b>[PL]</b> Published Language: COBS+CRC32 Telemetry\n<b>[C/S]</b> Edge supplies Anomaly Stream
+
+MLOpsContext -down-> AuditContext : <b>[U/D]</b> Feeds Validated Alerts\n<b>[C/S]</b> Audit consumes Drift & Anomaly Logs
+
+EdgeContext -down-> AuditContext : <b>[PL]</b> Direct Raw Event Integrity\n(Non-tamperable Hardware Timestamps)
+
+@enduml
