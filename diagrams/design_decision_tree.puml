@@ -1,0 +1,57 @@
+@startuml design_decision_tree
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam roundcorner 6
+skinparam shadowing false
+
+skinparam activity {
+    BackgroundColor #F8F9FA
+    BorderColor #2B2D42
+    BorderThickness 1.2
+    FontColor #2B2D42
+    DiamondBackgroundColor #EDF2F4
+    DiamondBorderColor #2B2D42
+}
+
+skinparam note {
+    BackgroundColor #F1F3F5
+    BorderColor #8D99AE
+    FontColor #2B2D42
+    FontSize 10
+}
+
+title <size:14><b>MicroShield - Deterministic Decision Tree Traversal (Depth <= 6)</b></size>\n<size:11>Worst-Case Execution Time: O(depth) <= 500 CPU Cycles (~2.98 µs @ 168 MHz)</size>\n
+
+(*) --> "<b>Root Node [Depth 0]</b>\nEvaluate Feature: delta_time_us"
+
+if "delta_time_us <= 80.0 µs\n(High-frequency burst / potential flood?)" then
+    -->[True (Burst Stream)] "<b>Internal Node [Depth 1]</b>\nEvaluate Feature: norm_length"
+    
+    if "norm_length > 0.50\n(Large payload frames?)" then
+        -->[True (Large MTU frames)] "<b>Terminal Leaf [Rule ID: 14]</b>\nVerdict: <b>ATTACK</b>\nPattern: Volumetric Buffer Flooding" as Leaf14 #FFD6D6
+        -down-> (*)
+    else
+        -->[False (Small/runt frames)] "<b>Internal Node [Depth 2]</b>\nEvaluate Feature: byte_variance"
+        
+        if "byte_variance > 150.0\n(High entropy / random bytes?)" then
+            -->[True (High randomness)] "<b>Terminal Leaf [Rule ID: 22]</b>\nVerdict: <b>ATTACK</b>\nPattern: High-Entropy Fuzzing Scan" as Leaf22 #FFD6D6
+            -down-> (*)
+        else
+            -->[False (Structured bytes)] "<b>Terminal Leaf [Rule ID: 7]</b>\nVerdict: <b>AMBIGUOUS</b>\nPattern: Borderline Burst / Drift Candidate" as Leaf7 #FFF3CD
+            -down-> (*)
+        endif
+    endif
+else
+    -->[False (Nominal Interval)] "<b>Internal Node [Depth 1]</b>\nEvaluate Feature: byte_variance"
+    
+    if "byte_variance <= 50.0\n(Structured industrial commands?)" then
+        -->[True (Low variance)] "<b>Terminal Leaf [Rule ID: 1]</b>\nVerdict: <b>BENIGN</b>\nPattern: Nominal Cyclic Process Flow" as Leaf1 #D4EDDA
+        -down-> (*)
+    else
+        -->[False (Anomalous variance)] "<b>Terminal Leaf [Rule ID: 4]</b>\nVerdict: <b>AMBIGUOUS</b>\nPattern: Out-of-Spec Payload / Drift" as Leaf4 #FFF3CD
+        -down-> (*)
+    endif
+endif
+
+@enduml

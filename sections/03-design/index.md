@@ -60,11 +60,54 @@ The functional boundaries and interaction points between the edge and supervisor
 | AST Model Transpiler | Supervisory (Python) | Generates static C99 decision lookup arrays and rule boundaries from trained Python estimators. | Consumes DecisionTreeClassifier; outputs valid C header syntax. |
 | Interactive Dashboard | Supervisory (Python) | Visualizes telemetry streams, alerts, and system health in a multi-page web browser interface. | Consumes SQLite event repository; isolated from serial ingestion thread. |
 
-### 3.1.5 Intrinsic Explainable AI (XAI) Architecture
+### 3.1.5 Theoretical Background: Mathematical & Scientific Justification of the 4D Feature Space
+
+An intrusion detection system operating on bare-metal industrial endpoints must resolve a fundamental engineering dilemma: how to reliably discriminate cyberattacks without inspecting deep payload contents.
+
+#### The Computational Failure of Deep Packet Inspection (DPI) on MCUs
+Conventional intrusion prevention systems (e.g., Snort, Suricata) rely on Deep Packet Inspection (DPI)—reconstructing TCP streams, tokenizing payloads, and executing regular expression pattern matching. On an ARM Cortex-M4 microcontroller, DPI is fundamentally unviable:
+1. **Memory Exhaustion:** Stateful TCP stream reassembly requires dynamic flow tables and extensive buffering queues (often exceeding several megabytes), instantly overflowing the 192 KB SRAM envelope of the STM32F407.
+2. **Timing Non-Determinism:** Regular expression matching exhibits computational complexity scaling with payload length <i>O</i>(<i>L</i> &times; <i>M</i>), inducing variable latencies ranging from hundreds of microseconds to milliseconds. This non-deterministic jitter violates the hard real-time schedule of industrial control loops (&le; 50 &mu;s).
+3. **Cryptographic Blindness:** Industrial standards increasingly mandate transport-layer encryption (e.g., TLS/DTLS in secure MQTT or Modbus/TCP). Terminating cryptographic sessions directly on the microcontroller consumes the entire CPU budget, rendering payload inspection impossible without unacceptable performance degradation.
+
+#### Scientific Foundation: Benchmark Evidence from Bot-IoT and Edge-IIoTset
+To overcome these limitations, MicroShield builds upon pioneering research demonstrated in benchmark IoT security corpora:
+- **The Bot-IoT Corpus** (Koroniotis et al., 2019) [6]: Proved that over 98% of volumetric botnet attacks (DDoS, DoS, port scans, OS fingerprinting) can be identified exclusively through statistical flow dynamics and temporal inter-packet relationships, completely bypassing application payload decoders.
+- **The Edge-IIoTset Corpus** (Ferrag et al., 2022) [7]: Demonstrated that in industrial cyber-physical protocols (Modbus, Ethernet/IP), malicious anomalies (command injection bursts, fuzzing attacks, brute-force coil sweeps) distort packet geometry and byte dispersion away from the strictly deterministic baseline distributions of nominal field operations.
+
+From this theoretical foundation, MicroShield synthesizes a **4-Dimensional Orthogonal Feature Space** extracted directly from OSI Layer 2 frames in constant time:
+
+| Feature Index | Formal Symbol | Technical Extraction Description | Discriminative Power & Targeted Threat Vectors |
+| :--- | :--- | :--- | :--- |
+| **f<sub>0</sub>** | <i>L</i><sub>norm</sub> | **Normalized Frame Length:** Defined as packet byte size normalized against the standard Ethernet MTU (1500 bytes):<br><br><div align="center"><i>L</i><sub>norm</sub> = min(len(Frame), 1500) / 1500.0</div> | Nominal industrial control traffic (e.g., periodic Modbus register polling) exhibits rigid, fixed-length geometries (typically 64–128 bytes). Volumetric floods utilize either minimal runt packets to maximize packet-per-second CPU starvation or maximal 1500-byte payloads to induce bandwidth saturation. |
+| **f<sub>1</sub>** | &Delta;<i>t</i> | **Inter-Arrival Time Delta (&mu;s):** The microsecond interval elapsed between contiguous packet reception events, captured via the hardware DWT cycle counter:<br><br><div align="center">&Delta;<i>t</i> = (Timestamp<sub><i>k</i></sub> - Timestamp<sub><i>k</i>-1</sub>) &times; <i>T</i><sub>cycle</sub></div> | Industrial control cycles operate with strict periodicity (e.g., 10 ms or 100 ms intervals). Port scans and DoS barrages transmit packets at line rate (&Delta;<i>t</i> &lt; 50 &mu;s), causing the temporal delta metric to collapse toward zero. |
+| **f<sub>2</sub>** | <i>P</i><sub>flags</sub> | **Normalized Protocol & Control Flags:** A composite floating-point bitmask capturing transport and data-link control states (e.g., TCP SYN, ACK, RST flags, or Modbus function categories). | Reconnaissance sweeps and synchronization floods exhibit highly anomalous control flag ratios (e.g., persistent SYN packets without subsequent ACK handshakes). |
+| **f<sub>3</sub>** | &sigma;<sup>2</sup> | **Two-Pass Payload Byte Variance:** The statistical dispersion of raw payload byte values across the frame:<br><br><div align="center">&sigma;<sup>2</sup> = (1 / <i>N</i>) &sum; (<i>x</i><sub><i>i</i></sub> - &mu;)<sup>2</sup></div> | Structured industrial control messages contain repetitive, low-entropy byte sequences (repeated zero-padding, fixed command opcodes). Malicious fuzzing sweeps, random payload padding, and encrypted exploit shellcodes exhibit near-uniform byte distributions and extremely high statistical variance. |
+
+Because these four dimensions evaluate physical frame size, inter-packet arrival timing, protocol control states, and internal byte entropy independently, they constitute an **orthogonal measurement basis** that detects network anomalies without requiring deep packet inspection.
+
+#### Deterministic Tree Traversal: Bounded <i>O</i>(depth) Evaluation
+Once the feature vector <i>v</i> = [<i>f</i><sub>0</sub>, <i>f</i><sub>1</sub>, <i>f</i><sub>2</sub>, <i>f</i><sub>3</sub>] is populated, the edge engine executes inference by traversing a pre-compiled, balanced Decision Tree. 
+
+Unlike iterative or gradient-based machine learning estimators, the worst-case execution time of a decision tree with a fixed depth bound (depth &le; 6) is strictly deterministic:
+
+<div align="center" style="font-size: 1.15em; margin: 0.8em 0;">
+  WCET = <i>O</i>(depth) &le; 6 Comparisons &le; 500 CPU Cycles (&approx; 2.98 &mu;s @ 168 MHz)
+</div>
+
+At each non-terminal tree node, the microcontroller performs a single floating-point comparison against a pre-compiled threshold value and branches to the left or right child array index. When a terminal leaf is reached, the traversal immediately resolves two outputs:
+1. The ternary classification verdict (`VERDICT_BENIGN`, `VERDICT_ATTACK`, or `VERDICT_AMBIGUOUS`).
+2. An immutable 16-bit `rule_id` identifying the exact leaf node responsible for the decision.
+
+The deterministic traversal hierarchy, split thresholds, and leaf classifications are modeled in the tree traversal diagram below (click image to expand to full resolution):
+
+[![MicroShield Deterministic Decision Tree Traversal](../../pictures/design_decision_tree.png)](../../pictures/design_decision_tree.png)
+
+### 3.1.6 Intrinsic Explainable AI (XAI) Architecture
 
 Unlike black-box machine learning approaches (deep neural networks, support vector machines, or ensemble forests) that require complex, compute-intensive post-hoc explanation frameworks (such as LIME or SHAP), MicroShield delivers native, zero-cost **Intrinsic Explainable AI (XAI)**:
-- On-Chip Symbolic Attribution: Each leaf node in the transpiled C99 decision tree is assigned an immutable 16-bit integer identifier (`rule_id`). When the inference engine reaches a terminal leaf, it captures the `rule_id` and the primary feature index responsible for the terminal branch split. This metadata is packed directly into the diagnostic telemetry frame with zero computational overhead.
-- Supervisory Semantic Decoding: The Python transpiler generates a companion semantic metadata registry (`rule_dictionary.json`). When the supervisory dashboard receives an anomaly event with `rule_id = 14`, it maps the identifier directly to human-readable symbolic logic (e.g., `"Flagged as ATTACK: byte_variance > 0.45 AND delta_time_us < 120 (Volumetric Flood Pattern)"`). This provides Zanni Giorgioni with instant, deterministic auditability for every automated filtering action without inducing any latency on the microcontroller.
+- **On-Chip Symbolic Attribution:** Each leaf node in the transpiled C99 decision tree is assigned an immutable 16-bit integer identifier (`rule_id`). When the inference engine reaches a terminal leaf, it captures the `rule_id` and the primary feature index responsible for the terminal branch split. This metadata is packed directly into the diagnostic telemetry frame with zero computational overhead.
+- **Supervisory Semantic Decoding:** The Python transpiler generates a companion semantic metadata registry (`rule_dictionary.json`). When the supervisory dashboard receives an anomaly event with `rule_id = 14`, it maps the identifier directly to human-readable symbolic logic (e.g., `"Flagged as ATTACK: byte_variance > 0.45 AND delta_time_us < 120 (Volumetric Flood Pattern)"`). This provides Zanni Giorgioni with instant, deterministic auditability for every automated filtering action without inducing any latency on the microcontroller.
 
 ---
 
