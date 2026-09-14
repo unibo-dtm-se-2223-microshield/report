@@ -10,34 +10,21 @@ nav_order: 5
 
 The implementation phase translates the architectural patterns established in the design specification into concrete, verifiable software artifacts. To maintain rigorous separation of concerns while coordinating heterogeneous runtimes, the project repository is partitioned into three autonomous development domains: bare-metal C99 edge firmware, a supervisory Python MLOps suite, and a containerized adversary playback harness.
 
-### 4.1.1 Artifact Directory Layout
+### 4.1.1 Artifact Subsystem Layout
 
-The physical directory tree of the software repository (artifact) isolates runtime dependencies, test harnesses, and build scripts into decoupled subsystems:
+The physical directory tree of the software repository isolates runtime dependencies, test harnesses, and build scripts into decoupled subsystems, organized as follows:
 
-<pre><code>artifact/
-├── Makefile                      # Root polyglot test &amp; build orchestrator
-│
-├── edge/                         # Bare-Metal C99 Runtime (Taddeo Pallabà)
-│   ├── include/                  # Public hexagonal headers and data types
-│   ├── src/                      # Zero-heap algorithmic implementations
-│   ├── model/                    # Transpiled C99 decision tree lookup matrices
-│   ├── tests/                    # Deterministic unit test suites (GCC)
-│   └── Makefile                  # Standalone edge compilation harness
-│
-├── supervisor/                   # Supervisory MLOps Tier: DaShield (Guidotti)
-│   ├── pyproject.toml            # Poetry dependency specification &amp; mypy rules
-│   ├── dashield/                 # Core Python package
-│   │   ├── domain/               # Value objects, Enums, and invariant logic
-│   │   ├── transport/            # Non-blocking COBS parser &amp; CRC32 validator
-│   │   ├── drift/                # Sliding-window statistical drift detectors
-│   │   ├── transpiler/           # AST Decision Tree to C99 matrix compiler
-│   │   └── ui/                   # Reactive Dash/Plotly operator dashboard
-│   └── tests/                    # Pytest test suite with strict mypy typing
-│
-└── simulation/                   # Adversary Testbed &amp; Simulation Harness
-    ├── whispers/                 # Bot-IoT &amp; Edge-IIoTset traffic playback engine
-    └── docker/                   # Dockerfiles and orchestration configurations
-</code></pre>
+| Directory / File Path | Architectural Subsystem | Engineering Responsibility & Technical Scope |
+| :--- | :--- | :--- |
+| <code>edge/include/</code> | Edge Core Runtime | Public C99 contracts, fixed-width integer types (<code>stdint.h</code>), and hexagonal ports. |
+| <code>edge/src/</code> | Edge Core Runtime | Zero-heap algorithmic logic (feature calculation, decision tree traversal, COBS encoding). |
+| <code>edge/model/</code> | Edge Core Runtime | Transpiled static decision tree lookup matrices (<code>transpiled_model.h</code>). |
+| <code>edge/tests/</code> | Edge Testbench | Deterministic unit tests with cycle and memory assertions compiled via native GCC. |
+| <code>supervisor/dashield/</code> | Supervisory MLOps Tier | Core Python package orchestrating serial ingestion, drift detection, and operator UI. |
+| <code>supervisor/tests/</code> | Supervisory Testbench | Pytest suite validating value object immutability, data types, and drift thresholds. |
+| <code>simulation/whispers/</code> | Adversary Simulation | Network traffic playback engine streaming Bot-IoT and Edge-IIoTset benchmark captures. |
+| <code>simulation/docker/</code> | Virtual Infrastructure | Container specifications and multi-container orchestration for the testbed. |
+| <code>Makefile</code> | Polyglot Root Orchestrator | Declarative build automation bridging the native C99 and Poetry toolchains. |
 
 ### 4.1.2 Concrete Software Implementation Pipeline
 
@@ -45,45 +32,30 @@ The execution flow bridging real-time packet interception on the microcontroller
 
 [![MicroShield Concrete Software Implementation Pipeline](../../pictures/impl_pipeline.png)](../../pictures/impl_pipeline.png)
 
-1. **Ingress & Feature Calculation (`microshield_features.c`):** Inbound network frames residing in DMA receive buffers are processed via zero-copy pointer access, extracting the 16-byte `FeatureVector_t` in bounded execution time (&le; 18 &mu;s).
-2. **Deterministic Inference (`microshield_engine.c`):** The extracted vector traverses constant lookup matrices defined in `transpiled_model.h`, returning a ternary verdict in bounded time (&le; 12 &mu;s).
-3. **Framing & Serial Egress (`microshield_cobs.c`):** Frames classified as `ATTACK` or `AMBIGUOUS` trigger the construction of a 32-byte `TelemetryFrame_t`, protected by an IEEE 802.3 CRC32 checksum and encoded using Consistent Overhead Byte Stuffing (COBS).
-4. **Supervisory Parsing (`dashield.transport`):** The supervisory daemon reconstructs incoming frames across the physical serial link, drops corrupted packets, and yields strongly typed domain transfer objects.
-5. **Drift Surveillance & Retraining (`dashield.drift` & `dashield.transpiler`):** Validated records feed the rolling ambiguity tracker. When the ratio exceeds 5%, the AST transpiler re-fits the decision tree and emits an updated `transpiled_model.h` for firmware deployment.
-6. **Reactive Presentation (`dashield.ui`):** The web console visualizes incoming anomalies and presents borderline cases to human operators for triage.
+1. **Ingress & Feature Calculation (<code>microshield_features.c</code>):** Inbound network frames residing in DMA receive buffers are processed via zero-copy pointer access, extracting the 16-byte <code>FeatureVector_t</code> in bounded execution time (&le; 18 &mu;s).
+2. **Deterministic Inference (<code>microshield_engine.c</code>):** The extracted vector traverses constant lookup matrices defined in <code>transpiled_model.h</code>, returning a ternary verdict in bounded time (&le; 12 &mu;s).
+3. **Framing & Serial Egress (<code>microshield_cobs.c</code>):** Frames classified as <code>ATTACK</code> or <code>AMBIGUOUS</code> trigger the construction of a 32-byte <code>TelemetryFrame_t</code>, protected by an IEEE 802.3 CRC32 checksum and encoded using Consistent Overhead Byte Stuffing (COBS).
+4. **Supervisory Parsing (<code>dashield.transport</code>):** The supervisory daemon reconstructs incoming frames across the physical serial link, drops corrupted packets, and yields strongly typed domain transfer objects.
+5. **Drift Surveillance & Retraining (<code>dashield.drift</code> & <code>dashield.transpiler</code>):** Validated records feed the rolling ambiguity tracker. When the ratio exceeds 5%, the AST transpiler re-fits the decision tree and emits an updated <code>transpiled_model.h</code> for firmware deployment.
+6. **Reactive Presentation (<code>dashield.ui</code>):** The web console visualizes incoming anomalies and presents borderline cases to human operators for triage.
 
 ### 4.1.3 Unified Polyglot Orchestration via Root Makefile
 
-Managing a heterogeneous software repository spanning two completely distinct toolchains—GNU Compiler Collection (GCC) for bare-metal C99 and Poetry for Python 3.11+—introduces workflow friction if commands are not centralized. 
+Managing a heterogeneous software repository spanning two completely distinct toolchains—the GNU Compiler Collection (GCC) for bare-metal C99 and Poetry for Python 3.11+—introduces operational complexity if workflows are fragmented. The root Makefile establishes a declarative, cross-platform interface exposing standard development targets:
 
-The root `Makefile` establishes a declarative, cross-platform interface exposing standard development targets:
-
-| Make Target | Governed Domain | Underlying Toolchain Action | Target Acceptance Gate |
+| Make Target | Governed Subsystem | Underlying Toolchain Invocation | Target Acceptance Gate |
 | :--- | :--- | :--- | :--- |
-| `make test-c` | Edge Runtime (C99) | Invokes `edge/Makefile` targeting native GCC with strict flags. | Zero runtime test failures, zero memory leaks. |
-| `make test-py` | Supervisory Tier (Python) | Executes `poetry run pytest -v tests/` across all unit suites. | 100% test pass rate for all domain invariants. |
-| `make typecheck` | Supervisory Tier (Python) | Runs `poetry run mypy --strict dashield/ tests/`. | Zero type errors, complete PEP 484/526 coverage. |
-| `make lint` | Supervisory Tier (Python) | Runs `flake8` and `black --check` across Python modules. | Conformity with PEP 8 styling conventions. |
-| `make test` | Full Monorepo | Sequentially runs `test-c`, `test-py`, and `typecheck`. | Universal regression test pass before Git commit. |
-| `make clean` | Full Monorepo | Strips compiled `.o` binaries, `__pycache__`, and test cache dirs. | Repository cleaned to pristine source state. |
+| <code>make test-c</code> | Edge Runtime (C99) | Invokes edge Makefile targeting native GCC with strict flags. | Zero test failures, zero memory leaks. |
+| <code>make test-py</code> | Supervisory Tier (Python) | Executes <code>poetry run pytest -v tests/</code> across all unit suites. | 100% test pass rate for all domain invariants. |
+| <code>make typecheck</code> | Supervisory Tier (Python) | Runs <code>poetry run mypy --strict dashield/ tests/</code>. | Zero type errors, full PEP 484/526 coverage. |
+| <code>make lint</code> | Supervisory Tier (Python) | Runs <code>flake8</code> and <code>black --check</code> across Python modules. | Conformity with PEP 8 styling conventions. |
+| <code>make test</code> | Full Monorepo | Sequentially executes <code>test-c</code>, <code>test-py</code>, and <code>typecheck</code>. | Universal regression pass before commit. |
+| <code>make clean</code> | Full Monorepo | Strips compiled binaries, cached bytecodes, and profiling traces. | Repository reset to pristine source state. |
 
 ### 4.1.4 Quality Assurance & Static Verification Gates
 
-To enforce the rigorous standards required by industrial safety-critical software (MISRA C) and academic software engineering methodology, the build pipeline integrates mandatory static verification gates:
+In high-reliability and safety-critical embedded systems, runtime failures frequently trace back to undefined behaviors, implicit type promotions, or non-deterministic data structures. To eliminate these failure modes by design, MicroShield enforces uncompromising static verification gates across both runtimes.
 
-#### 1. Bare-Metal C99 Compiler Enforcement (Zero-Warning Policy)
-Compilation of edge header contracts and source files enforces strict ISO/IEC 9899:1999 rules:
+For the bare-metal C99 tier, the build harness enforces strict compliance with the ISO/IEC 9899:1999 standard (<code>-std=c99</code>), deliberately prohibiting compiler-specific extensions to guarantee seamless portability across ARM GCC, Keil, and IAR toolchains. All standard and extended diagnostic warnings are activated (<code>-Wall</code>, <code>-Wextra</code>) to trap issues such as uninitialized variables, integer sign mismatches, and unhandled branches. Under the zero-warning policy, every detected warning is elevated to a fatal compilation error (<code>-Werror</code>), halting the build pipeline immediately. Furthermore, during interface design and continuous integration checks, contractual integrity is validated through pure lexical and grammatical parsing (<code>-fsyntax-only</code>), verifying header definitions without generating transient machine binaries.
 
-<pre><code>gcc -std=c99 -Wall -Wextra -Werror -fsyntax-only edge/include/microshield.h</code></pre>
-
-- `-std=c99`: Enforces adherence to the standard C99 specification, eliminating compiler-specific extensions and ensuring portable compilation across ARM GCC, Keil, and IAR toolchains.
-- `-Wall` & `-Wextra`: Activates comprehensive compiler warnings, trapping implicit type conversions, unused parameters, and uninitialized structures.
-- `-Werror`: Treats all warnings as fatal compilation errors, halting the build pipeline.
-- `-fsyntax-only`: Performs full grammatical, lexical, and structural type verification without generating binary code, allowing contract validation during continuous integration.
-
-#### 2. Supervisory Python Static Type Enforcement (`mypy --strict`)
-To satisfy the requirements of strictly typed object-oriented software engineering, Python components reject dynamic duck typing in favor of explicit static types managed through Poetry and configured via `pyproject.toml`:
-- `strict = true`: Enforces the highest level of static checking, disallowing untyped function definitions, untyped decorators, and implicit optional types.
-- `disallow_untyped_defs = true`: Requires explicit type annotations on every function parameter and return value.
-- `warn_return_any = true`: Traps and flags any function execution path that could implicitly return an unconstrained `Any` type.
-- Value Object Immutability: Enforces domain-driven design principles by wrapping transfer entities in `@dataclass(frozen=True)` and backing categorical states with `IntEnum`, verified through automated unit tests with `pytest`.
+On the supervisory Python tier, the dynamic nature of the language is constrained to adhere to strict object-oriented paradigms. Static type analysis is enforced through Mypy in strict mode (<code>--strict</code>), mandating explicit type signatures on all functions and attributes while eliminating implicit untyped fallbacks. Domain entities are structured as immutable Value Objects via frozen dataclasses, ensuring thread-safe data transfer between asynchronous serial ingestion routines, drift detection workers, and reactive dashboard rendering threads.

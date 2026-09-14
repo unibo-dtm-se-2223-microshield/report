@@ -1,0 +1,64 @@
+@startuml impl_pipeline
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam roundcorner 6
+skinparam shadowing false
+
+skinparam package {
+    BackgroundColor #F8F9FA
+    BorderColor #2B2D42
+    BorderThickness 1.2
+    FontColor #2B2D42
+}
+
+skinparam component {
+    BackgroundColor #EDF2F4
+    BorderColor #2B2D42
+    BorderThickness 1.2
+    FontColor #2B2D42
+}
+
+skinparam interface {
+    BackgroundColor #EDF2F4
+    BorderColor #2B2D42
+}
+
+title <size:14><b>MicroShield - Concrete Software Implementation Pipeline</b></size>\n<size:11>End-to-End Component Interaction Across C99 Edge and Python Supervisory Workstation</size>\n
+
+package "Edge Runtime Tier (C99 Bare-Metal)" as EdgePkg {
+    [Physical RX Ring Buffer] as RXBuf #E2E8F0
+    [microshield_features.c\n(Feature Extraction)] as ModFeat
+    [microshield_engine.c\n(Deterministic Decision Tree)] as ModEngine
+    [transpiled_model.h\n(Static Lookup Matrices)] as ModModel #FEF3C7
+    [microshield_cobs.c\n(COBS + CRC32 Adapter)] as ModCOBS
+    
+    RXBuf -right-> ModFeat : Zero-Copy Frame Pointer
+    ModFeat -right-> ModEngine : FeatureVector_t (16 bytes)
+    ModModel .down.> ModEngine : Compile-Time Arrays
+    ModEngine -right-> ModCOBS : TelemetryFrame_t (32 bytes)\n(On ATTACK / AMBIGUOUS)
+}
+
+package "Physical & Transport Layer" as PhysPkg {
+    interface "UART / USART DMA\n(115200 baud, 8N1)" as UARTIF
+    interface "USB Virtual COM Port\n(POSIX TTY Interface)" as VCP
+    ModCOBS -down-> UARTIF : Frame Delimited (0x00)
+    UARTIF -right-> VCP : Out-of-Band Channel
+}
+
+package "Supervisory MLOps Tier (Python 3.11+ / DaShield)" as SupPkg {
+    [dashield.transport\n(Serial Ingestion Daemon)] as ModTrans #E0F2FE
+    [dashield.domain.types\n(Immutable DTOs & Verdict)] as ModTypes #E0F2FE
+    [dashield.drift\n(Rolling Ambiguity Analyzer)] as ModDrift #E0F2FE
+    [dashield.transpiler\n(AST Model Transpiler)] as ModTranspiler #E0F2FE
+    [dashield.ui\n(Reactive Dash/Plotly Service)] as ModUI #E0F2FE
+
+    VCP -down-> ModTrans : Ingest Byte Stream
+    ModTrans -right-> ModTypes : Parse & Verify CRC32\nEmit TelemetryRecord
+    ModTypes -right-> ModDrift : Dispatch Event
+    ModTypes -down-> ModUI : Push Real-Time Telemetry
+    ModDrift -right-> ModTranspiler : Trigger on Drift (> 5%)
+    ModTranspiler .up.> ModModel : Emit transpiled_model.h\n(Offline FOTA Loop)
+}
+
+@enduml
