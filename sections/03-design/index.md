@@ -66,7 +66,7 @@ An intrusion detection system operating on bare-metal industrial endpoints must 
 
 #### The Computational Failure of Deep Packet Inspection (DPI) on MCUs
 Conventional intrusion prevention systems (e.g., Snort, Suricata) rely on Deep Packet Inspection (DPI)—reconstructing TCP streams, tokenizing payloads, and executing regular expression pattern matching. On an ARM Cortex-M4 microcontroller, DPI is fundamentally unviable:
-1. **Memory Exhaustion:** Stateful TCP stream reassembly requires dynamic flow tables and extensive buffering queues (often exceeding several megabytes), instantly overflowing the 192 KB SRAM envelope of the STM32F407.
+1. **Memory Exhaustion:** Stateful TCP stream reassembly requires dynamic flow tables and extensive buffering queues (often exceeding several megabytes), instantly overflowing the 192 KB SRAM envelope of the STM32F407RE.
 2. **Timing Non-Determinism:** Regular expression matching exhibits computational complexity scaling with payload length <i>O</i>(<i>L</i> &times; <i>M</i>), inducing variable latencies ranging from hundreds of microseconds to milliseconds. This non-deterministic jitter violates the hard real-time schedule of industrial control loops (&le; 50 &mu;s).
 3. **Cryptographic Blindness:** Industrial standards increasingly mandate transport-layer encryption (e.g., TLS/DTLS in secure MQTT or Modbus/TCP). Terminating cryptographic sessions directly on the microcontroller consumes the entire CPU budget, rendering payload inspection impossible without unacceptable performance degradation.
 
@@ -99,6 +99,12 @@ At each non-terminal tree node, the microcontroller performs a single floating-p
 1. The ternary classification verdict (`VERDICT_BENIGN`, `VERDICT_ATTACK`, or `VERDICT_AMBIGUOUS`).
 2. An immutable 16-bit `rule_id` identifying the exact leaf node responsible for the decision.
 
+To guarantee predictable worst-case timing across all network frames, the tree structure enforces a balanced decision path with explicit terminal classifications:
+- **Node 0 (Root, Depth 0):** Evaluates temporal frequency via `delta_time_us` with a threshold of 80.0 &mu;s. If `delta_time_us <= 80.0` (indicating high-frequency packet bursts or line-rate flooding), control branches to the left sub-tree (Node 1); otherwise, execution proceeds to the nominal cyclic branch (Node 2).
+- **Node 1 (Burst Evaluation, Depth 1):** Evaluates packet geometry via `norm_length` with a threshold of 0.50 (750 bytes). If `norm_length > 0.50` (large MTU frames in a burst stream), traversal terminates at **Leaf 4** emitting `VERDICT_ATTACK` with Rule ID `14` (*Volumetric Buffer Flooding*). If `norm_length <= 0.50` (small or runt frames), control branches to Node 3.
+- **Node 3 (Entropy Analysis, Depth 2):** Evaluates payload byte dispersion via `byte_variance` with a threshold of 150.0. If `byte_variance > 150.0` (high randomness or obfuscated shellcode), traversal terminates at **Leaf 5** emitting `VERDICT_ATTACK` with Rule ID `22` (*High-Entropy Fuzzing Scan*). If variance remains low, control reaches **Leaf 3** emitting `VERDICT_AMBIGUOUS` with Rule ID `7` (*Borderline Burst / Drift Candidate*).
+- **Node 2 (Nominal Stream Evaluation, Depth 1):** Evaluates internal payload structure via `byte_variance` with a threshold of 50.0. If `byte_variance <= 50.0` (uniform, repetitive command opcodes), traversal terminates at **Leaf 2** emitting `VERDICT_BENIGN` with Rule ID `1` (*Nominal Cyclic Process Flow*). If variance exceeds 50.0, traversal terminates at **Leaf 6** emitting `VERDICT_AMBIGUOUS` with Rule ID `4` (*Out-of-Spec Payload / Drift*).
+
 The deterministic traversal hierarchy, split thresholds, and leaf classifications are modeled in the tree traversal diagram below (click image to expand to full resolution):
 
 [![MicroShield Deterministic Decision Tree Traversal](../../pictures/design_decision_tree.png)](../../pictures/design_decision_tree.png)
@@ -128,7 +134,7 @@ The physical allocation of computational tasks is partitioned across two target 
 1. Edge Node Platform (STMicroelectronics STM32F407RE):
    - Core Architecture: ARM Cortex-M4 32-bit RISC core with Hardware Floating Point Unit (Single-Precision FPU).
    - Clock Frequency: 168 MHz (delivering up to 210 DMIPS / 1.25 DMIPS/MHz).
-   - Memory Mapping: 1024 KB on-chip non-volatile Flash memory for instructions and constant lookup tables; 192 KB contiguous Static RAM (112 KB System SRAM, 16 KB Auxiliary SRAM, 64 KB Core Coupled Memory - CCM Data RAM).
+   - Memory Mapping: 512 KB on-chip non-volatile Flash memory for instructions and constant lookup tables; 192 KB contiguous Static RAM (112 KB System SRAM, 16 KB Auxiliary SRAM, 64 KB Core Coupled Memory - CCM Data RAM).
    - Hardware Isolation: CCM RAM is utilized specifically for the IDS feature calculation workspace, completely bypassing the shared multi-layer AHB bus matrix to eliminate contention with CPU instruction fetching and direct memory access (DMA) transfers.
 2. Supervisory Station Platform (Industrial Workstation / Server):
    - Processor Architecture: x86-64 multi-core processor running modern Linux distributions.
@@ -258,7 +264,7 @@ The supervisory ecosystem is structured around pure object-oriented design patte
 
 ### 3.4.2 Edge Runtime Object-Based Architecture (C99 Bare-Metal)
 
-On the STM32F407 microcontroller, object-oriented concepts are realized using Object-Based C99 idioms optimized for single-cycle execution and deterministic memory alignment:
+On the STM32F407RE microcontroller, object-oriented concepts are realized using Object-Based C99 idioms optimized for single-cycle execution and deterministic memory alignment:
 - Encapsulation via Header Modularity: Private internal variables (ring buffer pointers, threshold tables) are marked static within the implementation translation unit (microshield_engine.c). External callers interact exclusively through opaque function signatures defined in microshield_engine.h.
 - Elimination of Virtual Tables (vptrs): Dynamic dispatch (function pointers inside structs) is deliberately excluded from the real-time fast path. In ARM Cortex-M4 architectures, indirect function calls through vtables disrupt instruction prefetching, introduce branch misprediction latency, and consume additional SRAM for pointer tables. All classification calls are resolved at link-time as direct relative branches (BL instructions).
 - Structure Padding & Cache Alignment: Memory structs (RawFrame_t, FeatureVector_t, TelemetryFrame_t) are explicitly designed with natural 32-bit alignment (4-byte boundaries). This eliminates compiler-induced structure padding overhead and prevents unaligned memory access penalties on the ARM Cortex-M bus interface.
@@ -323,7 +329,7 @@ Component states and transitions across both tiers are formalized using determin
 
 ### 3.6.1 Edge Engine Finite State Machine (FSM) & Hardware Visual Signaling
 
-On the STM32F407 microcontroller, the detection engine behaves as a deterministic, event-driven automaton. The engine remains in an ultra-low-power idle state until awakened by physical peripheral interrupts, eliminating active polling cycles. 
+On the STM32F407RE microcontroller, the detection engine behaves as a deterministic, event-driven automaton. The engine remains in an ultra-low-power idle state until awakened by physical peripheral interrupts, eliminating active polling cycles. 
 
 To provide immediate physical feedback to on-site technicians, physical board LEDs directly reflect real-time operational states:
 
@@ -372,7 +378,7 @@ Data management across MicroShield is strictly partitioned based on operational 
 ### 3.7.1 Edge Data Storage Architecture (Zero-Heap Allocation)
 
 To eliminate runtime memory fragmentation and prevent non-deterministic allocation latencies, the edge runtime operates with zero dynamic memory calls (`malloc`, `calloc`, `free` are strictly prohibited):
-- Core Coupled Memory (CCM RAM) Allocation: The feature extraction scratchpad and packet interception rings are placed within the 64 KB CCM Data RAM of the STM32F407. Because CCM RAM is directly tied to the D-bus of the Cortex-M4 core, read/write access operates with zero wait-states, completely isolated from peripheral DMA traffic on the main AHB bus matrix.
+- Core Coupled Memory (CCM RAM) Allocation: The feature extraction scratchpad and packet interception rings are placed within the 64 KB CCM Data RAM of the STM32F407RE. Because CCM RAM is directly tied to the D-bus of the Cortex-M4 core, read/write access operates with zero wait-states, completely isolated from peripheral DMA traffic on the main AHB bus matrix.
 - Static Ring Buffers: Intercepted packets and pending telemetry alerts reside in statically sized circular ring buffers sized as powers of two (2<sup><i>N</i></sup>), enabling pointer wraparound calculations via bitwise masking (`index = (index + 1) & (BUFFER_SIZE - 1)`) rather than costly integer division instructions.
 - Saturation Strategy: If physical serial bandwidth is saturated during a sustained denial-of-service attack, the telemetry ring buffer enforces an overwrite policy on older untransmitted alerts while atomically incrementing a dedicated `dropped_telemetry_frames` counter, ensuring that security monitoring never blocks core industrial control execution.
 
