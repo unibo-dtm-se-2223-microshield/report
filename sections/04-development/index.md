@@ -186,30 +186,34 @@ MicroShield establishes a **Transport-Agnostic Zero-Trust Boundary**: diagnostic
 To detect in-transit corruption without resorting to heavy cryptographic signatures, the telemetry frame incorporates an IEEE 802.3 standard 32-bit Cyclic Redundancy Check (CRC32) [9].
 
 #### Polynomial Division in Galois Field GF(2)
-The payload byte array is treated as a single binary polynomial $M(x)$ in the Galois Field $\text{GF}(2)$, where addition and subtraction correspond to the bitwise XOR operation ($\oplus$). The checksum is defined as the remainder $R(x)$ of the polynomial division against the standard generator polynomial $G(x)$:
+The payload byte array is treated as a single binary polynomial <i>M</i>(<i>x</i>) in the Galois Field GF(2), where addition and subtraction correspond to the bitwise XOR operation (&oplus;). The checksum is defined as the remainder <i>R</i>(<i>x</i>) of the polynomial division against the standard generator polynomial <i>G</i>(<i>x</i>):
 
-$$\frac{M(x) \cdot x^{32}}{G(x)} = Q(x) \oplus \frac{R(x)}{G(x)}$$
+<div align="center" style="font-size: 1.15em; margin: 1em 0; font-family: 'Times New Roman', serif;">
+  [<i>M</i>(<i>x</i>) &sdot; <i>x</i><sup>32</sup>] / <i>G</i>(<i>x</i>) = <i>Q</i>(<i>x</i>) &oplus; [<i>R</i>(<i>x</i>) / <i>G</i>(<i>x</i>)]
+</div>
 
-where $G(x)$ is the reversed representation constant `0xEDB88320`:
+where <i>G</i>(<i>x</i>) is the reversed representation constant <code>0xEDB88320</code>:
 
-$$G(x) = x^{32} + x^{26} + x^{23} + x^{22} + x^{16} + x^{12} + x^{11} + x^{10} + x^8 + x^7 + x^5 + x^4 + x^2 + x + 1$$
+<div align="center" style="font-size: 1.05em; margin: 0.8em 0; font-family: 'Times New Roman', serif;">
+  <i>G</i>(<i>x</i>) = <i>x</i><sup>32</sup> + <i>x</i><sup>26</sup> + <i>x</i><sup>23</sup> + <i>x</i><sup>22</sup> + <i>x</i><sup>16</sup> + <i>x</i><sup>12</sup> + <i>x</i><sup>11</sup> + <i>x</i><sup>10</sup> + <i>x</i><sup>8</sup> + <i>x</i><sup>7</sup> + <i>x</i><sup>5</sup> + <i>x</i><sup>4</sup> + <i>x</i><sup>2</sup> + <i>x</i> + 1
+</div>
 
 #### Precalculated Flash Lookup Table Optimization
 Iterative bit-by-bit software division requires 8 branch iterations per byte (224 conditional branches across the 28-byte payload), causing instruction pipeline stalls on ARM Cortex-M4 cores.
 
-MicroShield precalculates the 256-entry polynomial table (`CRC32_TABLE`), mapped statically into Flash memory (`.rodata`):
-- **Flash Memory Footprint:** $256 \times 4\text{ bytes} = 1024\text{ bytes}$ (&le; 0.20% of 512 KB Flash).
+MicroShield precalculates the 256-entry polynomial table (<code>CRC32_TABLE</code>), mapped statically into Flash memory (<code>.rodata</code>):
+- **Flash Memory Footprint:** 256 &times; 4 bytes = 1024 bytes (&le; 0.20% of 512 KB Flash).
 - **Volatile RAM Footprint:** **Exactly 0 bytes**.
 - **Computational Latency:** 28 single-cycle table lookups and XOR operations executing in less than 150 clock cycles (&approx; 0.89 &mu;s @ 168 MHz), fully satisfying the real-time budget.
 
 ### 4.3.3 Consistent Overhead Byte Stuffing (COBS) Protocol
 
-Asynchronous serial interfaces lack intrinsic packet boundaries. To allow the receiver to detect frame start and termination unambiguously, a null byte (`0x00`) is designated as the universal packet delimiter.
+Asynchronous serial interfaces lack intrinsic packet boundaries. To allow the receiver to detect frame start and termination unambiguously, a null byte (<code>0x00</code>) is designated as the universal packet delimiter.
 
-However, arbitrary binary structures (`float` values, integer timestamps, and CRC checksums) naturally contain raw `0x00` bytes, which would cause premature frame truncation. MicroShield implements Consistent Overhead Byte Stuffing (COBS) [10]:
+However, arbitrary binary structures (<code>float</code> values, integer timestamps, and CRC checksums) naturally contain raw <code>0x00</code> bytes, which would cause premature frame truncation. MicroShield implements Consistent Overhead Byte Stuffing (COBS) [10]:
 1. **Zero-Byte Elimination:** The payload is partitioned into sub-blocks delimited by zeros. Each zero byte is replaced with an offset pointer indicating the distance to the next zero.
 2. **Minimal Bounded Overhead:** For frames under 254 bytes, COBS adds exactly one prefix overhead byte and one trailing delimiter byte.
-3. **Delimiter Uniqueness:** The byte `0x00` is mathematically guaranteed never to appear within the encoded body, turning every `0x00` on the wire into an unambiguous end-of-frame signal.
+3. **Delimiter Uniqueness:** The byte <code>0x00</code> is mathematically guaranteed never to appear within the encoded body, turning every <code>0x00</code> on the wire into an unambiguous end-of-frame signal.
 
 ### 4.3.4 Wire Protocol & Cross-Language Pipeline
 
@@ -241,6 +245,7 @@ Verification of the transport vertical slice was executed across both runtime en
 The native C99 unit test harness execution log confirms arithmetic conformity on Linux desktop:
 
 <pre style="line-height: 1.25; font-size: 0.85em; font-family: ui-monospace, SFMono-Regular, 'Liberation Mono', Menlo, Consolas, monospace; background-color: #1e293b; padding: 14px 18px; border-radius: 6px; border: 1px solid #334155; overflow-x: auto; color: #f8fafc;">
+<span style="color: #94a3b8;">wearemassive@wearemassive:~/microshield/artifact$</span> <span style="color: #38bdf8;">gcc -std=c99 -Wall -Wextra -Werror -Iedge/include edge/src/microshield_cobs.c edge/tests/test_cobs.c -o edge/tests/test_cobs_bin &amp;&amp; ./edge/tests/test_cobs_bin</span>
 --- Running MicroShield Edge C99 Framing &amp; Integrity Tests ---
 [TEST] CRC32('123456789'): 0xCBF43926 (Expected: 0xCBF43926)
 [TEST] COBS Roundtrip: 8 raw bytes -> 10 encoded bytes -> matched
@@ -251,6 +256,7 @@ The native C99 unit test harness execution log confirms arithmetic conformity on
 The companion Python supervisory test suite execution log confirms symmetric validation via `pytest` and `mypy --strict`:
 
 <pre style="line-height: 1.25; font-size: 0.85em; font-family: ui-monospace, SFMono-Regular, 'Liberation Mono', Menlo, Consolas, monospace; background-color: #1e293b; padding: 14px 18px; border-radius: 6px; border: 1px solid #334155; overflow-x: auto; color: #f8fafc;">
+<span style="color: #94a3b8;">wearemassive@wearemassive:~/microshield/artifact/supervisor$</span> <span style="color: #38bdf8;">poetry run pytest -v tests/test_framing.py &amp;&amp; poetry run mypy --strict dashield/ tests/</span>
 ============================= test session starts ==============================
 collected 3 items
 
