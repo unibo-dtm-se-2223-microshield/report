@@ -8,32 +8,33 @@ nav_order: 5
 
 ## 4.1 Repository Scaffolding & Polyglot Build Automation
 
-The implementation phase translates architectural abstractions into deterministic, verifiable software artifacts. To isolate hardware dependencies while coordinating heterogeneous execution environments, the project monorepo is partitioned into three decoupled functional domains: a bare-metal C99 runtime, a supervisory Python MLOps suite, and a containerized adversary traffic playback harness.
+The implementation phase translates the architectural patterns established in the design specification into concrete, verifiable software artifacts. To maintain rigorous separation of concerns while coordinating heterogeneous runtimes, the project repository is partitioned into three autonomous development domains: bare-metal C99 edge firmware, a supervisory Python MLOps suite, and a containerized adversary playback harness.
 
 ### 4.1.1 Artifact Directory Layout
 
-The physical directory tree isolates compilation units, static models, and testing harnesses:
+The physical directory tree of the software repository isolates runtime dependencies, test harnesses, and build scripts into decoupled subsystems:
 
-<pre><code>artifact/
-├── Makefile                  # Root polyglot orchestration harness (POSIX make)
-├── edge/                     # Deterministic C99 bare-metal runtime
-│   ├── include/              # Public hexagonal contracts and data structures
-│   ├── src/                  # Zero-heap algorithmic implementations
-│   ├── model/                # Transpiled C99 decision tree lookup matrices
-│   ├── tests/                # Host and cross-target verification test suites
-│   └── Makefile              # Standalone edge compilation harness
-├── supervisor/               # Supervisory MLOps tier (DaShield)
-│   ├── pyproject.toml        # Poetry workspace and typecheck configuration
-│   ├── dashield/             # Supervisory management package
-│   │   ├── domain/           # Immutable domain types and value objects
-│   │   ├── transport/        # COBS framing and CRC32 verification engine
-│   │   ├── drift/            # Sliding-window statistical drift estimators
-│   │   ├── transpiler/       # AST-based scikit-learn model compiler
-│   │   └── ui/               # Reactive telemetry visualizer
-│   └── tests/                # Automated pytest invariant test suite
-└── simulation/               # Validation testbed and adversary tooling
-    ├── whispers/             # Bot-IoT and Edge-IIoTset packet injection engine
-    └── docker/               # Containerized testbed definitions</code></pre>
+    artifact/
+    ├── Makefile
+    ├── edge/
+    │   ├── include/
+    │   ├── src/
+    │   ├── model/
+    │   ├── tests/
+    │   └── Makefile
+    ├── supervisor/
+    │   ├── pyproject.toml
+    │   ├── README.md
+    │   ├── dashield/
+    │   │   ├── domain/
+    │   │   ├── transport/
+    │   │   ├── drift/
+    │   │   ├── transpiler/
+    │   │   └── ui/
+    │   └── tests/
+    └── simulation/
+        ├── whispers/
+        └── docker/
 
 ### 4.1.2 Concrete Software Implementation Pipeline
 
@@ -65,8 +66,8 @@ The root `Makefile` establishes a declarative, cross-platform interface exposing
 
 ### 4.1.4 Quality Assurance & Static Verification Gates
 
-To satisfy the dependability requirements of safety-critical embedded systems and formal software engineering methodology, the build pipeline enforces automated static verification across both compilation environments.
+To satisfy the safety and reliability standards required in industrial environments, the build pipeline integrates mandatory static verification mechanisms across both programming languages.
 
-At the edge tier, the C99 build system adheres strictly to the ISO/IEC 9899:1999 standard (`-std=c99`), deliberately disabling non-standard compiler extensions to ensure that source units compile identically under ARM GCC, Keil MDK, and IAR Embedded Workbench. Software dependability is enforced through an uncompromising zero-warning policy: standard and extended diagnostic checks (`-Wall`, `-Wextra`) are configured to treat any warning as an immediate compilation failure (`-Werror`). This setup eliminates implicit type coercions, unused parameters, and unaligned memory offsets before code generation. During architectural scaffolding, public header contracts are formally validated through dry syntax checking (`-fsyntax-only`), verifying types and macro expansions without producing intermediate binary artifacts.
+For the bare-metal edge tier, strict ISO/IEC 9899:1999 compliance (`-std=c99`) guarantees cross-compiler portability between local desktop GCC and target ARM embedded toolchains without reliance on proprietary GNU extensions. The build system enforces a zero-warning policy by activating standard and extended compiler diagnostics (`-Wall`, `-Wextra`) while promoting every warning to a fatal build-terminating error (`-Werror`). In addition, syntactic and semantic interface validation is executed directly on header contracts without generating intermediate object code (`-fsyntax-only`), enabling fast verification during automated integration pipelines.
 
-Concurrently, the supervisory Python tier prevents dynamic runtime faults by enforcing strict static type analysis through Poetry and `mypy` under full strict mode (`strict = true`). Dynamic duck-typing is eliminated at compile-time by prohibiting untyped function signatures (`disallow_untyped_defs = true`) and trapping implicit unconstrained return values (`warn_return_any = true`). At the architectural level, domain consistency is safeguarded by modeling core transfer entities as immutable frozen data structures (`@dataclass(frozen=True)`) and mapping categorical verdicts to explicit integer enumerations (`IntEnum`), with invariant preservation verified by automated regression test suites.
+In the supervisory tier, code quality is governed by static type theory rather than dynamic type inference. Leveraging modern Python type specifications (PEP 484, PEP 526), the MLOps pipeline enforces strict static typing via `mypy` configured in full strict mode. This configuration systematically prohibits dynamically typed functions, untyped decorators, and ambiguous return values, ensuring that domain entities and value objects remain strictly typed, immutable, and provably correct before execution.
