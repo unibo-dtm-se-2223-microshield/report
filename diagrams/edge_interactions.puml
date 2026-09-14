@@ -1,0 +1,71 @@
+@startuml edge_interactions
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam roundcorner 6
+skinparam shadowing false
+
+skinparam package {
+    BackgroundColor #F8F9FA
+    BorderColor #2B2D42
+    BorderThickness 1.2
+    FontColor #2B2D42
+}
+
+skinparam component {
+    BackgroundColor #EDF2F4
+    BorderColor #2B2D42
+    BorderThickness 1.2
+    FontColor #2B2D42
+}
+
+skinparam interface {
+    BackgroundColor #EDF2F4
+    BorderColor #2B2D42
+}
+
+title <size:14><b>MicroShield - Edge Modular Function & Header Interaction Graph</b></size>\n<size:11>Detailed Call Graph from Hardware Interrupt to Application Gatekeeping and DMA Offloading</size>\n
+
+package "Host Industrial Firmware (Application Space)" as AppSpace {
+    [Core Application Loop\n(main.c)] as AppMain
+    [Hardware Interrupt Handler\n(HAL_Network_RxCallback)] as AppISR #FEF3C7
+    [Industrial Actuator / Modbus Stack\n(Core Process)] as AppProcess #D4EDDA
+}
+
+package "Public Contract & Abstract Boundary" as ContractPkg {
+    () "microshield.h\n(Public API)" as PublicAPI #2B2D42
+}
+
+package "MicroShield Private Implementation Modules (Library Internal)" as LibInternal {
+    [microshield_features.c\n(Statistical Extractor)] as ModFeat
+    [microshield_engine.c\n(Deterministic Inference)] as ModEngine
+    [transpiled_model.h\n(Static Lookup Matrices)] as ModModel #FEF3C7
+    [microshield_cobs.c\n(Framing & Integrity)] as ModCOBS
+}
+
+package "Target Hardware Peripherals (STM32F407 Silicon)" as HWPkg {
+    [Hardware DWT Timer\n(168 MHz Cycle Counter)] as HWDWT
+    [Physical Board LEDs\n(Green / Red Status)] as HWLED
+    [USART2 DMA Controller\n(Diagnostic Stream)] as HWUART
+}
+
+' Interactions
+AppMain .right.> PublicAPI : microshield_init(node_id)
+AppISR .right.> PublicAPI : Invokes Ingress Pipeline
+
+PublicAPI -down-> ModFeat : microshield_extract_features(\nframe, len, timestamp_us, &features)
+ModFeat .down.> HWDWT : Reads DWT->CYCCNT\nfor Delta-T
+
+PublicAPI -down-> ModEngine : microshield_classify(\n&features, &rule_id, &split_feature)
+ModModel .right.> ModEngine : static const float thresholds[]\nstatic const uint8_t feature_idx[]
+
+ModEngine -down-> AppISR : Returns microshield_verdict_t\n(BENIGN, ATTACK, AMBIGUOUS)
+
+' Branching based on verdict
+AppISR -down-> AppProcess : If BENIGN:\nForward Frame Pointer (Zero Delay)
+AppISR -down-> HWLED : Steady Green (BENIGN) /\nBlinking Red (ATTACK) /\nAlternating (AMBIGUOUS)
+
+AppISR -down-> ModCOBS : If ATTACK or AMBIGUOUS:\nmicroshield_build_telemetry(...)
+ModCOBS -down-> HWUART : HAL_UART_Transmit_DMA(\n&huart2, &telemetry, 32 bytes)
+
+@enduml

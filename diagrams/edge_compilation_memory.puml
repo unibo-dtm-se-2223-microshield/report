@@ -1,0 +1,72 @@
+@startuml edge_compilation_memory
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam roundcorner 6
+skinparam shadowing false
+
+skinparam package {
+    BackgroundColor #F8F9FA
+    BorderColor #2B2D42
+    BorderThickness 1.2
+    FontColor #2B2D42
+}
+
+skinparam component {
+    BackgroundColor #EDF2F4
+    BorderColor #2B2D42
+    BorderThickness 1.2
+    FontColor #2B2D42
+}
+
+skinparam node {
+    BackgroundColor #FFFFFF
+    BorderColor #2B2D42
+    BorderThickness 1.2
+}
+
+title <size:14><b>MicroShield - Embedded Toolchain Compilation & Silicon Memory Allocation</b></size>\n<size:11>From Independent C99 Translation Units to STM32F407VGT6 Physical Memory Segments</size>\n
+
+package "Source Translation Units" as SrcPkg {
+    [main.c (Firmware)] as SrcMain
+    [microshield_features.c] as SrcFeat
+    [microshield_engine.c] as SrcEng
+    [microshield_cobs.c] as SrcCOBS
+    [transpiled_model.h] as HeaderModel #FEF3C7
+}
+
+package "Toolchain Build Pipeline" as ToolchainPkg {
+    [arm-none-eabi-gcc\n(-std=c99 -Wall -Wextra -Werror -O2)] as GCCComp
+    [arm-none-eabi-ld\n(STM32F407VGTx_FLASH.ld)] as Linker
+    [microshield_firmware.elf\n(Target Executable Binary)] as OutELF #D4EDDA
+}
+
+SrcMain --> GCCComp
+SrcFeat --> GCCComp
+SrcEng --> GCCComp
+SrcCOBS --> GCCComp
+HeaderModel .up.> SrcEng : Direct Include
+
+GCCComp --> Linker : Relocatable Objects (.o)
+Linker --> OutELF
+
+node "STM32F407VGT6 Silicon Physical Memory Map" as HWMemory {
+    frame "FLASH Memory (1024 KB) @ 0x08000000" as FlashMem {
+        [<b>.text Section (Code Instructions)</b>\n- Core Industrial Control & HAL Drivers\n- microshield_engine.o, features.o, cobs.o\n<b>Total Size: <= 16 KB (<= 1.56% of Flash)</b>] as FlashText #E0F2FE
+        [<b>.rodata Section (Read-Only Constants)</b>\n- transpiled_model.h static lookup matrices\n- CRC32 polynomial lookup tables\n<b>RAM Consumption: Exactly 0 Bytes</b>] as FlashROData #FEF3C7
+    }
+
+    frame "CCM DATA RAM (64 KB) @ 0x10000000\n(Direct Core-Coupled Memory - Zero Bus Contention)" as CCMMem {
+        [<b>.bss & .data Sections (MicroShield Isolated Workspace)</b>\n- Zero-Copy Frame Pointer Ingress Descriptors\n- microshield_features_t (16 bytes stack/workspace)\n- microshield_telemetry_t TX staging buffer\n<b>Total Size: <= 4 KB (<= 6.25% of CCM RAM)</b>] as CCMRam #D4EDDA
+    }
+
+    frame "SYSTEM SRAM (112 KB + 16 KB) @ 0x20000000" as SysSRAM {
+        [<b>Application System Memory (100% Preserved)</b>\n- Modbus/TCP Buffers, FreeRTOS Heaps, Motor Registers\n<b>Completely unconstrained and free from MicroShield traffic</b>] as AppSRAM #FFFFFF
+    }
+}
+
+OutELF ..> FlashText : Maps instructions
+OutELF ..> FlashROData : Maps constants
+OutELF ..> CCMRam : Directs workspace (__attribute__((section(".ccmram"))))
+
+@enduml

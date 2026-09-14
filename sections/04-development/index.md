@@ -73,3 +73,94 @@ To satisfy the safety and reliability standards required in industrial environme
 For the bare-metal edge tier, strict ISO/IEC 9899:1999 compliance (`-std=c99`) guarantees cross-compiler portability between local desktop GCC and target ARM embedded toolchains without reliance on proprietary GNU extensions. The build system enforces a zero-warning policy by activating standard and extended compiler diagnostics (`-Wall`, `-Wextra`) while promoting every warning to a fatal build-terminating error (`-Werror`). In addition, syntactic and semantic interface validation is executed directly on header contracts without generating intermediate object code (`-fsyntax-only`), enabling fast verification during automated integration pipelines.
 
 In the supervisory tier, code quality is governed by static type theory rather than dynamic type inference. Leveraging modern Python type specifications (PEP 484, PEP 526), the MLOps pipeline enforces strict static typing via `mypy` configured in full strict mode. This configuration systematically prohibits dynamically typed functions, untyped decorators, and ambiguous return values, ensuring that domain entities and value objects remain strictly typed, immutable, and provably correct before execution.
+
+---
+
+## 4.2 Edge Firmware Architecture, Memory Layout & Application Hooking
+
+The edge runtime is designed as a self-contained, statically linkable C99 library (`libmicroshield.a`) that embeds seamlessly into real-time industrial firmware without requiring an underlying Real-Time Operating System (RTOS).
+
+### 4.2.1 Modular Decomposition & Function Call Interactions
+
+Rather than implementing a monolithic firmware file, the edge detection engine is structured into three discrete translation units governed by the public contractual header `microshield.h`. This separation guarantees single responsibility and isolates hardware peripherals from classification logic:
+
+[![MicroShield Edge Modular Function & Header Interaction Graph](../../pictures/edge_interactions.png)](../../pictures/edge_interactions.png)
+
+The interaction sequence operates entirely within the hardware interrupt context:
+1. **Public Contract Ingress (`microshield.h`):** The application firmware (`main.c`) includes exclusively `microshield.h`. When a new packet arrives at the physical MAC interface, the hardware triggers `HAL_Network_RxCallback()`, passing a direct pointer to the contiguous DMA memory buffer.
+2. **Feature Extraction Call (`microshield_features.c`):** The callback invokes `microshield_extract_features()`. The module calculates the 16-byte `FeatureVector_t` in bounded execution time (&le; 18 &mu;s) using the hardware DWT cycle counter for microsecond-level timing delta acquisition.
+3. **Deterministic Traversal Call (`microshield_engine.c`):** The feature vector is passed to `microshield_classify()`. The engine traverses the static binary decision tree defined in `transpiled_model.h` in <i>O</i>(depth) time (&le; 12 &mu;s), resolving the ternary verdict (`BENIGN`, `ATTACK`, `AMBIGUOUS`), the leaf `rule_id`, and the dominant `split_feature`.
+4. **Boundary Gatekeeping & Signaling:**
+   - **Nominal Traffic (`BENIGN`):** The callback immediately forwards the packet pointer to the industrial process queue (e.g., Modbus engine) and sets the on-board green LED to steady state. Zero buffering delay is imposed on nominal physical control tasks.
+   - **Malicious or Ambiguous Traffic (`ATTACK` / `AMBIGUOUS`):** The packet pointer is quarantined, the red LED is triggered, and `microshield_build_telemetry()` is invoked in `microshield_cobs.c`.
+5. **Telemetry Assembly & DMA Egress (`microshield_cobs.c`):** An alert frame is formatted, stamped with an IEEE 802.3 CRC32 checksum, COBS-encoded, and dispatched via non-blocking USART DMA (`HAL_UART_Transmit_DMA()`). Primary CPU execution returns immediately to the core process loop without waiting for the physical serial baud clock.
+
+### 4.2.2 Silicon Placement, Compilation Pipeline & CCM RAM Allocation
+
+On resource-restricted microcontrollers, software architecture directly dictates physical silicon utilization. The compilation toolchain and memory layout for the STM32F407VGT6 microcontroller are formalized below (click image to expand to full resolution):
+
+[![MicroShield Embedded Toolchain Compilation & Silicon Memory Allocation](../../pictures/edge_compilation_memory.png)](../../pictures/edge_compilation_memory.png)
+
+The GCC toolchain (`arm-none-eabi-gcc`) compiles each translation unit into relocatable ELF object files (`.o`), which are subsequently positioned across physical memory segments by the linker script (`STM32F407VGTx_FLASH.ld`):
+
+1. **Flash Program Memory (`.text` Section @ 0x08000000):** All compiled machine instructions for `microshield_features.o`, `microshield_engine.o`, and `microshield_cobs.o` occupy less than 16 KB of Flash (&le; 1.56% of total 1024 KB Flash storage).
+2. **Flash Read-Only Memory (`.rodata` Section @ 0x08000000):** The transpiled decision tree thresholds and feature index matrices (`transpiled_model.h`) are declared `static const`. The compiler places them directly into Flash memory. **Their volatile RAM consumption is exactly zero bytes**, preserving all volatile memory for runtime processing.
+3. **Core Coupled Memory (`.ccmram` Section @ 0x10000000):** The volatile workspace—including temporary feature extraction structs, telemetry transmission buffers, and monotonic sequence counters—is explicitly mapped to the 64 KB Core Coupled Memory (CCM Data RAM) using GCC attributes (`__attribute__((section(".ccmram")))`). Because CCM RAM is wired directly to the Cortex-M4 D-bus, memory access executes with zero wait-states and causes zero bus contention with DMA transfers on the multi-layer AHB matrix.
+4. **Preservation of System SRAM (@ 0x20000000):** The primary 112 KB + 16 KB SRAM pool remains completely unconstrained, ensuring that customer industrial control tasks, RTOS stacks, and communication buffers operate without memory starvation.
+
+### 4.2.3 Application Hooking in Industrial Control Loops
+
+To integrate MicroShield into existing industrial firmware (e.g., generated via STM32CubeMX or STM32CubeIDE), the developer adds minimal, non-intrusive integration hooks into `main.c`:
+
+```c
+#include "main.h"
+#include "microshield.h" /* Public API contract */
+
+extern UART_HandleTypeDef huart2;
+
+int main(void) {
+    HAL_Init();
+    SystemClock_Config();
+    MX_GPIO_Init();
+    MX_USART2_UART_Init();
+
+    /* 1. Initialize MicroShield internal state (Node ID: 101) */
+    microshield_init(101);
+
+    while (1) {
+        /* Primary industrial control and actuator loop (1 kHz) */
+    }
+}
+
+/**
+ * @brief Ethernet/Fieldbus physical layer receive callback.
+ * Executes inline within the interrupt context (Total WCET <= 50 µs).
+ */
+void HAL_Network_RxCallback(uint8_t *frame_buffer, uint16_t length) {
+    microshield_features_t features;
+    uint16_t rule_id;
+    uint8_t split_feature;
+    uint32_t now_us = DWT->CYCCNT / 168; // Microsecond DWT hardware timestamp
+
+    /* 2. Zero-copy feature extraction */
+    microshield_extract_features(frame_buffer, length, now_us, &features);
+
+    /* 3. Deterministic decision tree inference */
+    microshield_verdict_t verdict = microshield_classify(&features, &rule_id, &split_feature);
+
+    if (verdict == VERDICT_BENIGN) {
+        /* Fast-Path: pass frame pointer to core application queue */
+        HAL_GPIO_WritePin(GPIOD, GPIO_PIN_12, GPIO_PIN_SET); // Green LED on
+        process_industrial_payload(frame_buffer, length);
+    } 
+    else {
+        /* Anomaly Gatekeeping: suppress payload and alert supervisor */
+        HAL_GPIO_WritePin(GPIOD, GPIO_PIN_14, GPIO_PIN_SET); // Red LED on
+        
+        static microshield_telemetry_t telemetry;
+        uint16_t bytes_to_send = microshield_build_telemetry(verdict, rule_id, split_feature, &features, &telemetry);
+        
+        /* Non-blocking DMA transfer: CPU returns to control loop immediately */
+        HAL_UART_Transmit_DMA(&huart2, (uint8_t *)&telemetry, bytes_to_send);
+    }
+}
