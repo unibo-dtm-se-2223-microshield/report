@@ -14,27 +14,29 @@ The implementation phase translates the architectural patterns established in th
 
 The physical directory tree of the software repository isolates runtime dependencies, test harnesses, and build scripts into decoupled subsystems:
 
-    artifact/
-    ├── Makefile
-    ├── edge/
-    │   ├── include/
-    │   ├── src/
-    │   ├── model/
-    │   ├── tests/
-    │   └── Makefile
-    ├── supervisor/
-    │   ├── pyproject.toml
-    │   ├── README.md
-    │   ├── dashield/
-    │   │   ├── domain/
-    │   │   ├── transport/
-    │   │   ├── drift/
-    │   │   ├── transpiler/
-    │   │   └── ui/
-    │   └── tests/
-    └── simulation/
-        ├── whispers/
-        └── docker/
+<pre style="line-height: 1.15; font-size: 0.9em; font-family: ui-monospace, SFMono-Regular, 'Liberation Mono', Menlo, Consolas, monospace; background-color: #f8f9fa; padding: 14px 18px; border-radius: 6px; border: 1px solid #e2e8f0; overflow-x: auto;">
+artifact/
+├── Makefile
+├── edge/
+│   ├── include/
+│   ├── src/
+│   ├── model/
+│   ├── tests/
+│   └── Makefile
+├── supervisor/
+│   ├── pyproject.toml
+│   ├── README.md
+│   ├── dashield/
+│   │   ├── domain/
+│   │   ├── transport/
+│   │   ├── drift/
+│   │   ├── transpiler/
+│   │   └── ui/
+│   └── tests/
+└── simulation/
+    ├── whispers/
+    └── docker/
+</pre>
 
 ### 4.1.2 Concrete Software Implementation Pipeline
 
