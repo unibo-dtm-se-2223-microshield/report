@@ -63,9 +63,9 @@ The requirement for bounded real-time latency (NFR-01) is directly derived from 
 
 ### 2.3.2 Quantitative Resource & Energy Overhead Ratios
 
-To enforce true "memory-zero" and "energy-zero" constraints, metrics are quantified both in absolute quantities and as relative percentages of the target hardware envelope (STMicroelectronics STM32F407VGT6 with 1024 KB Flash and 192 KB SRAM):
+To enforce true "memory-zero" and "energy-zero" constraints, metrics are quantified both in absolute quantities and as relative percentages of the target hardware envelope (STMicroelectronics STM32F407RE with 512 KB Flash and 192 KB SRAM):
 
-- Flash Memory Footprint: &le; 16 KB consumption out of 1024 KB total non-volatile memory &rarr; <b>&le; 1.56%</b> program memory utilization.
+- Flash Memory Footprint: &le; 16 KB consumption out of 1024 KB total non-volatile memory &rarr; <b>&le; 3.13%</b> program memory utilization.
 - Static RAM (SRAM) Utilization: &le; 4 KB out of 192 KB total volatile memory &rarr; <b>&le; 2.08%</b> system SRAM utilization. When allocated within the dedicated 64 KB Core Coupled Memory (CCM Data RAM), it occupies <b>&le; 6.25%</b> of CCM storage, leaving standard multi-layer bus SRAM completely unconstrained.
 - CPU Time & Energy Overhead: With a worst-case traversal budget of &le; 500 CPU cycles per packet, an edge device receiving a continuous industrial stream of 100 packets per second consumes:
 
@@ -81,7 +81,7 @@ This negligible duty cycle guarantees that additional power dissipation is kept 
 | :--- | :--- | :--- | :--- |
 | NFR-01 | Real-Time Latency | WCET bounded by O(depth) <= 50 µs (< 5% of 1 kHz loop); CPU cycles <= 500; jitter < 5%. | Hardware DWT cycle counter profiling and oscilloscope GPIO toggling. |
 | NFR-02 | Ultra-Low-Power | 100% interrupt-driven (zero polling loops); CPU duty cycle < 0.03%; energy overhead < 1% of node budget. | Current shunt measurement with digital storage oscilloscope across power states. |
-| NFR-03 | Heapless Memory | Zero dynamic heap allocation (no malloc/calloc/free). Flash <= 16 KB (<= 1.56%); SRAM <= 4 KB (<= 2.08%). | Linker map file analysis and static analysis with gcc flags (-Wstack-usage, -Wbad-function-cast). |
+| NFR-03 | Heapless Memory | Zero dynamic heap allocation (no malloc/calloc/free). Flash <= 16 KB (<= 3.13%); SRAM <= 4 KB (<= 2.08%). | Linker map file analysis and static analysis with gcc flags (-Wstack-usage, -Wbad-function-cast). |
 | NFR-04 | Intrinsic XAI | Output of deterministic Rule ID and split feature index for every leaf decision. Complete exclusion of black-box models. | Unit tests asserting returned Rule IDs against offline decision tree traversal traces. |
 | NFR-05 | Telemetry Security | Out-of-band serial telemetry frames protected via CRC32 checksum to guarantee diagnostic integrity. | Fault-injection testing introducing corrupted serial frames and asserting frame rejection. |
 | NFR-06 | Code Quality | Python supervisory suite strictly typed (PEP 484/526), formatted with black, and linted with flake8 and mypy. | Automated CI pipeline gate enforcing zero type errors and zero linter warnings. |

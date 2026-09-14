@@ -25,7 +25,7 @@ skinparam node {
     BorderThickness 1.2
 }
 
-title <size:14><b>MicroShield - Embedded Toolchain Compilation & Silicon Memory Allocation</b></size>\n<size:11>From Independent C99 Translation Units to STM32F407VGT6 Physical Memory Segments</size>\n
+title <size:14><b>MicroShield - Embedded Toolchain Compilation & Silicon Memory Allocation</b></size>\n<size:11>From Independent C99 Translation Units to STM32F407RE Physical Memory Segments</size>\n
 
 package "Source Translation Units" as SrcPkg {
     [main.c (Firmware)] as SrcMain
@@ -37,7 +37,7 @@ package "Source Translation Units" as SrcPkg {
 
 package "Toolchain Build Pipeline" as ToolchainPkg {
     [arm-none-eabi-gcc\n(-std=c99 -Wall -Wextra -Werror -O2)] as GCCComp
-    [arm-none-eabi-ld\n(STM32F407VGTx_FLASH.ld)] as Linker
+    [arm-none-eabi-ld\n(STM32F407RETx_FLASH.ld)] as Linker
     [microshield_firmware.elf\n(Target Executable Binary)] as OutELF #D4EDDA
 }
 
@@ -50,9 +50,9 @@ HeaderModel .up.> SrcEng : Direct Include
 GCCComp --> Linker : Relocatable Objects (.o)
 Linker --> OutELF
 
-node "STM32F407VGT6 Silicon Physical Memory Map" as HWMemory {
-    frame "FLASH Memory (1024 KB) @ 0x08000000" as FlashMem {
-        [<b>.text Section (Code Instructions)</b>\n- Core Industrial Control & HAL Drivers\n- microshield_engine.o, features.o, cobs.o\n<b>Total Size: <= 16 KB (<= 1.56% of Flash)</b>] as FlashText #E0F2FE
+node "STM32F407RE Silicon Physical Memory Map" as HWMemory {
+    frame "FLASH Memory (512 KB) @ 0x08000000" as FlashMem {
+        [<b>.text Section (Code Instructions)</b>\n- Core Industrial Control & HAL Drivers\n- microshield_engine.o, features.o, cobs.o\n<b>Total Size: <= 16 KB (<= 3.13% of Flash)</b>] as FlashText #E0F2FE
         [<b>.rodata Section (Read-Only Constants)</b>\n- transpiled_model.h static lookup matrices\n- CRC32 polynomial lookup tables\n<b>RAM Consumption: Exactly 0 Bytes</b>] as FlashROData #FEF3C7
     }
 

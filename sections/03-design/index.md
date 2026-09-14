@@ -125,7 +125,7 @@ This decoupled star topology ensures that diagnostic telemetry traffic generated
 
 The physical allocation of computational tasks is partitioned across two target environments:
 
-1. Edge Node Platform (STMicroelectronics STM32F407VGT6):
+1. Edge Node Platform (STMicroelectronics STM32F407RE):
    - Core Architecture: ARM Cortex-M4 32-bit RISC core with Hardware Floating Point Unit (Single-Precision FPU).
    - Clock Frequency: 168 MHz (delivering up to 210 DMIPS / 1.25 DMIPS/MHz).
    - Memory Mapping: 1024 KB on-chip non-volatile Flash memory for instructions and constant lookup tables; 192 KB contiguous Static RAM (112 KB System SRAM, 16 KB Auxiliary SRAM, 64 KB Core Coupled Memory - CCM Data RAM).
