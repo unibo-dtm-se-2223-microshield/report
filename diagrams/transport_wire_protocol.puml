@@ -1,0 +1,63 @@
+@startuml transport_wire_protocol
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam roundcorner 6
+skinparam shadowing false
+
+skinparam package {
+    BackgroundColor #F8F9FA
+    BorderColor #2B2D42
+    BorderThickness 1.2
+    FontColor #2B2D42
+}
+
+skinparam component {
+    BackgroundColor #EDF2F4
+    BorderColor #2B2D42
+    BorderThickness 1.2
+    FontColor #2B2D42
+}
+
+skinparam node {
+    BackgroundColor #FFFFFF
+    BorderColor #2B2D42
+    BorderThickness 1.2
+}
+
+title <size:14><b>MicroShield - Transport-Agnostic End-to-End Wire Protocol & Framing Pipeline</b></size>\n<size:11>Binary Serialization, IEEE 802.3 CRC32 Calculation, and COBS Encoding Across Heterogeneous Runtimes</size>\n
+
+package "Telemetry Frame Memory Layout (32 Bytes Contiguous)" as FrameLayout {
+    [Payload Workspace (28 Bytes)\nnode_id: 2B | rule_id: 2B | seq: 4B | verdict: 1B | split: 1B | res: 2B | features: 16B] as PayloadData #E0F2FE
+    [Integrity Checksum (4 Bytes)\nIEEE 802.3 CRC32 Polynomial 0xEDB88320] as CRCData #FEF3C7
+    PayloadData -right-> CRCData : Stamped into tail
+}
+
+package "Edge Ingress & Serialization (C99 Bare-Metal)" as EdgeSide {
+    [microshield_build_telemetry()] as BuildFn
+    [microshield_crc32()\n(Table Lookup in Flash)] as CRCFn
+    [microshield_cobs_encode()\n(Zero-Delimiter Guarantee)] as COBSEncFn
+    
+    BuildFn -right-> CRCFn : 28 Bytes Stream
+    CRCFn -right-> COBSEncFn : 32 Bytes Raw Frame
+}
+
+node "Transport-Agnostic Physical Medium (Zero-Trust Carrier)" as TranspMedium {
+    [Physical UART DMA / USB VCP / RS-485 / Wireless BLE Bridge / Cellular IP] as Wire
+    [Framed Packet Stream:\nPrefix Code ... Encoded Data Bytes ... 0x00 Delimiter] as WireBytes #F1F5F9
+    Wire -down-> WireBytes
+}
+
+package "Supervisory Deserialization & Ingestion (Python 3.11+ / DaShield)" as HostSide {
+    [cobs.decode()\n(Extract Delimited Frame)] as COBSDecPy
+    [zlib.crc32()\n(IEEE 802.3 Parity Check)] as CRCPy
+    [decode_telemetry_frame()\n(Immutable TelemetryRecord)] as RecordPy #D4EDDA
+    
+    COBSDecPy -right-> CRCPy : 32 Bytes Binary
+    CRCPy -right-> RecordPy : CRC Validated to Domain Entity
+}
+
+COBSEncFn -down-> Wire : Pushes Encoded Stream
+WireBytes -down-> COBSDecPy : Ingests Packet on 0x00 Delimiter
+
+@enduml

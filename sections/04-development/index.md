@@ -163,3 +163,116 @@ To integrate MicroShield into existing industrial firmware (e.g., generated via 
         HAL_UART_Transmit_DMA(&amp;huart2, (<span style="color: #0284c7;">uint8_t</span> *)&amp;telemetry, bytes_to_send);
     }
 }</code></pre>
+
+---
+
+## 4.3 End-to-End Diagnostic Transport: Framing (COBS) & Algebraic Integrity (CRC32)
+
+Establishing a robust communication link between edge microcontrollers and supervisory workstations requires solving two transport hazards: packet boundary desynchronization across continuous byte streams and data corruption induced by industrial electromagnetic interference (EMI).
+
+### 4.3.1 Transport-Agnostic Zero-Trust Rationale
+
+In industrial deployments, diagnostic telemetry traverses heterogeneous physical channels:
+- Short PCB inter-chip traces (e.g., UART links connecting the STM32 to local Wi-Fi or BLE transceivers).
+- Differential long-span factory floor fieldbuses (e.g., isolated RS-485 networks extending hundreds of meters).
+- Packetized IP backhauls (Ethernet bridges, VPN tunnels, or cellular gateways).
+
+In accordance with Saltzer's classical End-to-End Argument [8], intermediate network layers cannot be trusted to guarantee end-to-end payload integrity. High-voltage switching transients (IEC 61000-4-4 Electrical Fast Transients) and radio fading can flip bits at any stage along the transit pipeline. 
+
+MicroShield establishes a **Transport-Agnostic Zero-Trust Boundary**: diagnostic records are cryptographically and algebraically sealed directly in STM32 silicon and validated exclusively upon domain deserialization within the Python supervisory runtime. The underlying physical carrier remains completely transparent to the telemetry contract.
+
+### 4.3.2 Algebraic Integrity via IEEE 802.3 CRC32
+
+To detect in-transit corruption without resorting to heavy cryptographic signatures, the telemetry frame incorporates an IEEE 802.3 standard 32-bit Cyclic Redundancy Check (CRC32) [9].
+
+#### Polynomial Division in Galois Field GF(2)
+The payload byte array is treated as a single binary polynomial $M(x)$ in the Galois Field $\text{GF}(2)$, where addition and subtraction correspond to the bitwise XOR operation ($\oplus$). The checksum is defined as the remainder $R(x)$ of the polynomial division against the standard generator polynomial $G(x)$:
+
+$$\frac{M(x) \cdot x^{32}}{G(x)} = Q(x) \oplus \frac{R(x)}{G(x)}$$
+
+where $G(x)$ is the reversed representation constant `0xEDB88320`:
+
+$$G(x) = x^{32} + x^{26} + x^{23} + x^{22} + x^{16} + x^{12} + x^{11} + x^{10} + x^8 + x^7 + x^5 + x^4 + x^2 + x + 1$$
+
+#### Precalculated Flash Lookup Table Optimization
+Iterative bit-by-bit software division requires 8 branch iterations per byte (224 conditional branches across the 28-byte payload), causing instruction pipeline stalls on ARM Cortex-M4 cores.
+
+MicroShield precalculates the 256-entry polynomial table (`CRC32_TABLE`), mapped statically into Flash memory (`.rodata`):
+- **Flash Memory Footprint:** $256 \times 4\text{ bytes} = 1024\text{ bytes}$ (&le; 0.20% of 512 KB Flash).
+- **Volatile RAM Footprint:** **Exactly 0 bytes**.
+- **Computational Latency:** 28 single-cycle table lookups and XOR operations executing in less than 150 clock cycles (&approx; 0.89 &mu;s @ 168 MHz), fully satisfying the real-time budget.
+
+### 4.3.3 Consistent Overhead Byte Stuffing (COBS) Protocol
+
+Asynchronous serial interfaces lack intrinsic packet boundaries. To allow the receiver to detect frame start and termination unambiguously, a null byte (`0x00`) is designated as the universal packet delimiter.
+
+However, arbitrary binary structures (`float` values, integer timestamps, and CRC checksums) naturally contain raw `0x00` bytes, which would cause premature frame truncation. MicroShield implements Consistent Overhead Byte Stuffing (COBS) [10]:
+1. **Zero-Byte Elimination:** The payload is partitioned into sub-blocks delimited by zeros. Each zero byte is replaced with an offset pointer indicating the distance to the next zero.
+2. **Minimal Bounded Overhead:** For frames under 254 bytes, COBS adds exactly one prefix overhead byte and one trailing delimiter byte.
+3. **Delimiter Uniqueness:** The byte `0x00` is mathematically guaranteed never to appear within the encoded body, turning every `0x00` on the wire into an unambiguous end-of-frame signal.
+
+### 4.3.4 Wire Protocol & Cross-Language Pipeline
+
+The physical bit-level packing layout and the symmetric transformation pipeline bridging C99 and Python are modeled below (click image to expand to full resolution):
+
+[![MicroShield Transport-Agnostic Wire Protocol & Pipeline](../../pictures/transport_wire_protocol.png)](../../pictures/transport_wire_protocol.png)
+
+1. **Edge Construction (`microshield_cobs.c`):** The engine writes telemetry metadata into the 32-byte `microshield_telemetry_t` struct, calculates the CRC32 across the first 28 bytes, appends the checksum into the trailing 4 bytes, and applies `microshield_cobs_encode()`.
+2. **Asynchronous Dispatch:** The framed byte stream (maximum 34 bytes) is handed off to the non-blocking USART2 DMA peripheral.
+3. **Supervisory Parsing (`dashield.transport.framing`):** The Python daemon splits incoming streams by `0x00`, unmasks bytes via `cobs.decode()`, computes `zlib.crc32()` over the payload, and instantiates an immutable `TelemetryRecord`.
+
+### 4.3.5 Verification Evidence & Cross-Language Consistency
+
+Verification of the transport vertical slice was executed across both runtime environments using deterministic synthetic vectors.
+
+#### Dual-Tier Unit Test Results
+
+| Test ID | Test Target / Environment | Input Vector | Expected Output | Verification Status |
+| :--- | :--- | :--- | :--- | :--- |
+| `UT-C-01` | `edge/tests/test_cobs.c` (GCC C99) | ASCII string `"123456789"` | CRC32 `0xCBF43926` | **PASSED** (Matches IEEE 802.3) |
+| `UT-C-02` | `edge/tests/test_cobs.c` (GCC C99) | 8-byte payload with 3 embedded null bytes | 10-byte COBS stream, 100% bit recovery | **PASSED** (Lossless Roundtrip) |
+| `UT-C-03` | `edge/tests/test_cobs.c` (GCC C99) | Synthetic `microshield_telemetry_t` frame | CRC32 `0xD8C5B3C9` matches struct field | **PASSED** (Valid Field Integrity) |
+| `UT-PY-01`| `tests/test_framing.py` (Python 3.11+) | Binary payload matching `UT-C-03` | Reconstructed `TelemetryRecord` (`ATTACK`, Node 101) | **PASSED** (Cross-Language Match) |
+| `UT-PY-02`| `tests/test_framing.py` (Python 3.11+) | Injected 1-bit corruption in CRC field | Rejection with `FramingError("CRC32 mismatch")` | **PASSED** (Tamper Detection) |
+| `UT-PY-03`| `tests/test_framing.py` (Python 3.11+) | Truncated 4-byte malformed frame | Rejection with `FramingError("Unexpected length")` | **PASSED** (Truncation Guard) |
+
+#### Verification Execution Logs
+
+The native C99 unit test harness execution log confirms arithmetic conformity on Linux desktop:
+
+<pre style="line-height: 1.25; font-size: 0.85em; font-family: ui-monospace, SFMono-Regular, 'Liberation Mono', Menlo, Consolas, monospace; background-color: #1e293b; padding: 14px 18px; border-radius: 6px; border: 1px solid #334155; overflow-x: auto; color: #f8fafc;">
+--- Running MicroShield Edge C99 Framing &amp; Integrity Tests ---
+[TEST] CRC32('123456789'): 0xCBF43926 (Expected: 0xCBF43926)
+[TEST] COBS Roundtrip: 8 raw bytes -> 10 encoded bytes -> matched
+[TEST] TelemetryFrame CRC32 Verified: 0xD8C5B3C9 (Sequence: 0)
+--- ALL C99 FRAMING &amp; INTEGRITY TESTS PASSED SUCCESSFULLY ---
+</pre>
+
+The companion Python supervisory test suite execution log confirms symmetric validation via `pytest` and `mypy --strict`:
+
+<pre style="line-height: 1.25; font-size: 0.85em; font-family: ui-monospace, SFMono-Regular, 'Liberation Mono', Menlo, Consolas, monospace; background-color: #1e293b; padding: 14px 18px; border-radius: 6px; border: 1px solid #334155; overflow-x: auto; color: #f8fafc;">
+============================= test session starts ==============================
+collected 3 items
+
+tests/test_framing.py::test_decode_valid_frame_matching_c_test PASSED    [ 33%]
+tests/test_framing.py::test_corrupted_crc_rejection PASSED               [ 66%]
+tests/test_framing.py::test_truncated_frame_rejection PASSED             [100%]
+
+============================== 3 passed in 0.03s ===============================
+Success: no issues found in 11 source files
+</pre>
+
+---
+
+## 4.4 References
+
+- [1] I. Sommerville, *Software Engineering*, 10th ed. Boston, MA: Pearson, 2016.
+- [2] A. Cockburn, "Hexagonal Architecture: Ports and Adapters," *Alistair Cockburn Humans and Technology*, 2005.
+- [3] E. Evans, *Domain-Driven Design: Tackling Complexity in the Heart of Software*. Boston, MA: Addison-Wesley, 2004.
+- [4] European Commission, "Proposal for a Regulation on horizontal cybersecurity requirements for products with digital elements (Cyber Resilience Act)," COM(2022) 454 final, Brussels, 2022.
+- [5] European Parliament and Council of the European Union, "Directive (EU) 2022/2555 on measures for a high common level of cybersecurity across the Union (NIS 2 Directive)," *Official Journal of the European Union*, L 333, pp. 80–152, 2022.
+- [6] N. Koroniotis, N. Moustafa, E. Sitnikova, and B. Turnbull, "Towards the Development of Realistic Botnet Dataset in the Internet of Things for Network Forensic Analytics: Bot-IoT Dataset," *Future Generation Computer Systems*, vol. 100, pp. 779–796, 2019.
+- [7] M. A. Ferrag, O. Friha, D. Hamouda, L. Maglaras, and H. Janicke, "Edge-IIoTset: A New Comprehensive Realistic Cyber Security Dataset of IoT and IIoT Applications for Centralized and Federated Learning," *IEEE Access*, vol. 10, pp. 40281–40306, 2022.
+- [8] J. H. Saltzer, D. P. Reed, and D. D. Clark, "End-to-End Arguments in System Design," *ACM Transactions on Computer Systems (TOCS)*, vol. 2, no. 4, pp. 277–288, 1984.
+- [9] IEEE Standards Association, "IEEE Standard for Ethernet," *IEEE Std 802.3-2022*, pp. 1–7025, 2022.
+- [10] S. Cheshire and M. Baker, "Consistent Overhead Byte Stuffing," *IEEE/ACM Transactions on Networking*, vol. 7, no. 2, pp. 159–172, 1999.
