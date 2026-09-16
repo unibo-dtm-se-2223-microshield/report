@@ -428,7 +428,62 @@ Success: no issues found in 15 source files
 
 ---
 
-## 4.6 References
+## 4.6 Concept Drift Surveillance & Rolling Window Monitoring
+
+In industrial cybersecurity, operational environments are non-stationary: production line retooling, firmware updates, and adversarial evasion tactics induce statistical shifts between field data distributions and the training corpus. The supervisory daemon implements continuous Concept Drift surveillance (`dashield.drift`) to identify model degradation before catastrophic misclassifications occur.
+
+### 4.6.1 Sliding-Window Ambiguity Ratio Formulation
+
+Unlike binary intrusion detectors that force a forced binary choice between benign and malicious verdicts, MicroShield leverages the ternary output space of the edge engine. Packets falling within borderline decision boundaries are assigned `VERDICT_AMBIGUOUS`.
+
+The supervisory drift detector maintains a bounded, First-In First-Out (FIFO) rolling window of capacity $W = 100$ observations. The instantaneous Ambiguity Ratio $\alpha_t$ at time $t$ is calculated across the active window:
+
+$$\alpha_t = \frac{1}{|W_t|} \sum_{i \in W_t} \mathbb{I}(v_i = \text{VERDICT\_AMBIGUOUS})$$
+
+where $\mathbb{I}(\cdot)$ denotes the indicator function and $|W_t| \le W$. 
+
+- **Drift Ceiling Threshold ($\tau = 0.05$):** Concept drift is asserted whenever $\alpha_t > 0.05$ (5% ambiguity ceiling).
+- **Warm-Up Guard ($N_{\min} = 20$):** To suppress false alarm spikes during cold start or low-traffic intervals, drift evaluation is suppressed until the active window contains at least 20 observations ($|W_t| \ge N_{\min}$).
+- **FIFO Self-Healing:** If transient electrical noise causes a temporary spike in ambiguous classifications, nominal recovery flushes the FIFO queue automatically, restoring $\alpha_t \le 0.05$ without manual operator intervention.
+
+### 4.6.2 Verification Evidence & Unit Test Results
+
+The sliding-window drift surveillance engine was verified through unit test suites in `tests/test_drift.py`.
+
+#### Drift Detector Test Matrix
+
+| Test ID | Test Target | Test Case Description | Stimulus Scenario | Expected Detector Outcome | Status |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| `UT-DR-01` | `test_drift.py` | Nominal Operation | 30 Benign + 20 Attack verdicts | $\alpha = 0.00$, `is_drift_detected == False` | **PASSED** |
+| `UT-DR-02` | `test_drift.py` | Warm-Up Guard | 3 Benign + 2 Ambiguous ($|W| = 5$) | $\alpha = 0.40$, alarm suppressed ($5 < 20$) | **PASSED** |
+| `UT-DR-03` | `test_drift.py` | Drift Alarm Trigger | 90 Benign + 10 Ambiguous ($|W| = 100$) | $\alpha = 0.10 > 0.05$, `is_drift_detected == True` | **PASSED** |
+| `UT-DR-04` | `test_drift.py` | FIFO Queue Recovery | 10 Benign + 10 Ambiguous, then 30 Benign | Self-healing: $\alpha \to 0.00$, alarm clears | **PASSED** |
+| `UT-DR-05` | `test_drift.py` | Detector Reset | 15 Ambiguous verdicts, then `reset()` | History purged: $|W| = 0$, $\alpha = 0.00$ | **PASSED** |
+| `UT-DR-06` | `test_drift.py` | Parameter Guarding | Negative window, out-of-bound threshold | Defensive constructor raises `ValueError` | **PASSED** |
+
+#### Verification Execution Logs
+
+Execution logs from the drift surveillance test harness confirm mathematical correctness across all operational phases:
+
+<pre style="line-height: 1.25; font-size: 0.85em; font-family: ui-monospace, SFMono-Regular, 'Liberation Mono', Menlo, Consolas, monospace; background-color: #1e293b; padding: 14px 18px; border-radius: 6px; border: 1px solid #334155; overflow-x: auto; color: #f8fafc;">
+<span style="color: #94a3b8;">wearemassive@wearemassive:~/microshield/artifact/supervisor$</span> <span style="color: #38bdf8;">poetry run pytest -v tests/test_drift.py &amp;&amp; poetry run mypy --strict dashield/ tests/</span>
+============================= test session starts ==============================
+collected 6 items
+
+tests/test_drift.py::test_nominal_traffic_no_drift PASSED                 [ 16%]
+tests/test_drift.py::test_warmup_guard_prevents_premature_alarm PASSED    [ 33%]
+tests/test_drift.py::test_concept_drift_alarm_trigger PASSED              [ 50%]
+tests/test_drift.py::test_fifo_sliding_window_recovery PASSED             [ 66%]
+tests/test_drift.py::test_detector_reset PASSED                           [ 83%]
+tests/test_drift.py::test_invalid_parameters_raise_value_error PASSED     [100%]
+
+============================== 6 passed in 0.02s ===============================
+Success: no issues found in 17 source files
+</pre>
+
+---
+
+## 4.7 References
 
 - [1] I. Sommerville, *Software Engineering*, 10th ed. Boston, MA: Pearson, 2016.
 - [2] A. Cockburn, "Hexagonal Architecture: Ports and Adapters," *Alistair Cockburn Humans and Technology*, 2005.
