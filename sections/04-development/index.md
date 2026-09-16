@@ -434,7 +434,7 @@ In industrial cybersecurity, operational environments are non-stationary: produc
 
 ### 4.6.1 Sliding-Window Ambiguity Ratio Formulation
 
-Unlike binary intrusion detectors that force a forced binary choice between benign and malicious verdicts, MicroShield leverages the ternary output space of the edge engine. Packets falling within borderline decision boundaries are assigned `VERDICT_AMBIGUOUS`.
+Unlike binary intrusion detectors that force a binary choice between benign and malicious verdicts, MicroShield leverages the ternary output space of the edge engine. Packets falling within borderline decision boundaries are assigned `VERDICT_AMBIGUOUS`.
 
 The supervisory drift detector maintains a bounded, First-In First-Out (FIFO) rolling window of capacity $W = 100$ observations. The instantaneous Ambiguity Ratio $\alpha_t$ at time $t$ is calculated across the active window:
 
@@ -483,7 +483,56 @@ Success: no issues found in 17 source files
 
 ---
 
-## 4.7 References
+## 4.7 Reactive Operator Dashboard & Human-in-the-Loop Triage
+
+The final tier of the supervisory pipeline provides human operators with real-time situational awareness and interactive control over model lifecycle events (`dashield.ui`).
+
+### 4.7.1 Decoupled Reactive Architecture via Plotly Dash
+
+Rather than tightly coupling UI rendering to lower-level serial transport threads, the web console operates as an autonomous presentation adapter. Developed using Plotly Dash and Flask, the architecture enforces a strict unidirectional information hierarchy:
+
+1. **Non-Intrusive State Polling:** The browser client executes periodic 1 Hz polling via a declarative `dcc.Interval(id="ui-poll-interval", interval=1000)` component, querying backend state without injecting blocking latency into edge communications.
+2. **KPI Card Visualizations:** The top grid summarizes the core health indicators of the monitored STM32 node:
+   - **Ambiguity Ratio:** Instantaneous sliding-window ambiguity percentage relative to the 5.0% ceiling.
+   - **Total Processed & Ambiguous Counts:** Absolute counts inside the active 100-sample window.
+   - **Concept Drift State:** Visual binary badge switching dynamically between `NOMINAL` (emerald green) and `DRIFT DETECTED` (crimson red).
+3. **Event Stream Feed:** Displays quarantined packet metadata, rule identifiers, and XAI boolean explanations emitted by `rule_dictionary.json`.
+4. **Human-in-the-Loop MLOps Retraining:** When drift occurs, the operator is presented with the **Trigger AST Retraining** action. Activating this control triggers the transpiler, re-fits the decision tree against the latest ambiguous samples, resets the drift detector, and emits an updated `transpiled_model.h` for edge compilation.
+
+### 4.7.2 Verification Evidence & UI Unit Test Results
+
+The dashboard presentation components and reactive callback contracts were verified using isolated unit tests in `tests/test_ui.py`.
+
+#### UI Component & Callback Test Matrix
+
+| Test ID | Test Target | Test Case Description | Evaluation Criteria | Status |
+| :--- | :--- | :--- | :--- | :--- |
+| `UT-UI-01` | `test_ui.py` | Dashboard Instantiation | Initialized `Dash` app instance, title contains Node ID | **PASSED** |
+| `UT-UI-02` | `test_ui.py` | DOM Layout Scaffolding | Layout contains all critical component IDs and controls | **PASSED** |
+| `UT-UI-03` | `test_ui.py` | Callback Map Integrity | At least 2 reactive callbacks wired into the app context | **PASSED** |
+| `UT-UI-04` | `test_ui.py` | Drift State UI Reaction | Ingestion of drifted detector triggers `DRIFT DETECTED` | **PASSED** |
+
+#### Verification Execution Logs
+
+Execution logs from the UI unit test harness demonstrate proper layout and typing compliance:
+
+<pre style="line-height: 1.25; font-size: 0.85em; font-family: ui-monospace, SFMono-Regular, 'Liberation Mono', Menlo, Consolas, monospace; background-color: #1e293b; padding: 14px 18px; border-radius: 6px; border: 1px solid #334155; overflow-x: auto; color: #f8fafc;">
+<span style="color: #94a3b8;">wearemassive@wearemassive:~/microshield/artifact/supervisor$</span> <span style="color: #38bdf8;">poetry run pytest -v tests/test_ui.py &amp;&amp; poetry run mypy --strict dashield/ tests/</span>
+============================= test session starts ==============================
+collected 4 items
+
+tests/test_ui.py::test_dashboard_instantiation PASSED                    [ 25%]
+tests/test_ui.py::test_layout_contains_critical_components PASSED        [ 50%]
+tests/test_ui.py::test_callback_registration PASSED                      [ 75%]
+tests/test_ui.py::test_metric_state_reaction_with_drift PASSED           [100%]
+
+============================== 4 passed in 0.03s ===============================
+Success: no issues found in 19 source files
+</pre>
+
+---
+
+## 4.8 References
 
 - [1] I. Sommerville, *Software Engineering*, 10th ed. Boston, MA: Pearson, 2016.
 - [2] A. Cockburn, "Hexagonal Architecture: Ports and Adapters," *Alistair Cockburn Humans and Technology*, 2005.
