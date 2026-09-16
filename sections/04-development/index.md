@@ -270,7 +270,102 @@ Success: no issues found in 11 source files
 
 ---
 
-## 4.4 References
+## 4.4 Zero-Copy Feature Extraction & Deterministic Inference Engine
+
+The fast path of the edge intrusion detection system bridges raw network buffer reception to instant packet gatekeeping. This requires two coordinated components: a statistical feature extraction pipeline and a deterministic binary decision tree engine.
+
+### 4.4.1 Zero-Copy Feature Calculation Pipeline
+
+Rather than copying incoming Ethernet frames into temporary scratchpad buffers, `microshield_features.c` operates via direct read-only pointer dereferencing on physical DMA memory. The module constructs the 16-byte `microshield_features_t` structure through four specialized mathematical algorithms:
+
+1. **Normalized Frame Length ($f_0$):** Network frame sizes are saturated to the maximum Ethernet transmission unit (MTU = 1500 bytes) and mapped linearly to the interval $[0.0, 1.0]$. Jumbo frames are capped defensively to prevent metric divergence.
+2. **Hardware Rollover-Safe Inter-Arrival Delta ($f_1$):** Inter-packet arrival timing is acquired from the ARM Cortex-M4 Data Watchpoint and Trace (DWT) cycle counter running at 168 MHz. To guard against hardware timer overflow (occurring every &approx; 71.58 minutes on 32-bit registers), delta calculation relies on unsigned integer modular subtraction in $\mathbb{Z}_{2^{32}}$:
+   $$\Delta t = t_{\text{curr}} - t_{\text{prev}} \pmod{2^{32}}$$
+   This formulation guarantees accurate microsecond intervals across timer wrap-around events without requiring conditional branch overhead.
+3. **Defensive Protocol Flag Extraction ($f_2$):** Byte offsets corresponding to TCP control flags (offset 47) or data-link EtherType fields (offset 12) are checked against actual buffer boundaries. Runt packets (length &lt; 14 bytes) default safely to zero, eliminating buffer over-read vulnerabilities.
+4. **Numerically Stable Two-Pass Payload Variance ($f_3$):** Single-pass variance estimators based on $\sum x_i^2 - (\sum x_i)^2 / N$ suffer from severe catastrophic cancellation when executed on single-precision IEEE 754 floating-point hardware, frequently resulting in negative variances due to round-off error. MicroShield adopts an industrial two-pass algorithm:
+   - **Pass 1:** Accumulates a 32-bit unsigned integer sum of all payload bytes ($\sum x_i \le 1500 \times 255 = 382500$), deriving the exact sample mean $\mu$.
+   - **Pass 2:** Accumulates squared deviations $(x_i - \mu)^2$ strictly as positive quantities, guaranteeing $\sigma^2 \ge 0$ with optimal floating-point mantissa precision.
+
+### 4.4.2 MISRA-Compliant Deterministic Decision Tree Traversal
+
+The inference engine implemented in `microshield_engine.c` executes deterministic classification by traversing the static matrices defined in `transpiled_model.h`.
+
+#### Elimination of Recursion (MISRA C:2012 Rule 17.2)
+In safety-critical embedded systems, function recursion introduces non-deterministic stack memory growth, posing severe risk of stack overflow and unrecoverable hardware `HardFault` exceptions [11]. In strict compliance with MISRA C:2012 Rule 17.2, `microshield_classify()` implements an iterative traversal loop driven by pre-compiled child index lookup tables:
+
+<pre style="line-height: 1.25; font-size: 0.88em; font-family: ui-monospace, SFMono-Regular, 'Liberation Mono', Menlo, Consolas, monospace; background-color: #f8f9fa; padding: 14px 18px; border-radius: 6px; border: 1px solid #e2e8f0; overflow-x: auto; color: #1e293b;"><code><span style="color: #0284c7;">while</span> ((current_node &gt;= 0) &amp;&amp; 
+       (current_node &lt; (<span style="color: #0284c7;">int16_t</span>)MICROSHIELD_TREE_NODE_COUNT) &amp;&amp; 
+       (TREE_CHILD_LEFT[current_node] != -1)) {
+
+    <span style="color: #94a3b8;">/* Bounded depth guard: fail-safe against infinite iteration */</span>
+    <span style="color: #0284c7;">if</span> (depth &gt;= MICROSHIELD_TREE_MAX_DEPTH) {
+        *out_rule_id = 0U;
+        *out_split_feature = last_split_feature;
+        <span style="color: #0284c7;">return</span> VERDICT_AMBIGUOUS;
+    }
+
+    <span style="color: #0284c7;">uint8_t</span> feat_idx = TREE_FEATURE[current_node];
+    <span style="color: #0284c7;">float</span> val = extract_feature_by_index(features, feat_idx);
+    <span style="color: #0284c7;">float</span> threshold = TREE_THRESHOLD[current_node];
+
+    last_split_feature = feat_idx;
+    current_node = (val &lt;= threshold) ? TREE_CHILD_LEFT[current_node] : TREE_CHILD_RIGHT[current_node];
+    depth++;
+}</code></pre>
+
+- **Bounded Execution Time:** Traversal depth is clamped to `MICROSHIELD_TREE_MAX_DEPTH = 6`, guaranteeing an execution bound of &le; 6 branch iterations (&le; 12 &mu;s @ 168 MHz).
+- **Fail-Safe Mechanism:** If tree depth exceeds the bound due to corrupted lookup arrays, traversal halts immediately and returns `VERDICT_AMBIGUOUS`, triggering quarantine action.
+- **Intrinsic Attribution:** Terminal leaves (marked by child index `-1`) emit the immutable `rule_id` and the primary `split_feature`, providing immediate XAI explainability without additional latency.
+
+### 4.4.3 Verification Evidence & Unit Test Results
+
+The feature extraction and inference engines were verified through dedicated native C99 test suites on Linux desktop under `-std=c99 -Wall -Wextra -Werror`.
+
+#### Feature Extraction & Inference Test Matrix
+
+| Test ID | Test Target | Test Case Description | Stimulus Vector | Expected Classification / Metric | Status |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| `UT-FEAT-01` | `test_features.c` | MTU Length Normalization | Buffer lengths: 60B, 1500B, 2000B | $f_0 \in \{0.04, 1.00, 1.00\}$ (Capped) | **PASSED** |
+| `UT-FEAT-02` | `test_features.c` | 32-bit Timer Rollover | $t_{\text{prev}} = \text{0xFFFFFFF0}$, $t_{\text{curr}} = \text{0x00000010}$ | $\Delta t = 32.0\ \mu\text{s}$ (Modular Exact) | **PASSED** |
+| `UT-FEAT-03` | `test_features.c` | Protocol Flag Boundary Guard | Offset 47 TCP SYN (0x02) vs. 10B Runt | $f_2 = 0.0078$ (SYN) / $f_2 = 0.0$ (Runt) | **PASSED** |
+| `UT-FEAT-04` | `test_features.c` | Two-Pass Variance Precision | Constant buffer vs. $[0, 100, 0, 100]$ | $\sigma^2 = 0.00$ vs. $\sigma^2 = 2500.00$ | **PASSED** |
+| `UT-ENG-01`  | `test_engine.c`   | Nominal Industrial Traffic | $\Delta t = 120.0$, $\sigma^2 = 30.0$ | `VERDICT_BENIGN`, Rule ID 1 | **PASSED** |
+| `UT-ENG-02`  | `test_engine.c`   | Volumetric Flood Attack | $\Delta t = 20.0$, $L_{\text{norm}} = 0.85$ | `VERDICT_ATTACK`, Rule ID 14 | **PASSED** |
+| `UT-ENG-03`  | `test_engine.c`   | High-Entropy Fuzzing Scan | $\Delta t = 20.0$, $\sigma^2 = 180.0$ | `VERDICT_ATTACK`, Rule ID 22 | **PASSED** |
+| `UT-ENG-04`  | `test_engine.c`   | Ambiguous Drift Candidate | $\Delta t = 120.0$, $\sigma^2 = 75.0$ | `VERDICT_AMBIGUOUS`, Rule ID 4 | **PASSED** |
+| `UT-ENG-05`  | `test_engine.c`   | Null Pointer Defensive Guard | `features = NULL` | `VERDICT_AMBIGUOUS` (Fail-Safe) | **PASSED** |
+
+#### Verification Execution Logs
+
+Execution logs from the feature extractor test harness demonstrate numerical precision across all conditions:
+
+<pre style="line-height: 1.25; font-size: 0.85em; font-family: ui-monospace, SFMono-Regular, 'Liberation Mono', Menlo, Consolas, monospace; background-color: #1e293b; padding: 14px 18px; border-radius: 6px; border: 1px solid #334155; overflow-x: auto; color: #f8fafc;">
+<span style="color: #94a3b8;">wearemassive@wearemassive:~/microshield/artifact$</span> <span style="color: #38bdf8;">gcc -std=c99 -Wall -Wextra -Werror -Iedge/include edge/src/microshield_features.c edge/tests/test_features.c -o edge/tests/test_features_bin -lm &amp;&amp; ./edge/tests/test_features_bin</span>
+--- Running MicroShield Edge C99 Feature Extractor Tests ---
+[TEST] Length Normalization: PASSED (60B, 1500B, 2000B)
+[TEST] Timing Delta &amp; Rollover Protection: PASSED (Boot default, nominal, wrap-around)
+[TEST] Protocol Flags Extraction: PASSED (TCP SYN detected, runt frame guarded)
+[TEST] Two-Pass Variance Accuracy: PASSED (Constant=0.0, Known-dist=2500.0)
+--- ALL C99 FEATURE EXTRACTOR TESTS PASSED SUCCESSFULLY ---
+</pre>
+
+Execution logs from the inference engine test harness confirm bounded $O(\text{depth})$ path resolution:
+
+<pre style="line-height: 1.25; font-size: 0.85em; font-family: ui-monospace, SFMono-Regular, 'Liberation Mono', Menlo, Consolas, monospace; background-color: #1e293b; padding: 14px 18px; border-radius: 6px; border: 1px solid #334155; overflow-x: auto; color: #f8fafc;">
+<span style="color: #94a3b8;">wearemassive@wearemassive:~/microshield/artifact$</span> <span style="color: #38bdf8;">gcc -std=c99 -Wall -Wextra -Werror -Iedge/include -Iedge/model edge/src/microshield_engine.c edge/tests/test_engine.c -o edge/tests/test_engine_bin &amp;&amp; ./edge/tests/test_engine_bin</span>
+--- Running MicroShield Edge C99 Inference Engine Tests ---
+[TEST] Nominal: verdict=0, rule_id=1, split_feat=3
+[TEST] Volumetric Flood: verdict=1, rule_id=14, split_feat=0
+[TEST] Fuzzing Attack: verdict=1, rule_id=22, split_feat=3
+[TEST] Ambiguous Drift: verdict=2, rule_id=4, split_feat=3
+[TEST] Null Pointer Safety: verdict=2
+--- ALL C99 INFERENCE ENGINE TESTS PASSED SUCCESSFULLY ---
+</pre>
+
+---
+
+## 4.5 References
 
 - [1] I. Sommerville, *Software Engineering*, 10th ed. Boston, MA: Pearson, 2016.
 - [2] A. Cockburn, "Hexagonal Architecture: Ports and Adapters," *Alistair Cockburn Humans and Technology*, 2005.
@@ -282,3 +377,4 @@ Success: no issues found in 11 source files
 - [8] J. H. Saltzer, D. P. Reed, and D. D. Clark, "End-to-End Arguments in System Design," *ACM Transactions on Computer Systems (TOCS)*, vol. 2, no. 4, pp. 277–288, 1984.
 - [9] IEEE Standards Association, "IEEE Standard for Ethernet," *IEEE Std 802.3-2022*, pp. 1–7025, 2022.
 - [10] S. Cheshire and M. Baker, "Consistent Overhead Byte Stuffing," *IEEE/ACM Transactions on Networking*, vol. 7, no. 2, pp. 159–172, 1999.
+- [11] MISRA, *MISRA C:2012 - Guidelines for the use of the C language in critical systems*, 3rd ed. Nuneaton, Warwickshire, UK: MIRA Ltd, 2013.
