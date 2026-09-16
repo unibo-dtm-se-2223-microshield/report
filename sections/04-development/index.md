@@ -365,7 +365,70 @@ Execution logs from the inference engine test harness confirm bounded $O(\text{d
 
 ---
 
-## 4.5 References
+## 4.5 Supervisory MLOps Tier & AST Model Transpiler
+
+Bridging machine learning development in Python to deterministic edge execution on the STM32 microcontroller requires an automated, source-to-source code generator. The supervisory MLOps tier (`dashield.transpiler`) automates offline training on IoT corpora and transpiles fitted estimators directly into MISRA-compliant C99 lookup headers.
+
+### 4.5.1 Bounded Decision Tree Training Pipeline
+
+Model training is governed by `dashield.transpiler.trainer`, which synthesizes representative network traffic distributions modeled after the *Bot-IoT* [6] and *Edge-IIoTset* [7] benchmark corpora. 
+
+To satisfy the strict execution budget of the ARM Cortex-M4 core ($WCET \le 50\ \mu\text{s}$), the estimator is trained with strict structural boundaries:
+- **Depth Ceiling (`max_depth = 6`):** Guarantees that the resulting binary tree has at most $2^6 = 64$ leaf nodes and requires at most 6 comparisons per packet.
+- **Deterministic Convergence (`random_state = 42`):** Ensures bit-exact mathematical reproducibility across training executions.
+- **Pruning Guards (`min_samples_split = 10`, `min_samples_leaf = 5`):** Suppresses overfitting to transient traffic spikes while retaining clear separation boundaries.
+
+### 4.5.2 AST Transpilation & C99 Code Generation
+
+The `DecisionTreeTranspiler` inspects the internal abstract syntax tree of scikit-learn's fitted `tree_` structure:
+- It extracts parallel structural arrays: `children_left`, `children_right`, `feature`, `threshold`, and `value`.
+- It evaluates leaf nodes via majority class voting (`argmax`), mapping terminal leaves to ternary verdicts (`VERDICT_BENIGN`, `VERDICT_ATTACK`, `VERDICT_AMBIGUOUS`).
+- **Defensive Hardware Assertion:** The transpiler verifies `model.get_depth() <= 6`. If an unconstrained estimator violating the depth ceiling is supplied, it raises a `ValueError` exception and aborts code generation, preventing the emission of invalid firmware.
+
+The transpiler outputs two synchronized artifacts:
+1. **`transpiled_model.h`:** C99 header declaring `static const` Flash-resident arrays (`.rodata`), enabling $O(\text{depth})$ inference with zero volatile RAM consumption.
+2. **`rule_dictionary.json`:** An Explainable AI (XAI) semantic registry mapping every leaf `rule_id` to human-readable boolean expressions (e.g., `"(norm_length > 0.500) AND (delta_time_us <= 80.000) -> VERDICT_ATTACK"`), enabling immediate root-cause attribution on the supervisory dashboard.
+
+### 4.5.3 Verification Evidence & Unit Test Results
+
+The training and transpilation pipelines were validated through automated test suites in `supervisor/tests/`, enforced by strict static typing (`mypy --strict`).
+
+#### MLOps & Transpiler Test Matrix
+
+| Test ID | Test Target | Test Case Description | Evaluation Criteria | Status |
+| :--- | :--- | :--- | :--- | :--- |
+| `UT-ML-01` | `test_trainer.py` | Benchmark Dataset Geometry | Balanced $(N \times 3, 4)$ array, labels $\{0, 1, 2\}$ | **PASSED** |
+| `UT-ML-02` | `test_trainer.py` | Hardware Depth Ceiling | Fitted tree `model.get_depth() <= 6` | **PASSED** |
+| `UT-ML-03` | `test_trainer.py` | Classification Quality | Baseline training accuracy $> 90\%$ | **PASSED** |
+| `UT-TR-01` | `test_transpiler.py` | Depth Bound Guard | Rejection of deep trees ($> 6$) with `ValueError` | **PASSED** |
+| `UT-TR-02` | `test_transpiler.py` | C99 Header Syntax | Source includes required arrays, macros, include guards | **PASSED** |
+| `UT-TR-03` | `test_transpiler.py` | XAI Rule Registry | JSON contains valid leaf conditions and verdict strings | **PASSED** |
+| `UT-TR-04` | `test_transpiler.py` | Disk Artifact Emission | Valid non-empty `.h` and `.json` written to filesystem | **PASSED** |
+
+#### Verification Execution Logs
+
+Execution logs from the training and transpilation test suites confirm complete operational and typing correctness:
+
+<pre style="line-height: 1.25; font-size: 0.85em; font-family: ui-monospace, SFMono-Regular, 'Liberation Mono', Menlo, Consolas, monospace; background-color: #1e293b; padding: 14px 18px; border-radius: 6px; border: 1px solid #334155; overflow-x: auto; color: #f8fafc;">
+<span style="color: #94a3b8;">wearemassive@wearemassive:~/microshield/artifact/supervisor$</span> <span style="color: #38bdf8;">poetry run pytest -v tests/test_trainer.py tests/test_transpiler.py &amp;&amp; poetry run mypy --strict dashield/ tests/</span>
+============================= test session starts ==============================
+collected 7 items
+
+tests/test_trainer.py::test_dataset_generation_dimensions PASSED         [ 14%]
+tests/test_trainer.py::test_tree_depth_hardware_constraint PASSED        [ 28%]
+tests/test_trainer.py::test_tree_classification_performance PASSED       [ 42%]
+tests/test_transpiler.py::test_tree_depth_exceeded_guard PASSED          [ 57%]
+tests/test_transpiler.py::test_c_header_generation_syntax PASSED          [ 71%]
+tests/test_transpiler.py::test_rule_dictionary_xai_generation PASSED      [ 85%]
+tests/test_transpiler.py::test_artifacts_disk_emission PASSED             [100%]
+
+============================== 7 passed in 0.98s ===============================
+Success: no issues found in 15 source files
+</pre>
+
+---
+
+## 4.6 References
 
 - [1] I. Sommerville, *Software Engineering*, 10th ed. Boston, MA: Pearson, 2016.
 - [2] A. Cockburn, "Hexagonal Architecture: Ports and Adapters," *Alistair Cockburn Humans and Technology*, 2005.
