@@ -127,7 +127,7 @@ To integrate MicroShield into existing industrial firmware (e.g., generated via 
     microshield_init(101);
 
     <span style="color: #0284c7;">while</span> (1) {
-        <span style="color: #94a3b8;">/* Primary industrial control and actuator loop (1 kHz) */</span>
+        <span style="color: #94a3b8;">/* Race-to-Sleep: arresta il clock del core finché non arriva un interrupt */\n        __WFI();</span>
     }
 }
 
