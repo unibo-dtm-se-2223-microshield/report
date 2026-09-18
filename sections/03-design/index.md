@@ -414,3 +414,20 @@ Under Article 10 of the EU Cyber Resilience Act and the incident notification ma
 - [5] European Parliament and Council of the European Union, "Directive (EU) 2022/2555 on measures for a high common level of cybersecurity across the Union (NIS 2 Directive)," *Official Journal of the European Union*, L 333, pp. 80–152, 2022.
 - [6] N. Koroniotis, N. Moustafa, E. Sitnikova, and B. Turnbull, "Towards the Development of Realistic Botnet Dataset in the Internet of Things for Network Forensic Analytics: Bot-IoT Dataset," *Future Generation Computer Systems*, vol. 100, pp. 779–796, 2019.
 - [7] M. A. Ferrag, O. Friha, D. Hamouda, L. Maglaras, and H. Janicke, "Edge-IIoTset: A New Comprehensive Realistic Cyber Security Dataset of IoT and IIoT Applications for Centralized and Federated Learning," *IEEE Access*, vol. 10, pp. 40281–40306, 2022.
+
+## 3.7 Ultra-Low-Power (ULP) Architectural Principles
+
+In industrial battery-backed edge gateways and isolated field instrumentation, energy consumption is as critical as latency determinism. MicroShield adopts an architectural **Race-to-Sleep** execution model, minimizing the active duty cycle of the core CPU.
+
+### 3.7.1 The Race-to-Sleep Governance Model
+The total energy consumed per inspected network packet is governed by:
+
+$$E_{\text{packet}} = P_{\text{active}} \cdot t_{\text{active}} + P_{\text{sleep}} \cdot t_{\text{sleep}}$$
+
+Because the active power consumption of an ARM Cortex-M4 running at 168 MHz ($P_{\text{active}} \approx 115\ \text{mW}$) is three orders of magnitude greater than in Low-Power Sleep mode ($P_{\text{sleep}} \approx 120\ \mu\text{W}$ with core clock gated via WFI), dynamic energy reduction is achieved strictly by minimizing $t_{\text{active}}$ ($t_{\text{WCET}} \le 50\ \mu\text{s}$) rather than down-clocking the core.
+
+### 3.7.2 Software Architectural Optimizations for Low Power
+* **Zero-Copy Memory Access:** Eliminates energy-intensive SRAM read-write memory cycles by dereferencing ingress DMA buffers directly.
+* **Non-Volatile Static Lookups:** Mapping decision matrices and CRC tables into Flash `.rodata` reduces volatile memory refresh and write activity.
+* **FPU Throttling via Integer Accumulation:** Using two-pass integer addition for sample mean calculations suppresses floating-point hardware utilization during the first pass.
+* **DMA Autonomy:** Transmission of telemetry packets is delegated entirely to the USART DMA controller, allowing the core CPU to re-enter low-power `__WFI()` sleep immediately after initiating the transfer.
