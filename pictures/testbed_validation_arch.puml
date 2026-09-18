@@ -1,0 +1,73 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam handwritten false
+skinparam defaultFontName "Liberation Sans"
+skinparam fontSize 11
+
+skinparam package {
+  BackgroundColor #F8FAFC
+  BorderColor #64748B
+  FontStyle bold
+}
+
+skinparam component {
+  BackgroundColor #FFFFFF
+  BorderColor #0284C7
+  ArrowColor #0F172A
+}
+
+skinparam node {
+  BackgroundColor #F1F5F9
+  BorderColor #334155
+}
+
+package "1. Software-in-the-Loop (SIL) Host Validation" {
+  [Synthetic Adversary Injector\n(Fuzzing / Floods / Modbus)] as GEN
+  node "Host Runtime (x86_64 Linux)" {
+    [Native Edge Engine\n(libmicroshield.a / C99)] as EDGE_HOST
+    [Diagnostic Transport\n(POSIX Pipe / COBS + CRC32)] as PIPE
+    [Supervisory Telemetry Daemon\n(dashield.transport / Python 3.12)] as SUP_HOST
+  }
+  [Operator Dash Console\n(1 Hz Dynamic Polling)] as UI_HOST
+  
+  GEN -> EDGE_HOST : Ingress Raw Bytes
+  EDGE_HOST -> PIPE : Encoded Telemetry
+  PIPE -> SUP_HOST : Framing Extraction
+  SUP_HOST -> UI_HOST : Rolling Drift (FIFO W=100)
+}
+
+package "2. Hardware-in-the-Loop (HIL) Silicon Validation" {
+  node "Development Workstation" {
+    [Traffic Stimulus Generator\n(USB VCP @ 115200 8N1)] as VCP_TX
+  }
+
+  node "Target Silicon (STM32F407RE @ 168 MHz)" {
+    component "Foreground Task" as FG {
+      [Heavy Float MatMul Benchmark\n(32x32 MAC Loops @ FPU)] as MATMUL
+    }
+    component "Core Coupled Memory (CCM RAM)" as CCM {
+      [Zero-Copy Ring Buffers\n& Telemetry Staging] as RAM_BUF
+    }
+    component "Interrupt Service Routine" as ISR {
+      [Inline MicroShield Engine\n(Feature Extraction + Decision Tree)] as IDS_CORE
+    }
+    [Hardware DWT Cycle Counter\n(CYCCNT Resolution = 5.95 ns)] as DWT
+  }
+
+  package "Mini Breadboard Testbed (Header CN9)" {
+    [Green LED (D3 / PB3)\nNominal Ingress] as LED_G
+    [Yellow LED (D4 / PB5)\nAmbiguous Quarantine] as LED_Y
+    [Red LED (D5 / PB4)\nMalicious Attack Drop] as LED_R
+    [Tactile Pushbutton (D6 / PB10)\nSoftware Pull-Up Reset] as BTN
+  }
+
+  VCP_TX -> IDS_CORE : UART2 DMA Ingress (50 pkt/s)
+  IDS_CORE ..> DWT : Read Cycle Latency
+  MATMUL ..> DWT : Read Workload Overhead
+  IDS_CORE -> RAM_BUF : Scratchpad Access
+  IDS_CORE --> LED_G : State: Benign
+  IDS_CORE --> LED_Y : State: Ambiguous
+  IDS_CORE --> LED_R : State: Attack
+  BTN --> IDS_CORE : Hardware Clear
+}
+@enduml

@@ -1,0 +1,52 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName "Liberation Sans"
+skinparam sequence {
+  ArrowColor #0F172A
+  ActorBorderColor #0284C7
+  LifeLineBorderColor #64748B
+  LifeLineBackgroundColor #E2E8F0
+  ParticipantBorderColor #334155
+  ParticipantBackgroundColor #F8FAFC
+}
+
+participant "Hardware Core\n(DWT Counter)" as DWT
+participant "Foreground Task\n(32x32 Float MatMul)" as APP
+participant "DMA Peripheral\n(USART2 Ingress)" as DMA
+participant "MicroShield ISR\n(libmicroshield)" as IDS
+participant "Memory Bus\n(CCM / System RAM)" as BUS
+
+autonumber
+APP -> DWT : Read CYCCNT (Start Timestamp)
+activate APP
+note over APP: Executing 32,768 FP Multiply-Accumulate Operations
+
+DMA -> IDS : Frame Received Interrupt (f = 50 pkt/s)
+deactivate APP
+activate IDS
+note over IDS: Preempts MatMul (Hard Real-Time Context)
+
+IDS -> DWT : Read CYCCNT (ISR Ingress)
+IDS -> BUS : Zero-Copy Feature Extraction (f0, f1, f2, f3)
+IDS -> IDS : Tree Traversal (O(depth) <= 6 comparisons)
+
+alt Benign Packet
+  IDS -> BUS : Forward sanitized frame pointer to app buffer
+  IDS -> DWT : Delta = 23.0 us (3,864 cycles)
+else Corrupted / Attack Frame
+  IDS -> BUS : Quarantine payload; increment drop counter
+  IDS -> DWT : Delta = 31.5 us (5,292 cycles)
+end
+
+IDS --> APP : Return from Interrupt (RETI)
+deactivate IDS
+activate APP
+
+APP -> DWT : Read CYCCNT (Stop Timestamp)
+note over APP #E0F2FE
+  Baseline MatMul: ~718,450 cycles (4.276 ms)
+  Protected MatMul: ~721,810 cycles (4.296 ms)
+  Overhead = +0.46% (Well within <= 0.50% ceiling)
+end note
+deactivate APP
+@enduml
