@@ -8,20 +8,20 @@ nav_order: 2
 
 ## 1.1 Industrial Context & Emerging Threat Surface
 
-The rapid proliferation of cyber-physical systems, Industrial Internet of Things (IIoT) platforms, and connected edge nodes has fundamentally transformed modern industrial automation. Microcontroller units (MCUs) running bare-metal firmware or lightweight Real-Time Operating Systems (RTOS) are increasingly integrated into networked environments to manage critical functions: factory sensor acquisition, robotics motor actuation, telecommunications gateways, and smart grid substations.
+The rapid proliferation of cyber-physical systems, Industrial Internet of Things (IIoT) platforms, and connected edge nodes has fundamentally transformed modern industrial automation [1], [2]. Microcontroller units (MCUs) running bare-metal firmware or lightweight Real-Time Operating Systems (RTOS) are increasingly integrated into networked environments to manage critical functions: factory sensor acquisition, robotics motor actuation, telecommunications gateways, and smart grid substations [2].
 
-Historically, embedded microcontrollers relied on "security through obscurity" or physical perimeter isolation (air-gapped networks). However, the convergence of Operational Technology (OT) with enterprise Information Technology (IT) networks—driven by Industry 4.0 paradigms—has exposed these constrained endpoints directly to hostile network traffic. Common threat vectors include:
-- Volumetric Denial-of-Service (DoS/DDoS) floods targeting low-bandwidth field buses.
-- Port scanning, endpoint discovery sweeps, and network enumeration probes.
-- Unauthorized protocol commands, register tampering, and malformed payload injection (e.g., Modbus/TCP or MQTT exploit payloads).
+Historically, embedded microcontrollers relied on "security through obscurity" or physical perimeter isolation (air-gapped networks) [1]. However, the convergence of Operational Technology (OT) with enterprise Information Technology (IT) networks—driven by Industry 4.0 paradigms—has exposed these constrained endpoints directly to hostile network traffic [1], [2]. Common threat vectors include:
+- Volumetric Denial-of-Service (DoS/DDoS) floods targeting low-bandwidth field buses [1], [2].
+- Port scanning, endpoint discovery sweeps, and network enumeration probes [2].
+- Unauthorized protocol commands, register tampering, and malformed payload injection (e.g., Modbus/TCP or MQTT exploit payloads) [2].
 
-Concurrently, European regulatory mandates—most notably the **EU Cyber Resilience Act (CRA)** and the **NIS 2 Directive**—impose strict legal liabilities on equipment manufacturers to guarantee cybersecurity by design throughout the entire device lifecycle, enforcing tamper detection, proactive anomaly monitoring, and auditable vulnerability telemetry.
+Concurrently, European regulatory mandates—most notably the **EU Cyber Resilience Act (CRA)** and the **NIS 2 Directive**—impose strict legal liabilities on equipment manufacturers to guarantee cybersecurity by design throughout the entire device lifecycle, enforcing tamper detection, proactive anomaly monitoring, and auditable vulnerability telemetry [3], [4].
 
 ---
 
 ## 1.2 The Problem: Limitations of Conventional IDS on Bare-Metal Silicons
 
-Traditional Intrusion Detection and Prevention Systems (such as Snort, Suricata, Zeek, or eBPF-based host monitors) were architected exclusively for general-purpose computing platforms (x86_64, high-end ARM application processors) equipped with gigabytes of RAM, multi-core CPUs, and rich operating system kernels (Linux/Windows). 
+Traditional Intrusion Detection and Prevention Systems (such as Snort, Suricata, Zeek, or eBPF-based host monitors) were architected exclusively for general-purpose computing platforms (x86_64, high-end ARM application processors) equipped with gigabytes of RAM, multi-core CPUs, and rich operating system kernels (Linux/Windows) [2]. 
 
 Attempting to adapt these conventional paradigms directly onto resource-constrained microcontrollers introduces fundamental architectural failure modes:
 
@@ -30,17 +30,19 @@ Attempting to adapt these conventional paradigms directly onto resource-constrai
 | **Execution Environment** | Linux / Windows (Virtual Memory & MMU) | Bare-Metal / RTOS (Flat physical memory space) | Lack of an MMU means any pointer corruption crashes the entire physical node. |
 | **Memory Allocation** | Dynamic Heap (`malloc`, `free`, hash tables) | Strictly Static Allocation (Zero dynamic heap) | Dynamic allocation causes heap fragmentation, non-deterministic latency, and panic halts. |
 | **Timing Constraints** | Best-effort, asynchronous batch processing | Hard Real-Time control loops (1 kHz, sub-millisecond) | Variable-latency packet inspection induces fatal jitter in critical industrial control tasks. |
-| **Energy & Power Budget** | High-power server/desktop infrastructure | Milliwatt power budgets, battery or energy-harvested | Heavy computation depletes power reserves and causes thermal throttling. |
+| **Energy & Power Budget** | High-power server/desktop infrastructure | Milliwatt/microwatt budgets, battery or energy-harvested | Heavy computation depletes power reserves, causing rapid battery exhaustion and operational blackout. |
 | **Model Explainability** | Deep Neural Networks, Black-box ensembles | Direct engineering auditability (Rule ID, XAI) | Regulatory standards mandate verifiable, symbolic justification for all filtering actions. |
+
+In battery-powered or energy-harvesting field deployments (such as pipeline monitors, agricultural telemetry, and remote grid sensors), energy consumption represents a non-negotiable operational boundary [2]. A security monitor that requires continuous active polling or introduces computationally heavy cryptographic workloads rapidly drains the device power supply, transforming the defensive mechanism into an unintended denial-of-service vulnerability.
 
 ---
 
 ## 1.3 The MicroShield Proposition
 
-**MicroShield** resolves this architectural mismatch by providing an ultra-compact, deterministic, dual-tier intrusion detection and prevention framework tailored specifically for resource-critical microcontrollers.
+**MicroShield** resolves this architectural mismatch by providing an ultra-compact, deterministic, dual-tier intrusion detection framework tailored specifically for resource-critical and energy-constrained microcontrollers.
 
 The system decouples real-time inline packet inspection from compute-intensive machine learning operations:
-1. **Edge Runtime Tier (Embedded C99):** An inline, hardware-agnostic packet inspection engine that executes directly on the microcontroller. By replacing complex pattern matching with statically pre-compiled Decision Trees, the edge runtime evaluates incoming data-link frames in bounded, deterministic time ($O(\text{depth}) \le 50\ \mu\text{s}$) using zero dynamic memory allocation.
+1. **Edge Runtime Tier (Embedded C99):** An inline, hardware-agnostic packet inspection engine that executes directly on the microcontroller. By replacing complex pattern matching with statically pre-compiled Decision Trees, the edge runtime evaluates incoming data-link frames in bounded, deterministic time ($O(\text{depth}) \le 50\ \mu\text{s}$) using zero dynamic memory allocation. The edge tier strictly follows an **Ultra-Low-Power (ULP) Race-to-Sleep** architecture: it operates in a pure event-driven model that executes zero active polling cycles during quiescent periods, allowing the processor core to remain in deep low-power sleep modes until awakened by a network peripheral interrupt.
 2. **Supervisory MLOps Tier (Host Python):** An asynchronous fleet management suite operating on a host workstation or industrial gateway. It monitors telemetry streams dispatched over out-of-band diagnostic channels, computes statistical concept drift, triggers model retraining when network traffic distributions evolve, and automatically transpiles updated estimators into portable C99 header files.
 
 ---
@@ -79,6 +81,7 @@ MicroShield is engineered to serve three distinct operational stakeholders acros
 - **Key Goals:**
   - Strict preservation of the primary control loop schedule ($T_{\text{loop}} = 1000\ \mu\text{s}$ at 1 kHz), demanding an IDS inspection overhead that is strictly bounded ($\le 50\ \mu\text{s}$) with near-zero jitter.
   - Total exclusion of dynamic memory allocation (`no malloc`) to safeguard firmware stability against memory exhaustion, heap fragmentation, and unhandled pointer faults.
+  - Strict adherence to the **Ultra-Low-Power (ULP)** paradigm: zero polling loops, minimal active cycle budgets ($\le 500$ CPU cycles per packet), and immediate return to deep sleep (`__WFI()`) to maximize battery autonomy in field sensors.
   - Seamless integration via a modular, statically linkable C library exposing an intuitive, hardware-agnostic API.
 - **Interaction with MicroShield:**
   - Statically links `libmicroshield.a` into the embedded firmware build during target compilation.
@@ -90,6 +93,7 @@ MicroShield is engineered to serve three distinct operational stakeholders acros
 - **Profile:** Executive manager responsible for manufacturing uptime, operational safety, and statutory regulatory compliance across factory facilities.
 - **Key Goals:**
   - Complete elimination of false-positive plant shutdowns caused by overzealous security filters.
+  - Minimization of operational maintenance costs (preventing costly battery-replacement truck-rolls across wide-area deployments by enforcing high energy efficiency).
   - Direct compliance with statutory European cybersecurity directives (EU CRA Article 10, NIS 2).
   - Verifiable, tamper-evident forensic audit trails for insurance verification and official regulatory audits.
 - **Interaction with MicroShield:**
@@ -108,6 +112,8 @@ The macro-scale architectural boundaries and component responsibilities separati
 
 ## 1.7 References
 
-- [1] European Commission, "Proposal for a Regulation on horizontal cybersecurity requirements for products with digital elements (Cyber Resilience Act)," COM(2022) 454 final, Brussels, 2022.
-- [2] European Parliament and Council of the European Union, "Directive (EU) 2022/2555 on measures for a high common level of cybersecurity across the Union (NIS 2 Directive)," Official Journal of the European Union, L 333, pp. 80–152, 2022.
-- [3] I. Sommerville, *Software Engineering*, 10th ed. Boston, MA: Pearson, 2016.
+- [1] N. Koroniotis, N. Moustafa, E. Sitnikova, and B. Turnbull, "Towards the Development of Realistic Botnet Dataset in the Internet of Things for Network Forensic Analytics: Bot-IoT Dataset," *Future Generation Computer Systems*, vol. 100, pp. 779–796, 2019.
+- [2] M. A. Ferrag, O. Friha, D. Hamouda, L. Maglaras, and H. Janicke, "Edge-IIoTset: A New Comprehensive Realistic Cyber Security Dataset of IoT and IIoT Applications for Centralized and Federated Learning," *IEEE Access*, vol. 10, pp. 40281–40306, 2022.
+- [3] European Commission, "Proposal for a Regulation on horizontal cybersecurity requirements for products with digital elements (Cyber Resilience Act)," COM(2022) 454 final, Brussels, 2022.
+- [4] European Parliament and Council of the European Union, "Directive (EU) 2022/2555 on measures for a high common level of cybersecurity across the Union (NIS 2 Directive)," *Official Journal of the European Union*, L 333, pp. 80–152, 2022.
+- [5] I. Sommerville, *Software Engineering*, 10th ed. Boston, MA: Pearson, 2016.
