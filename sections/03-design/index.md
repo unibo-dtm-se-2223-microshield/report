@@ -34,6 +34,8 @@ At the Edge Runtime Tier, MicroShield implements Cockburn's Hexagonal Architectu
 * **Gatekeeping Port:** Outbound interface signaling the application firmware whether an intercepted frame is benign (forwarded immediately) or anomalous (quarantined and suppressed).
 * **Telemetry Egress Port:** Outbound interface offloading anomaly descriptors to serial transmission buffers without blocking execution.
 
+[![MicroShield Dual-Tier Component & Hexagonal Architecture](../../pictures/design_components.png)](../../pictures/design_components.png)
+
 ### 3.1.3 Supervisory Event-Driven Pipeline Architecture
 
 On the host workstation, the supervisory tier is structured as an asynchronous event-driven processing pipeline:
@@ -64,8 +66,8 @@ The functional boundaries and interaction points between the edge and supervisor
 Deep Packet Inspection (DPI) on resource-constrained microcontrollers fails due to memory exhaustion (stateful TCP reassembly exceeds 192 KB SRAM), timing non-determinism (regex matching exhibits variable latency), and cryptographic blindness (payloads are encrypted under TLS/DTLS).
 
 MicroShield builds upon empirical evidence from benchmark corpora:
-* **The Bot-IoT Corpus:** Proved that over 98% of volumetric botnet attacks can be identified through statistical flow dynamics and temporal relationships without payload inspection.
-* **The Edge-IIoTset Corpus:** Demonstrated that in industrial protocols (Modbus, Ethernet/IP), malicious anomalies distort packet geometry and byte dispersion away from deterministic baseline distributions.
+* **The Bot-IoT Corpus:** Proved that over 98% of volumetric botnet attacks can be identified through statistical flow dynamics and temporal relationships without payload inspection [6].
+* **The Edge-IIoTset Corpus:** Demonstrated that in industrial protocols (Modbus, Ethernet/IP), malicious anomalies distort packet geometry and byte dispersion away from deterministic baseline distributions [7].
 
 From this foundation, MicroShield synthesizes a 4-Dimensional Orthogonal Feature Space extracted in constant time:
 
@@ -79,6 +81,8 @@ From this foundation, MicroShield synthesizes a 4-Dimensional Orthogonal Feature
 #### Deterministic Tree Traversal: Bounded O(depth) Evaluation
 
 Once the feature vector v = [f0, f1, f2, f3] is populated, the edge engine executes inference by traversing a pre-compiled decision tree:
+
+[![MicroShield Deterministic Decision Tree Traversal](../../pictures/design_decision_tree.png)](../../pictures/design_decision_tree.png)
 
 * Worst-Case Execution Time (WCET) is strictly bounded by tree depth: WCET = O(depth) <= 6 comparisons <= 500 CPU cycles (approx. 2.98 µs @ 168 MHz).
 * At each non-terminal node, the MCU performs a single comparison against a pre-compiled threshold and branches to the left or right child array index.
@@ -103,7 +107,9 @@ MicroShield establishes a Central-Star Diagnostic Architecture. While field devi
 
 This decoupled topology ensures that diagnostic telemetry traffic generated during cyberattacks cannot saturate or introduce communication jitter into the operational control network.
 
-### 3.2.2 Execution Environments & Hardware Allocation
+### 3.2.2 Execution Environments & Physical Deployment
+
+[![MicroShield Distributed Deployment & Physical Infrastructure](../../pictures/design_deployment.png)](../../pictures/design_deployment.png)
 
 * **Edge Node Platform (STM32F407RE):**
   * Core: ARM Cortex-M4 32-bit RISC with single-precision FPU @ 168 MHz.
@@ -134,6 +140,8 @@ Serial links lack intrinsic frame boundaries. MicroShield implements Consistent 
 * **Deterministic Overhead:** COBS encodes payload bytes such that raw null bytes within telemetry records are replaced with offset pointers, guaranteeing an overhead bounded by at most 1 byte per 254 bytes of payload.
 * **Transmission Integrity:** Every telemetry frame concludes with an IEEE 802.3 compliant 32-bit CRC. The supervisory ingestion daemon validates the checksum prior to allocating domain objects, discarding corrupted frames caused by industrial line noise.
 
+[![MicroShield Transport-Agnostic Wire Protocol & Pipeline](../../pictures/transport_wire_protocol.png)](../../pictures/transport_wire_protocol.png)
+
 ---
 
 ## 3.3 Domain-Driven Design (DDD) Modelling
@@ -141,6 +149,8 @@ Serial links lack intrinsic frame boundaries. MicroShield implements Consistent 
 ### 3.3.1 Bounded Context Formalization & Ubiquitous Language
 
 The problem domain is segregated into three autonomous Bounded Contexts:
+
+[![MicroShield Domain-Driven Design (DDD) Context Map](../../pictures/design_ddd_context_map.png)](../../pictures/design_ddd_context_map.png)
 
 | Bounded Context | Governing Persona | Operational Boundary & Purpose | Ubiquitous Vocabulary |
 | :--- | :--- | :--- | :--- |
@@ -167,6 +177,8 @@ The problem domain is segregated into three autonomous Bounded Contexts:
 
 ## 3.4 Structural & Object-Oriented Modelling
 
+[![MicroShield Structural Class & Data Type Model](../../pictures/design_class_diagram.png)](../../pictures/design_class_diagram.png)
+
 ### 3.4.1 Supervisory Tier Architecture (Python 3.11+)
 
 The supervisory software applies standard object-oriented design patterns:
@@ -178,15 +190,16 @@ The supervisory software applies standard object-oriented design patterns:
 
 * **Encapsulation via Translation Units:** Internal state variables are marked `static` within `microshield_engine.c`. External callers interact exclusively through opaque function signatures defined in `microshield.h`.
 * **Elimination of Dynamic Dispatch:** Function pointers inside structs (vtables) are excluded from the fast path. All classification calls resolve at link-time as direct branches (BL instructions) to prevent pipeline stalls.
-* **Natural 32-Bit Alignment:** Structs (`FeatureVector_t`, `TelemetryFrame_t`) enforce 4-byte alignment boundaries, eliminating compiler padding and unaligned memory access penalties.
+* **Fast-Path Memory Layout: Natural 32-Bit Alignment:** The feature vector struct (`microshield_features_t`) strictly enforces 4-byte natural alignment across all fields (four 32-bit single-precision floats, 16 bytes total). On the ARM Cortex-M4 architecture, 32-bit aligned memory addresses allow the core and the hardware Floating Point Unit (FPU) to perform single-cycle loads and stores (`LDR`, `VLDR`) without incurring bus wait-states, unaligned access penalties, or compiler padding bytes. This minimal cycle consumption directly shortens active execution time ($t_{\text{active}}$).
+* **Slow-Path Memory Layout: Explicit Byte Packing:** In contrast to the feature vector, the diagnostic telemetry struct (`microshield_telemetry_t`) is qualified with `__attribute__((packed))`. This directive eliminates all internal compiler padding across heterogeneous data types (integers, bytes, floats), collapsing the memory footprint to exactly 32 contiguous bytes. Because telemetry traverses an asynchronous serial link (Slow Path), absolute cross-platform binary reproducibility between the C runtime and the host Python deserializer (`struct.unpack`) takes precedence over single-cycle memory alignment.
 
 ### 3.4.3 Distributed Mapping of Domain Concepts
 
 | Domain Concept | Software Data Type | Runtime Hosting Environment | Concurrency & Access Model |
 | :--- | :--- | :--- | :--- |
 | **RawFrame** | RawFrame_t (C99 struct) | Edge SRAM (CCM Data RAM) | Single-producer (DMA ISR), single-consumer (Engine). Zero-copy access via pointers. |
-| **FeatureVector** | FeatureVector_t (C99 struct) | Edge Stack Frame | Allocated strictly on stack; lifetime confined to single-packet inspection cycle. |
-| **TelemetryFrame** | TelemetryFrame_t (Packed C99) | Edge TX Ring Buffer | Written by IDS engine on anomaly; read by UART DMA controller. |
+| **FeatureVector** | FeatureVector_t (C99 struct) | Edge Stack Frame | Allocated strictly on stack; natural 32-bit alignment; lifetime confined to single-packet inspection. |
+| **TelemetryFrame** | TelemetryFrame_t (Packed C99) | Edge TX Ring Buffer | Written by IDS engine on anomaly; packed without padding; read by UART DMA controller. |
 | **TelemetryRecord** | TelemetryRecord (Python dataclass) | Supervisory Heap | Immutable; shared concurrently across ingestion, drift monitor, and dashboard threads. |
 | **DriftDetector** | DriftDetector (Python class) | Supervisory Process | Evaluated on packet arrival within the ingestion worker thread. |
 
@@ -197,6 +210,8 @@ The supervisory software applies standard object-oriented design patterns:
 ### 3.5.1 The Real-Time Fast Path (Inline Gatekeeping)
 
 The fast path executes on every inbound data-link frame. Worst-Case Execution Time (WCET) is strictly bounded: delta_t_IDS <= 50 µs.
+
+[![MicroShield Real-Time Fast Path & Asynchronous Egress](../../pictures/design_sequence_fast_path.png)](../../pictures/design_sequence_fast_path.png)
 
 1. **Interrupt Ingress (<= 5 µs):** The hardware ISR captures the frame pointer directly from the DMA buffer without memory copying.
 2. **Feature Extraction (<= 18 µs):** The statistical extractor calculates normalized length, inter-arrival time delta, protocol flags, and payload byte variance.
@@ -214,6 +229,8 @@ Alert records staged in the internal transmission buffer are drained by the USAR
 
 ### 3.6.1 Edge Engine Finite State Machine & Hardware Visual Signaling
 
+[![MicroShield Edge Engine Deterministic Finite State Machine](../../pictures/design_state_engine.png)](../../pictures/design_state_engine.png)
+
 | State Identifier | State Nature | Visual Indicator | Entry Trigger & Operational Behavior | Exit Condition |
 | :--- | :--- | :--- | :--- | :--- |
 | **STATE_IDLE_SLEEP** | Quiescent (Low Power) | LEDs Off / Prior State | Core sleeps in WFI mode. Peripheral clocks remain gated. | Hardware RX interrupt from communication peripheral. |
@@ -228,6 +245,8 @@ Alert records staged in the internal transmission buffer are drained by the USAR
 ### 3.6.2 Supervisory Concept Drift & Retraining Pipeline
 
 On the supervisory workstation, behavior is driven by continuous statistical evaluation across sliding temporal windows. When the rolling ambiguity ratio exceeds 5%, the system flags concept drift and presents the operator with retraining options.
+
+[![MicroShield Supervisory Drift Surveillance & Transpilation Pipeline](../../pictures/design_activity_drift.png)](../../pictures/design_activity_drift.png)
 
 ### 3.6.3 Human-in-the-Loop Triaging
 
@@ -250,6 +269,7 @@ Because the active power consumption of an ARM Cortex-M4 running at 168 MHz (P_a
 ### 3.7.2 Software Architectural Optimizations for Low Power
 
 * **Zero-Copy Memory Access:** Eliminates energy-intensive SRAM read-write memory cycles by dereferencing ingress DMA buffers directly.
+* **Natural 32-Bit Alignment of Operands:** Aligning the feature structure to 4-byte boundaries ensures that the FPU and ALU load data in single-cycle bus transactions, shaving critical clock cycles off active computation time ($t_{\text{active}}$) before returning to sleep.
 * **Non-Volatile Static Lookups:** Mapping decision matrices and CRC tables into Flash .rodata reduces volatile memory refresh and write activity.
 * **FPU Throttling via Integer Accumulation:** Using two-pass integer addition for sample mean calculations suppresses floating-point hardware utilization during the first pass.
 * **DMA Autonomy:** Transmission of telemetry packets is delegated entirely to the USART DMA controller, allowing the core CPU to re-enter low-power WFI sleep immediately after initiating the transfer.
@@ -285,10 +305,10 @@ Any retrospective alteration, deletion, or insertion of historical alert records
 
 ## 3.9 References
 
-1. I. Sommerville, Software Engineering, 10th ed. Boston, MA: Pearson, 2016.
-2. A. Cockburn, "Hexagonal Architecture: Ports and Adapters," Alistair Cockburn Humans and Technology, 2005.
-3. E. Evans, Domain-Driven Design: Tackling Complexity in the Heart of Software. Boston, MA: Addison-Wesley, 2004.
-4. European Commission, "Proposal for a Regulation on horizontal cybersecurity requirements for products with digital elements (Cyber Resilience Act)," COM(2022) 454 final, Brussels, 2022.
-5. European Parliament and Council of the European Union, "Directive (EU) 2022/2555 on measures for a high common level of cybersecurity across the Union (NIS 2 Directive)," Official Journal of the European Union, L 333, pp. 80-152, 2022.
-6. N. Koroniotis, N. Moustafa, E. Sitnikova, and B. Turnbull, "Towards the Development of Realistic Botnet Dataset in the Internet of Things for Network Forensic Analytics: Bot-IoT Dataset," Future Generation Computer Systems, vol. 100, pp. 779-796, 2019.
-7. M. A. Ferrag, O. Friha, D. Hamouda, L. Maglaras, and H. Janicke, "Edge-IIoTset: A New Comprehensive Realistic Cyber Security Dataset of IoT and IIoT Applications for Centralized and Federated Learning," IEEE Access, vol. 10, pp. 40281-40306, 2022.
+- [1] I. Sommerville, *Software Engineering*, 10th ed. Boston, MA: Pearson, 2016.
+- [2] A. Cockburn, "Hexagonal Architecture: Ports and Adapters," *Alistair Cockburn Humans and Technology*, 2005.
+- [3] E. Evans, *Domain-Driven Design: Tackling Complexity in the Heart of Software*. Boston, MA: Addison-Wesley, 2004.
+- [4] European Commission, "Proposal for a Regulation on horizontal cybersecurity requirements for products with digital elements (Cyber Resilience Act)," COM(2022) 454 final, Brussels, 2022.
+- [5] European Parliament and Council of the European Union, "Directive (EU) 2022/2555 on measures for a high common level of cybersecurity across the Union (NIS 2 Directive)," *Official Journal of the European Union*, L 333, pp. 80-152, 2022.
+- [6] N. Koroniotis, N. Moustafa, E. Sitnikova, and B. Turnbull, "Towards the Development of Realistic Botnet Dataset in the Internet of Things for Network Forensic Analytics: Bot-IoT Dataset," *Future Generation Computer Systems*, vol. 100, pp. 779-796, 2019.
+- [7] M. A. Ferrag, O. Friha, D. Hamouda, L. Maglaras, and H. Janicke, "Edge-IIoTset: A New Comprehensive Realistic Cyber Security Dataset of IoT and IIoT Applications for Centralized and Federated Learning," *IEEE Access*, vol. 10, pp. 40281-40306, 2022.
