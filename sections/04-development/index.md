@@ -214,19 +214,23 @@ MicroShield establishes a **Transport-Agnostic Zero-Trust Boundary**: diagnostic
 To detect in-transit corruption without resorting to heavy cryptographic signatures, the telemetry frame incorporates an IEEE 802.3 standard 32-bit Cyclic Redundancy Check (CRC32) [9].
 
 #### Polynomial Division in Galois Field GF(2)
-The payload byte array is treated as a single binary polynomial $M(x)$ in the Galois Field GF(2), where addition and subtraction correspond to the bitwise XOR operation ($\oplus$). The checksum is defined as the remainder $R(x)$ of the polynomial division against the standard generator polynomial $G(x)$:
+The payload byte array is treated as a single binary polynomial <i>M</i>(<i>x</i>) in the Galois Field GF(2), where addition and subtraction correspond to the bitwise XOR operation (&oplus;). The checksum is defined as the remainder <i>R</i>(<i>x</i>) of the polynomial division against the standard generator polynomial <i>G</i>(<i>x</i>):
 
-$$[M(x) \cdot x^{32}] / G(x) = Q(x) \oplus [R(x) / G(x)]$$
+<div align="center" style="font-size: 1.1em; margin: 1em 0;">
+  [<i>M</i>(<i>x</i>) &sdot; <i>x</i><sup>32</sup>] / <i>G</i>(<i>x</i>) = <i>Q</i>(<i>x</i>) &oplus; [<i>R</i>(<i>x</i>) / <i>G</i>(<i>x</i>)]
+</div>
 
-where $G(x)$ is the reversed representation constant `0xEDB88320`:
+where <i>G</i>(<i>x</i>) is the reversed representation constant `0xEDB88320`:
 
-$$G(x) = x^{32} + x^{26} + x^{23} + x^{22} + x^{16} + x^{12} + x^{11} + x^{10} + x^8 + x^7 + x^5 + x^4 + x^2 + x + 1$$
+<div align="center" style="font-size: 1.05em; margin: 0.8em 0;">
+  <i>G</i>(<i>x</i>) = <i>x</i><sup>32</sup> + <i>x</i><sup>26</sup> + <i>x</i><sup>23</sup> + <i>x</i><sup>22</sup> + <i>x</i><sup>16</sup> + <i>x</i><sup>12</sup> + <i>x</i><sup>11</sup> + <i>x</i><sup>10</sup> + <i>x</i><sup>8</sup> + <i>x</i><sup>7</sup> + <i>x</i><sup>5</sup> + <i>x</i><sup>4</sup> + <i>x</i><sup>2</sup> + <i>x</i> + 1
+</div>
 
 #### Precalculated Flash Lookup Table Optimization
 Iterative bit-by-bit software division requires 8 branch iterations per byte (224 conditional branches across the 28-byte payload), causing instruction pipeline stalls on ARM Cortex-M4 cores.
 
 MicroShield precalculates the 256-entry polynomial table (`CRC32_TABLE`), mapped statically into Flash memory (`.rodata`):
-- **Flash Memory Footprint:** $256 \times 4\text{ bytes} = 1024\text{ bytes}$ (&le; 0.20% of 512 KB Flash).
+- **Flash Memory Footprint:** 256 &times; 4 bytes = 1024 bytes (&le; 0.20% of 512 KB Flash).
 - **Volatile RAM Footprint:** **Exactly 0 bytes**.
 - **Computational Latency:** 28 single-cycle table lookups and XOR operations executing in less than 150 clock cycles (&approx; 0.89 &mu;s @ 168 MHz), fully satisfying the real-time budget.
 
@@ -260,9 +264,9 @@ Verification of the transport vertical slice was executed across both runtime en
 | `UT-C-01` | `edge/tests/test_cobs.c` (GCC C99) | ASCII string `"123456789"` | CRC32 `0xCBF43926` | **PASSED** (Matches IEEE 802.3) |
 | `UT-C-02` | `edge/tests/test_cobs.c` (GCC C99) | 8-byte payload with 3 embedded null bytes | 10-byte COBS stream, 100% bit recovery | **PASSED** (Lossless Roundtrip) |
 | `UT-C-03` | `edge/tests/test_cobs.c` (GCC C99) | Synthetic `microshield_telemetry_t` frame | CRC32 `0xD8C5B3C9` matches struct field | **PASSED** (Valid Field Integrity) |
-| `UT-PY-01`| `tests/test_framing.py` (Python 3.11+) | Binary payload matching `UT-C-03` | Reconstructed `TelemetryRecord` (`ATTACK`, Node 101) | **PASSED** (Cross-Language Match) |
-| `UT-PY-02`| `tests/test_framing.py` (Python 3.11+) | Injected 1-bit corruption in CRC field | Rejection with `FramingError("CRC32 mismatch")` | **PASSED** (Tamper Detection) |
-| `UT-PY-03`| `tests/test_framing.py` (Python 3.11+) | Truncated 4-byte malformed frame | Rejection with `FramingError("Unexpected length")` | **PASSED** (Truncation Guard) |
+| `UT-PY-01` | `tests/test_framing.py` (Python 3.11+) | Binary payload matching `UT-C-03` | Reconstructed `TelemetryRecord` (`ATTACK`, Node 101) | **PASSED** (Cross-Language Match) |
+| `UT-PY-02` | `tests/test_framing.py` (Python 3.11+) | Injected 1-bit corruption in CRC field | Rejection with `FramingError("CRC32 mismatch")` | **PASSED** (Tamper Detection) |
+| `UT-PY-03` | `tests/test_framing.py` (Python 3.11+) | Truncated 4-byte malformed frame | Rejection with `FramingError("Unexpected length")` | **PASSED** (Truncation Guard) |
 
 ---
 
@@ -274,14 +278,19 @@ The fast path of the edge intrusion detection system bridges raw network buffer 
 
 Rather than copying incoming Ethernet frames into temporary scratchpad buffers, `microshield_features.c` operates via direct read-only pointer dereferencing on physical DMA memory. The module constructs the 16-byte `microshield_features_t` structure through four specialized mathematical algorithms:
 
-1. **Normalized Frame Length ($f_0$):** Network frame sizes are saturated to the maximum Ethernet transmission unit (MTU = 1500 bytes) and mapped linearly to the interval $[0.0, 1.0]$. Jumbo frames are capped defensively to prevent metric divergence.
-2. **Hardware Rollover-Safe Inter-Arrival Delta ($f_1$):** Inter-packet arrival timing is acquired from the ARM Cortex-M4 Data Watchpoint and Trace (DWT) cycle counter running at 168 MHz. To guard against hardware timer overflow (occurring every &approx; 71.58 minutes on 32-bit registers), delta calculation relies on unsigned integer modular subtraction in $\mathbb{Z}_{2^{32}}$:
-   $$\Delta t = t_{\text{curr}} - t_{\text{prev}} \pmod{2^{32}}$$
-   This formulation guarantees accurate microsecond intervals across timer wrap-around events without requiring conditional branch overhead.
-3. **Defensive Protocol Flag Extraction ($f_2$):** Byte offsets corresponding to TCP control flags (offset 47) or data-link EtherType fields (offset 12) are checked against actual buffer boundaries. Runt packets (length &lt; 14 bytes) default safely to zero, eliminating buffer over-read vulnerabilities.
-4. **Numerically Stable Two-Pass Payload Variance ($f_3$):** Single-pass variance estimators based on $\sum x_i^2 - (\sum x_i)^2 / N$ suffer from severe catastrophic cancellation when executed on single-precision IEEE 754 floating-point hardware, frequently resulting in negative variances due to round-off error. MicroShield adopts an industrial two-pass algorithm:
-   - **Pass 1:** Accumulates a 32-bit unsigned integer sum of all payload bytes ($\sum x_i \le 1500 \times 255 = 382500$), deriving the exact sample mean $\mu$.
-   - **Pass 2:** Accumulates squared deviations $(x_i - \mu)^2$ strictly as positive quantities, guaranteeing $\sigma^2 \ge 0$ with optimal floating-point mantissa precision.
+1. **Normalized Frame Length (<i>f</i><sub>0</sub>):** Network frame sizes are saturated to the maximum Ethernet transmission unit (MTU = 1500 bytes) and mapped linearly to the interval [0.0, 1.0]. Jumbo frames are capped defensively to prevent metric divergence.
+2. **Hardware Rollover-Safe Inter-Arrival Delta (<i>f</i><sub>1</sub>):** Inter-packet arrival timing is acquired from the ARM Cortex-M4 Data Watchpoint and Trace (DWT) cycle counter running at 168 MHz. To guard against hardware timer overflow (occurring every &approx; 71.58 minutes on 32-bit registers), delta calculation relies on unsigned integer modular subtraction in Z<sub>2<sup>32</sup></sub>:
+
+<div align="center" style="font-size: 1.05em; margin: 0.6em 0;">
+  &Delta;<i>t</i> = (<i>t</i><sub>curr</sub> - <i>t</i><sub>prev</sub>) mod 2<sup>32</sup>
+</div>
+
+This formulation guarantees accurate microsecond intervals across timer wrap-around events without requiring conditional branch overhead.
+
+3. **Defensive Protocol Flag Extraction (<i>f</i><sub>2</sub>):** Byte offsets corresponding to TCP control flags (offset 47) or data-link EtherType fields (offset 12) are checked against actual buffer boundaries. Runt packets (length &lt; 14 bytes) default safely to zero, eliminating buffer over-read vulnerabilities.
+4. **Numerically Stable Two-Pass Payload Variance (<i>f</i><sub>3</sub>):** Single-pass variance estimators based on &Sigma; <i>x</i><sub><i>i</i></sub><sup>2</sup> - (&Sigma; <i>x</i><sub><i>i</i></sub>)<sup>2</sup> / <i>N</i> suffer from severe catastrophic cancellation when executed on single-precision IEEE 754 floating-point hardware, frequently resulting in negative variances due to round-off error. MicroShield adopts an industrial two-pass algorithm:
+   - **Pass 1:** Accumulates an unsigned 32-bit integer sum of all payload bytes (&Sigma; <i>x</i><sub><i>i</i></sub> &le; 1500 &times; 255 = 382,500), deriving the exact sample mean &mu;.
+   - **Pass 2:** Accumulates squared deviations (<i>x</i><sub><i>i</i></sub> - &mu;)<sup>2</sup> strictly as positive quantities, guaranteeing &sigma;<sup>2</sup> &ge; 0 with optimal floating-point mantissa precision.
 
 ### 4.4.2 MISRA-Compliant Deterministic Decision Tree Traversal
 
@@ -320,15 +329,15 @@ In safety-critical embedded systems, function recursion introduces non-determini
 
 | Test ID | Test Target | Test Case Description | Stimulus Vector | Expected Classification / Metric | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| `UT-FEAT-01` | `test_features.c` | MTU Length Normalization | Buffer lengths: 60B, 1500B, 2000B | $f_0 \in \{0.04, 1.00, 1.00\}$ (Capped) | **PASSED** |
-| `UT-FEAT-02` | `test_features.c` | 32-bit Timer Rollover | $t_{\text{prev}} = \text{0xFFFFFFF0}$, $t_{\text{curr}} = \text{0x00000010}$ | $\Delta t = 32.0\ \mu\text{s}$ (Modular Exact) | **PASSED** |
-| `UT-FEAT-03` | `test_features.c` | Protocol Flag Boundary Guard | Offset 47 TCP SYN (0x02) vs. 10B Runt | $f_2 = 0.0078$ (SYN) / $f_2 = 0.0$ (Runt) | **PASSED** |
-| `UT-FEAT-04` | `test_features.c` | Two-Pass Variance Precision | Constant buffer vs. $[0, 100, 0, 100]$ | $\sigma^2 = 0.00$ vs. $\sigma^2 = 2500.00$ | **PASSED** |
-| `UT-ENG-01`  | `test_engine.c`   | Nominal Industrial Traffic | $\Delta t = 120.0$, $\sigma^2 = 30.0$ | `VERDICT_BENIGN`, Rule ID 1 | **PASSED** |
-| `UT-ENG-02`  | `test_engine.c`   | Volumetric Flood Attack | $\Delta t = 20.0$, $L_{\text{norm}} = 0.85$ | `VERDICT_ATTACK`, Rule ID 14 | **PASSED** |
-| `UT-ENG-03`  | `test_engine.c`   | High-Entropy Fuzzing Scan | $\Delta t = 20.0$, $\sigma^2 = 180.0$ | `VERDICT_ATTACK`, Rule ID 22 | **PASSED** |
-| `UT-ENG-04`  | `test_engine.c`   | Ambiguous Drift Candidate | $\Delta t = 120.0$, $\sigma^2 = 75.0$ | `VERDICT_AMBIGUOUS`, Rule ID 4 | **PASSED** |
-| `UT-ENG-05`  | `test_engine.c`   | Null Pointer Defensive Guard | `features = NULL` | `VERDICT_AMBIGUOUS` (Fail-Safe) | **PASSED** |
+| `UT-FEAT-01` | `test_features.c` | MTU Length Normalization | Buffer lengths: 60B, 1500B, 2000B | <i>f</i><sub>0</sub> &isin; {0.04, 1.00, 1.00} (Capped) | **PASSED** |
+| `UT-FEAT-02` | `test_features.c` | 32-bit Timer Rollover | <i>t</i><sub>prev</sub> = 0xFFFFFFF0, <i>t</i><sub>curr</sub> = 0x00000010 | &Delta;<i>t</i> = 32.0 &mu;s (Modular Exact) | **PASSED** |
+| `UT-FEAT-03` | `test_features.c` | Protocol Flag Boundary Guard | Offset 47 TCP SYN (0x02) vs. 10B Runt | <i>f</i><sub>2</sub> = 0.0078 (SYN) / <i>f</i><sub>2</sub> = 0.0 (Runt) | **PASSED** |
+| `UT-FEAT-04` | `test_features.c` | Two-Pass Variance Precision | Constant buffer vs. [0, 100, 0, 100] | &sigma;<sup>2</sup> = 0.00 vs. &sigma;<sup>2</sup> = 2500.00 | **PASSED** |
+| `UT-ENG-01` | `test_engine.c` | Nominal Industrial Traffic | &Delta;<i>t</i> = 120.0, &sigma;<sup>2</sup> = 30.0 | `VERDICT_BENIGN`, Rule ID 1 | **PASSED** |
+| `UT-ENG-02` | `test_engine.c` | Volumetric Flood Attack | &Delta;<i>t</i> = 20.0, <i>L</i><sub>norm</sub> = 0.85 | `VERDICT_ATTACK`, Rule ID 14 | **PASSED** |
+| `UT-ENG-03` | `test_engine.c` | High-Entropy Fuzzing Scan | &Delta;<i>t</i> = 20.0, &sigma;<sup>2</sup> = 180.0 | `VERDICT_ATTACK`, Rule ID 22 | **PASSED** |
+| `UT-ENG-04` | `test_engine.c` | Ambiguous Drift Candidate | &Delta;<i>t</i> = 120.0, &sigma;<sup>2</sup> = 75.0 | `VERDICT_AMBIGUOUS`, Rule ID 4 | **PASSED** |
+| `UT-ENG-05` | `test_engine.c` | Null Pointer Defensive Guard | `features = NULL` | `VERDICT_AMBIGUOUS` (Fail-Safe) | **PASSED** |
 
 ---
 
@@ -340,8 +349,8 @@ Bridging machine learning development in Python to deterministic edge execution 
 
 Model training is governed by `dashield.transpiler.trainer`, which synthesizes representative network traffic distributions modeled after the *Bot-IoT* [6] and *Edge-IIoTset* [7] benchmark corpora. 
 
-To satisfy the strict execution budget of the ARM Cortex-M4 core ($WCET \le 50\ \mu\text{s}$), the estimator is trained with strict structural boundaries:
-- **Depth Ceiling (`max_depth = 6`):** Guarantees that the resulting binary tree has at most $2^6 = 64$ leaf nodes and requires at most 6 comparisons per packet.
+To satisfy the strict execution budget of the ARM Cortex-M4 core (WCET &le; 50 &mu;s), the estimator is trained with strict structural boundaries:
+- **Depth Ceiling (`max_depth = 6`):** Guarantees that the resulting binary tree has at most 2<sup>6</sup> = 64 leaf nodes and requires at most 6 comparisons per packet.
 - **Deterministic Convergence (`random_state = 42`):** Ensures bit-exact mathematical reproducibility across training executions.
 - **Pruning Guards (`min_samples_split = 10`, `min_samples_leaf = 5`):** Suppresses overfitting to transient traffic spikes while retaining clear separation boundaries.
 
@@ -353,17 +362,17 @@ The `DecisionTreeTranspiler` inspects the internal abstract syntax tree of sciki
 - **Defensive Hardware Assertion:** The transpiler verifies `model.get_depth() <= 6`. If an unconstrained estimator violating the depth ceiling is supplied, it raises a `ValueError` exception and aborts code generation, preventing the emission of invalid firmware.
 
 The transpiler outputs two synchronized artifacts:
-1. **`transpiled_model.h`:** C99 header declaring `static const` Flash-resident arrays (`.rodata`), enabling $O(\text{depth})$ inference with zero volatile RAM consumption.
-2. **`rule_dictionary.json`:** An Explainable AI (XAI) semantic registry mapping every leaf `rule_id` to human-readable boolean expressions (e.g., `"(norm_length > 0.500) AND (delta_time_us <= 80.000) -> VERDICT_ATTACK"`), enabling immediate root-cause attribution on the supervisory dashboard.
+1. **`transpiled_model.h`:** C99 header declaring `static const` Flash-resident arrays (`.rodata`), enabling bounded execution time with zero volatile RAM consumption.
+2. **`rule_dictionary.json`:** An Explainable AI (XAI) semantic registry mapping every leaf `rule_id` to human-readable boolean expressions, enabling immediate root-cause attribution on the supervisory dashboard.
 
 ### 4.5.3 Verification Evidence & Transpiler Test Matrix
 
 | Test ID | Test Target | Test Case Description | Evaluation Criteria | Status |
 | :--- | :--- | :--- | :--- | :--- |
-| `UT-ML-01` | `test_trainer.py` | Benchmark Dataset Geometry | Balanced $(N \times 3, 4)$ array, labels $\{0, 1, 2\}$ | **PASSED** |
+| `UT-ML-01` | `test_trainer.py` | Benchmark Dataset Geometry | Balanced (<i>N</i> &times; 3, 4) array, labels {0, 1, 2} | **PASSED** |
 | `UT-ML-02` | `test_trainer.py` | Hardware Depth Ceiling | Fitted tree `model.get_depth() <= 6` | **PASSED** |
-| `UT-ML-03` | `test_trainer.py` | Classification Quality | Baseline training accuracy $> 90\%$ | **PASSED** |
-| `UT-TR-01` | `test_transpiler.py` | Depth Bound Guard | Rejection of deep trees ($> 6$) with `ValueError` | **PASSED** |
+| `UT-ML-03` | `test_trainer.py` | Classification Quality | Baseline training accuracy &gt; 90% | **PASSED** |
+| `UT-TR-01` | `test_transpiler.py` | Depth Bound Guard | Rejection of deep trees (&gt; 6) with `ValueError` | **PASSED** |
 | `UT-TR-02` | `test_transpiler.py` | C99 Header Syntax | Source includes required arrays, macros, include guards | **PASSED** |
 | `UT-TR-03` | `test_transpiler.py` | XAI Rule Registry | JSON contains valid leaf conditions and verdict strings | **PASSED** |
 | `UT-TR-04` | `test_transpiler.py` | Disk Artifact Emission | Valid non-empty `.h` and `.json` written to filesystem | **PASSED** |
@@ -378,25 +387,27 @@ In industrial cybersecurity, operational environments are non-stationary: produc
 
 Unlike binary intrusion detectors that force a binary choice between benign and malicious verdicts, MicroShield leverages the ternary output space of the edge engine. Packets falling within borderline decision boundaries are assigned `VERDICT_AMBIGUOUS`.
 
-The supervisory drift detector maintains a bounded, First-In First-Out (FIFO) rolling window of capacity $W = 100$ observations. The instantaneous Ambiguity Ratio $\alpha_t$ at time $t$ is calculated across the active window:
+The supervisory drift detector maintains a bounded, First-In First-Out (FIFO) rolling window of capacity <i>W</i> = 100 observations. The instantaneous Ambiguity Ratio &alpha;<sub><i>t</i></sub> at time <i>t</i> is calculated across the active window:
 
-$$\alpha_t = \frac{1}{\vert{}W_t\vert{}} \sum_{i \in W_t} \mathbb{I}(v_i = \text{VERDICT\_AMBIGUOUS})$$
+<div align="center" style="font-size: 1.1em; margin: 1em 0;">
+  &alpha;<sub><i>t</i></sub> = (1 / &#124;<i>W</i><sub><i>t</i></sub>&#124;) &sum;<sub><i>i</i> &isin; <i>W</i><sub><i>t</i></sub></sub> I(<i>v</i><sub><i>i</i></sub> == VERDICT_AMBIGUOUS)
+</div>
 
-where $\mathbb{I}(\cdot)$ denotes the indicator function and $\vert{}W_t\vert{} \le W$. 
+where I(&middot;) denotes the indicator function and &#124;<i>W</i><sub><i>t</i></sub>&#124; &le; <i>W</i>.
 
-- **Drift Ceiling Threshold ($\tau = 0.05$):** Concept drift is asserted whenever $\alpha_t > 0.05$ (5% ambiguity ceiling).
-- **Warm-Up Guard ($N_{\min} = 20$):** To suppress false alarm spikes during cold start or low-traffic intervals, drift evaluation is suppressed until the active window contains at least 20 observations ($\vert{}W_t\vert{} \ge N_{\min}$).
-- **FIFO Self-Healing:** If transient electrical noise causes a temporary spike in ambiguous classifications, nominal recovery flushes the FIFO queue automatically, restoring $\alpha_t \le 0.05$ without manual operator intervention.
+- **Drift Ceiling Threshold (&tau; = 0.05):** Concept drift is asserted whenever &alpha;<sub><i>t</i></sub> &gt; 0.05 (5% ambiguity ceiling).
+- **Warm-Up Guard (<i>N</i><sub>min</sub> = 20):** To suppress false alarm spikes during cold start or low-traffic intervals, drift evaluation is suppressed until the active window contains at least 20 observations (&#124;<i>W</i><sub><i>t</i></sub>&#124; &ge; <i>N</i><sub>min</sub>).
+- **FIFO Self-Healing:** If transient electrical noise causes a temporary spike in ambiguous classifications, nominal recovery flushes the FIFO queue automatically, restoring &alpha;<sub><i>t</i></sub> &le; 0.05 without manual operator intervention.
 
 ### 4.6.2 Drift Detector Test Matrix
 
 | Test ID | Test Target | Test Case Description | Stimulus Scenario | Expected Detector Outcome | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| `UT-DR-01` | `test_drift.py` | Nominal Operation | 30 Benign + 20 Attack verdicts | $\alpha = 0.00$, `is_drift_detected == False` | **PASSED** |
-| `UT-DR-02` | `test_drift.py` | Warm-Up Guard | 3 Benign + 2 Ambiguous ($\vert{}W\vert{} = 5$) | $\alpha = 0.40$, alarm suppressed ($5 < 20$) | **PASSED** |
-| `UT-DR-03` | `test_drift.py` | Drift Alarm Trigger | 90 Benign + 10 Ambiguous ($\vert{}W\vert{} = 100$) | $\alpha = 0.10 > 0.05$, `is_drift_detected == True` | **PASSED** |
-| `UT-DR-04` | `test_drift.py` | FIFO Queue Recovery | 10 Benign + 10 Ambiguous, then 30 Benign | Self-healing: $\alpha \to 0.00$, alarm clears | **PASSED** |
-| `UT-DR-05` | `test_drift.py` | Detector Reset | 15 Ambiguous verdicts, then `reset()` | History purged: $\vert{}W\vert{} = 0$, $\alpha = 0.00$ | **PASSED** |
+| `UT-DR-01` | `test_drift.py` | Nominal Operation | 30 Benign + 20 Attack verdicts | &alpha; = 0.00, `is_drift_detected == False` | **PASSED** |
+| `UT-DR-02` | `test_drift.py` | Warm-Up Guard | 3 Benign + 2 Ambiguous (&#124;<i>W</i>&#124; = 5) | &alpha; = 0.40, alarm suppressed (5 &lt; 20) | **PASSED** |
+| `UT-DR-03` | `test_drift.py` | Drift Alarm Trigger | 90 Benign + 10 Ambiguous (&#124;<i>W</i>&#124; = 100) | &alpha; = 0.10 &gt; 0.05, `is_drift_detected == True` | **PASSED** |
+| `UT-DR-04` | `test_drift.py` | FIFO Queue Recovery | 10 Benign + 10 Ambiguous, then 30 Benign | Self-healing: &alpha; &rarr; 0.00, alarm clears | **PASSED** |
+| `UT-DR-05` | `test_drift.py` | Detector Reset | 15 Ambiguous verdicts, then `reset()` | History purged: &#124;<i>W</i>&#124; = 0, &alpha; = 0.00 | **PASSED** |
 | `UT-DR-06` | `test_drift.py` | Parameter Guarding | Negative window, out-of-bound threshold | Defensive constructor raises `ValueError` | **PASSED** |
 
 ---
@@ -433,11 +444,11 @@ To provide empirical evidence of system integrity, the entire regression suite s
 make -C edge test
 make[1]: Entering directory '/home/wearemassive/microshield/artifact/edge'
 === Running MicroShield Edge C99 Test Suite ===
---- Running MicroShield Edge C99 Framing & Integrity Tests ---
+--- Running MicroShield Edge C99 Framing &amp; Integrity Tests ---
 [TEST] CRC32('123456789'): 0xCBF43926 (Expected: 0xCBF43926)
-[TEST] COBS Roundtrip: 8 raw bytes -> 10 encoded bytes -> matched
+[TEST] COBS Roundtrip: 8 raw bytes -&gt; 10 encoded bytes -&gt; matched
 [TEST] TelemetryFrame CRC32 Verified: 0xD8C5B3C9 (Sequence: 0)
---- ALL C99 FRAMING & INTEGRITY TESTS PASSED SUCCESSFULLY ---
+--- ALL C99 FRAMING &amp; INTEGRITY TESTS PASSED SUCCESSFULLY ---
 --- Running MicroShield Edge C99 Inference Engine Tests ---
 [TEST] Nominal: verdict=0, rule_id=1, split_feat=3
 [TEST] Volumetric Flood: verdict=1, rule_id=14, split_feat=0
@@ -447,14 +458,14 @@ make[1]: Entering directory '/home/wearemassive/microshield/artifact/edge'
 --- ALL C99 INFERENCE ENGINE TESTS PASSED SUCCESSFULLY ---
 --- Running MicroShield Edge C99 Feature Extractor Tests ---
 [TEST] Length Normalization: PASSED (60B, 1500B, 2000B)
-[TEST] Timing Delta & Rollover Protection: PASSED (Boot default, nominal, wrap-around)
+[TEST] Timing Delta &amp; Rollover Protection: PASSED (Boot default, nominal, wrap-around)
 [TEST] Protocol Flags Extraction: PASSED (TCP SYN detected, runt frame guarded)
 [TEST] Two-Pass Variance Accuracy: PASSED (Constant=0.0, Known-dist=2500.0)
 --- ALL C99 FEATURE EXTRACTOR TESTS PASSED SUCCESSFULLY ---
 === All Edge C99 Unit Tests Passed Successfully ===
 make[1]: Leaving directory '/home/wearemassive/microshield/artifact/edge'
 === [2/3] Running Python Supervisory Test Suite ===
-cd supervisor && poetry run pytest -v tests/
+cd supervisor &amp;&amp; poetry run pytest -v tests/
 ============================= test session starts ==============================
 platform linux -- Python 3.14.4, pytest-7.4.4, pluggy-1.6.0 -- /home/wearemassive/microshield/artifact/supervisor/.venv/bin/python
 cachedir: .pytest_cache
@@ -489,11 +500,11 @@ tests/test_ui.py::test_metric_state_reaction_with_drift PASSED            [100%]
 
 ============================== 24 passed in 1.18s ==============================
 === [3/3] Running Strict Static Typecheck (mypy) ===
-cd supervisor && poetry run mypy --strict dashield/ tests/
+cd supervisor &amp;&amp; poetry run mypy --strict dashield/ tests/
 Success: no issues found in 20 source files
 
 ============================================================
-  ALL MICROSHIELD TESTS & STATIC GATES PASSED (C99 + PYTHON)
+  ALL MICROSHIELD TESTS &amp; STATIC GATES PASSED (C99 + PYTHON)
 ============================================================
 </pre>
 
