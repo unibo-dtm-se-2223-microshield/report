@@ -15,29 +15,19 @@ start
 
 if (f1: Delta Time <= 30.0 µs?) then (yes)
   if (f3: Byte Variance > 140.0?) then (yes)
-    #FFCDD2:<b>Rule #22: ATTACK</b>\nHigh-Entropy Flood / Fuzzing;
+    #FFCDD2:<b>Rule #22: ATTACK</b>\nHigh-Entropy Payload Fuzzing\n(Action: DROPPED & Quarantined);
     detach
   else (no)
-    #FFCDD2:<b>Rule #14: ATTACK</b>\nVolumetric Line Rate Flood;
+    #FFCDD2:<b>Rule #14: ATTACK</b>\nVolumetric Line Rate Flood\n(Action: DROPPED & Quarantined);
     detach
   endif
 else (no)
-  if (f1: Delta Time >= 100.0 µs?) then (yes)
-    if (f3: Byte Variance <= 45.0?) then (yes)
-      #C8E6C9:<b>Rule #1: BENIGN</b>\nNominal Modbus Cyclic Traffic\n(Fast-Path: 0 µs Egress);
-      detach
-    else (no)
-      #FFE082:<b>Rule #4: AMBIGUOUS</b>\nPayload Noise Drift Candidate;
-      detach
-    endif
-  else (no [70-95 µs])
-    if (f3: Byte Variance in [65, 105]?) then (yes)
-      #FFE082:<b>Rule #4: AMBIGUOUS</b>\nBoundary Erosion Candidate\n(Trigger for Supervisory Drift Window);
-      detach
-    else (no)
-      #FFCDD2:<b>Rule #18: ATTACK</b>\nPolymorphic Scan;
-      detach
-    endif
+  if (f1: Delta Time >= 100.0 µs and f3: Byte Variance <= 45.0?) then (yes)
+    #C8E6C9:<b>Rule #1: BENIGN</b>\nNominal Modbus Cyclic Traffic\n(Fast-Path: Forward to Application);
+    detach
+  else (no)
+    #FFE082:<b>Rule #4: AMBIGUOUS</b>\nBoundary Erosion / Drift Candidate\n(Action: HELD & Ingested into FIFO Window);
+    detach
   endif
 endif
 

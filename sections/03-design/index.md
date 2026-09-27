@@ -190,7 +190,7 @@ The supervisory software applies standard object-oriented design patterns:
 
 * **Encapsulation via Translation Units:** Internal state variables are marked `static` within `microshield_engine.c`. External callers interact exclusively through opaque function signatures defined in `microshield.h`.
 * **Elimination of Dynamic Dispatch:** Function pointers inside structs (vtables) are excluded from the fast path. All classification calls resolve at link-time as direct branches (BL instructions) to prevent pipeline stalls.
-* **Fast-Path Memory Layout: Natural 32-Bit Alignment:** The feature vector struct (`microshield_features_t`) strictly enforces 4-byte natural alignment across all fields (four 32-bit single-precision floats, 16 bytes total). On the ARM Cortex-M4 architecture, 32-bit aligned memory addresses allow the core and the hardware Floating Point Unit (FPU) to perform single-cycle loads and stores (`LDR`, `VLDR`) without incurring bus wait-states, unaligned access penalties, or compiler padding bytes. This minimal cycle consumption directly shortens active execution time ($t_{\text{active}}$).
+* **Fast-Path Memory Layout: Natural 32-Bit Alignment:** The feature vector struct (`microshield_features_t`) strictly enforces 4-byte natural alignment across all fields (four 32-bit single-precision floats, 16 bytes total). On the ARM Cortex-M4 architecture, 32-bit aligned memory addresses allow the core and the hardware Floating Point Unit (FPU) to perform single-cycle loads and stores (`LDR`, `VLDR`) without incurring bus wait-states, unaligned access penalties, or compiler padding bytes. This minimal cycle consumption directly shortens active execution time (<i>t</i><sub>active</sub>).
 * **Slow-Path Memory Layout: Explicit Byte Packing:** In contrast to the feature vector, the diagnostic telemetry struct (`microshield_telemetry_t`) is qualified with `__attribute__((packed))`. This directive eliminates all internal compiler padding across heterogeneous data types (integers, bytes, floats), collapsing the memory footprint to exactly 32 contiguous bytes. Because telemetry traverses an asynchronous serial link (Slow Path), absolute cross-platform binary reproducibility between the C runtime and the host Python deserializer (`struct.unpack`) takes precedence over single-cycle memory alignment.
 
 ### 3.4.3 Distributed Mapping of Domain Concepts
@@ -203,56 +203,34 @@ The supervisory software applies standard object-oriented design patterns:
 | **TelemetryRecord** | TelemetryRecord (Python dataclass) | Supervisory Heap | Immutable; shared concurrently across ingestion, drift monitor, and dashboard threads. |
 | **DriftDetector** | DriftDetector (Python class) | Supervisory Process | Evaluated on packet arrival within the ingestion worker thread. |
 
----
-
-
-### 3.4.3 Intrinsic Explainability & Decision Tree Topology
+### 3.4.4 Intrinsic Explainability & Decision Tree Topology
 
 To satisfy the strict execution budget of the ARM Cortex-M4 core without sacrificing interpretability, MicroShield compiles trained estimators into a static binary decision tree with bounded depth. Each leaf node maps directly to an immutable rule identifier:
 
 [![MicroShield CART Decision Tree Topology](../../pictures/edge_cart_tree.png)](../../pictures/edge_cart_tree.png)
 
-- **Rule #1 (BENIGN):** Nominal Modbus industrial cycles exhibiting predictable delta-times (&ge; 100 &mu;s) and low byte variance (&le; 45.0).
-- **Rule #14 & Rule #22 (ATTACK):** High-rate floods characterized by microsecond line-rate bursts (&Delta;t &le; 30 &mu;s) or high-entropy payload fuzzing (&sigma;² > 140.0).
-- **Rule #4 (AMBIGUOUS):** Boundary erosion candidates where traffic features fall into the transitional margin, feeding the supervisory drift surveillance window.
+- **Rule #1 (BENIGN):** Nominal Modbus industrial cycles exhibiting predictable inter-arrival deltas (&Delta;t &ge; 100 &mu;s) and low byte variance (&sigma;² &le; 45.0). Processed along the real-time fast path.
+- **Rule #14 (ATTACK):** Volumetric line-rate floods characterized by microsecond burst intervals (&Delta;t &le; 30 &mu;s). Suppressed and quarantined at the edge boundary.
+- **Rule #22 (ATTACK):** High-entropy payload fuzzing and polymorphic injection marked by extreme byte variance (&sigma;² > 140.0). Quarantined and alerted.
+- **Rule #4 (AMBIGUOUS):** Boundary erosion candidates where traffic dynamics fall into transitional margins, feeding the supervisory sliding-window drift detector.
+
+---
 
 ## 3.5 Dynamic Interaction Modelling
 
-#
-### 3.4.3 Intrinsic Explainability & Decision Tree Topology
+### 3.5.1 The Real-Time Fast Path (Inline Gatekeeping)
 
-To satisfy the strict execution budget of the ARM Cortex-M4 core without sacrificing interpretability, MicroShield compiles trained estimators into a static binary decision tree with bounded depth. Each leaf node maps directly to an immutable rule identifier:
-
-[![MicroShield CART Decision Tree Topology](../../pictures/edge_cart_tree.png)](../../pictures/edge_cart_tree.png)
-
-- **Rule #1 (BENIGN):** Nominal Modbus industrial cycles exhibiting predictable delta-times (&ge; 100 &mu;s) and low byte variance (&le; 45.0).
-- **Rule #14 & Rule #22 (ATTACK):** High-rate floods characterized by microsecond line-rate bursts (&Delta;t &le; 30 &mu;s) or high-entropy payload fuzzing (&sigma;² > 140.0).
-- **Rule #4 (AMBIGUOUS):** Boundary erosion candidates where traffic features fall into the transitional margin, feeding the supervisory drift surveillance window.
-
-## 3.5.1 The Real-Time Fast Path (Inline Gatekeeping)
-
-The fast path executes on every inbound data-link frame. Worst-Case Execution Time (WCET) is strictly bounded: delta_t_IDS <= 50 µs.
+The fast path executes on every inbound data-link frame. Worst-Case Execution Time (WCET) is strictly bounded: &Delta;t<sub>IDS</sub> &le; 50 &mu;s.
 
 [![MicroShield Real-Time Fast Path & Asynchronous Egress](../../pictures/design_sequence_fast_path.png)](../../pictures/design_sequence_fast_path.png)
 
-1. **Interrupt Ingress (<= 5 µs):** The hardware ISR captures the frame pointer directly from the DMA buffer without memory copying.
-2. **Feature Extraction (<= 18 µs):** The statistical extractor calculates normalized length, inter-arrival time delta, protocol flags, and payload byte variance.
-3. **Decision Tree Evaluation (<= 12 µs):** The feature vector traverses the static decision matrix in bounded O(depth) time.
-4. **Deterministic Gatekeeping (<= 5 µs):** If BENIGN, the frame pointer is passed to the application queue. If ATTACK or AMBIGUOUS, the payload is suppressed.
-5. **Telemetry Buffer Staging (<= 4 µs):** For non-benign frames, an alert descriptor is copied into a static ring buffer, and the CPU returns immediately to primary tasks.
+1. **Interrupt Ingress (&le; 5 &mu;s):** The hardware ISR captures the frame pointer directly from the DMA buffer without memory copying.
+2. **Feature Extraction (&le; 18 &mu;s):** The statistical extractor calculates normalized length, inter-arrival time delta, protocol flags, and payload byte variance.
+3. **Decision Tree Evaluation (&le; 12 &mu;s):** The feature vector traverses the static decision matrix in bounded O(depth) time.
+4. **Deterministic Gatekeeping (&le; 5 &mu;s):** If BENIGN, the frame pointer is passed to the application queue. If ATTACK or AMBIGUOUS, the payload is suppressed.
+5. **Telemetry Buffer Staging (&le; 4 &mu;s):** For non-benign frames, an alert descriptor is copied into a static ring buffer, and the CPU returns immediately to primary tasks.
 
-#
-### 3.4.3 Intrinsic Explainability & Decision Tree Topology
-
-To satisfy the strict execution budget of the ARM Cortex-M4 core without sacrificing interpretability, MicroShield compiles trained estimators into a static binary decision tree with bounded depth. Each leaf node maps directly to an immutable rule identifier:
-
-[![MicroShield CART Decision Tree Topology](../../pictures/edge_cart_tree.png)](../../pictures/edge_cart_tree.png)
-
-- **Rule #1 (BENIGN):** Nominal Modbus industrial cycles exhibiting predictable delta-times (&ge; 100 &mu;s) and low byte variance (&le; 45.0).
-- **Rule #14 & Rule #22 (ATTACK):** High-rate floods characterized by microsecond line-rate bursts (&Delta;t &le; 30 &mu;s) or high-entropy payload fuzzing (&sigma;² > 140.0).
-- **Rule #4 (AMBIGUOUS):** Boundary erosion candidates where traffic features fall into the transitional margin, feeding the supervisory drift surveillance window.
-
-## 3.5.2 The Asynchronous Slow Path (Telemetry Offload)
+### 3.5.2 The Asynchronous Slow Path (Telemetry Offload)
 
 Alert records staged in the internal transmission buffer are drained by the USART DMA controller operating in circular mode at 115200 baud, ensuring physical serial delays never introduce jitter into packet inspection.
 
@@ -302,7 +280,7 @@ Because the active power consumption of an ARM Cortex-M4 running at 168 MHz (P_a
 ### 3.7.2 Software Architectural Optimizations for Low Power
 
 * **Zero-Copy Memory Access:** Eliminates energy-intensive SRAM read-write memory cycles by dereferencing ingress DMA buffers directly.
-* **Natural 32-Bit Alignment of Operands:** Aligning the feature structure to 4-byte boundaries ensures that the FPU and ALU load data in single-cycle bus transactions, shaving critical clock cycles off active computation time ($t_{\text{active}}$) before returning to sleep.
+* **Natural 32-Bit Alignment of Operands:** Aligning the feature structure to 4-byte boundaries ensures that the FPU and ALU load data in single-cycle bus transactions, shaving critical clock cycles off active computation time (<i>t</i><sub>active</sub>) before returning to sleep.
 * **Non-Volatile Static Lookups:** Mapping decision matrices and CRC tables into Flash .rodata reduces volatile memory refresh and write activity.
 * **FPU Throttling via Integer Accumulation:** Using two-pass integer addition for sample mean calculations suppresses floating-point hardware utilization during the first pass.
 * **DMA Autonomy:** Transmission of telemetry packets is delegated entirely to the USART DMA controller, allowing the core CPU to re-enter low-power WFI sleep immediately after initiating the transfer.
