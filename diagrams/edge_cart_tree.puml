@@ -1,0 +1,44 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam ActivityBackgroundColor #F8FAFC
+skinparam ActivityBorderColor #334155
+skinparam ArrowColor #0284C7
+skinparam DiamondBackgroundColor #E2E8F0
+skinparam DiamondBorderColor #475569
+skinparam defaultFontName sans-serif
+
+title MicroShield Edge CART Decision Tree (Intrinsic XAI Attribution)
+
+start
+
+:Ingress Packet Vector (f0, f1, f2, f3);
+
+if (f1: Delta Time <= 30.0 µs?) then (yes)
+  if (f3: Byte Variance > 140.0?) then (yes)
+    #FFCDD2:<b>Rule #22: ATTACK</b>\nHigh-Entropy Flood / Fuzzing;
+    detach
+  else (no)
+    #FFCDD2:<b>Rule #14: ATTACK</b>\nVolumetric Line Rate Flood;
+    detach
+  endif
+else (no)
+  if (f1: Delta Time >= 100.0 µs?) then (yes)
+    if (f3: Byte Variance <= 45.0?) then (yes)
+      #C8E6C9:<b>Rule #1: BENIGN</b>\nNominal Modbus Cyclic Traffic\n(Fast-Path: 0 µs Egress);
+      detach
+    else (no)
+      #FFE082:<b>Rule #4: AMBIGUOUS</b>\nPayload Noise Drift Candidate;
+      detach
+    endif
+  else (no [70-95 µs])
+    if (f3: Byte Variance in [65, 105]?) then (yes)
+      #FFE082:<b>Rule #4: AMBIGUOUS</b>\nBoundary Erosion Candidate\n(Trigger for Supervisory Drift Window);
+      detach
+    else (no)
+      #FFCDD2:<b>Rule #18: ATTACK</b>\nPolymorphic Scan;
+      detach
+    endif
+  endif
+endif
+
+@enduml

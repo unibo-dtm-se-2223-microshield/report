@@ -205,9 +205,31 @@ The supervisory software applies standard object-oriented design patterns:
 
 ---
 
+
+### 3.4.3 Intrinsic Explainability & Decision Tree Topology
+
+To satisfy the strict execution budget of the ARM Cortex-M4 core without sacrificing interpretability, MicroShield compiles trained estimators into a static binary decision tree with bounded depth. Each leaf node maps directly to an immutable rule identifier:
+
+[![MicroShield CART Decision Tree Topology](../../pictures/edge_cart_tree.png)](../../pictures/edge_cart_tree.png)
+
+- **Rule #1 (BENIGN):** Nominal Modbus industrial cycles exhibiting predictable delta-times (&ge; 100 &mu;s) and low byte variance (&le; 45.0).
+- **Rule #14 & Rule #22 (ATTACK):** High-rate floods characterized by microsecond line-rate bursts (&Delta;t &le; 30 &mu;s) or high-entropy payload fuzzing (&sigma;² > 140.0).
+- **Rule #4 (AMBIGUOUS):** Boundary erosion candidates where traffic features fall into the transitional margin, feeding the supervisory drift surveillance window.
+
 ## 3.5 Dynamic Interaction Modelling
 
-### 3.5.1 The Real-Time Fast Path (Inline Gatekeeping)
+#
+### 3.4.3 Intrinsic Explainability & Decision Tree Topology
+
+To satisfy the strict execution budget of the ARM Cortex-M4 core without sacrificing interpretability, MicroShield compiles trained estimators into a static binary decision tree with bounded depth. Each leaf node maps directly to an immutable rule identifier:
+
+[![MicroShield CART Decision Tree Topology](../../pictures/edge_cart_tree.png)](../../pictures/edge_cart_tree.png)
+
+- **Rule #1 (BENIGN):** Nominal Modbus industrial cycles exhibiting predictable delta-times (&ge; 100 &mu;s) and low byte variance (&le; 45.0).
+- **Rule #14 & Rule #22 (ATTACK):** High-rate floods characterized by microsecond line-rate bursts (&Delta;t &le; 30 &mu;s) or high-entropy payload fuzzing (&sigma;² > 140.0).
+- **Rule #4 (AMBIGUOUS):** Boundary erosion candidates where traffic features fall into the transitional margin, feeding the supervisory drift surveillance window.
+
+## 3.5.1 The Real-Time Fast Path (Inline Gatekeeping)
 
 The fast path executes on every inbound data-link frame. Worst-Case Execution Time (WCET) is strictly bounded: delta_t_IDS <= 50 µs.
 
@@ -219,7 +241,18 @@ The fast path executes on every inbound data-link frame. Worst-Case Execution Ti
 4. **Deterministic Gatekeeping (<= 5 µs):** If BENIGN, the frame pointer is passed to the application queue. If ATTACK or AMBIGUOUS, the payload is suppressed.
 5. **Telemetry Buffer Staging (<= 4 µs):** For non-benign frames, an alert descriptor is copied into a static ring buffer, and the CPU returns immediately to primary tasks.
 
-### 3.5.2 The Asynchronous Slow Path (Telemetry Offload)
+#
+### 3.4.3 Intrinsic Explainability & Decision Tree Topology
+
+To satisfy the strict execution budget of the ARM Cortex-M4 core without sacrificing interpretability, MicroShield compiles trained estimators into a static binary decision tree with bounded depth. Each leaf node maps directly to an immutable rule identifier:
+
+[![MicroShield CART Decision Tree Topology](../../pictures/edge_cart_tree.png)](../../pictures/edge_cart_tree.png)
+
+- **Rule #1 (BENIGN):** Nominal Modbus industrial cycles exhibiting predictable delta-times (&ge; 100 &mu;s) and low byte variance (&le; 45.0).
+- **Rule #14 & Rule #22 (ATTACK):** High-rate floods characterized by microsecond line-rate bursts (&Delta;t &le; 30 &mu;s) or high-entropy payload fuzzing (&sigma;² > 140.0).
+- **Rule #4 (AMBIGUOUS):** Boundary erosion candidates where traffic features fall into the transitional margin, feeding the supervisory drift surveillance window.
+
+## 3.5.2 The Asynchronous Slow Path (Telemetry Offload)
 
 Alert records staged in the internal transmission buffer are drained by the USART DMA controller operating in circular mode at 115200 baud, ensuring physical serial delays never introduce jitter into packet inspection.
 
