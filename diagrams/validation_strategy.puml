@@ -1,0 +1,75 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName sans-serif
+skinparam BoxPadding 15
+skinparam ParticipantPadding 10
+
+skinparam package {
+  BackgroundColor #F8FAFC
+  BorderColor #334155
+  FontColor #0F172A
+  FontStyle bold
+}
+
+skinparam node {
+  BackgroundColor #F1F5F9
+  BorderColor #475569
+  FontColor #0F172A
+}
+
+skinparam component {
+  BackgroundColor #FFFFFF
+  BorderColor #0284C7
+  FontColor #0F172A
+}
+
+title MicroShield Dual-Tier Verification & Validation Strategy (SIL vs HIL)
+
+package "Host Software-in-the-Loop (SIL) Tier [Ubuntu Linux x86-64]" {
+  node "Unit & Property Verification" as SIL_Unit {
+    [12 C99 Edge Deterministic Tests] as C_Tests
+    [24 Python DaShield Unit Tests] as Py_Tests
+    [pytest-cov: 88% Real Coverage] as Cov_Gate
+  }
+
+  node "Differential Integration" as SIL_Int {
+    [COBS Framing & CRC32 Oracle] as Diff_Framing
+    [AST Transpiler AST vs C99 Equivalence] as Diff_Transpiler
+  }
+
+  node "Fleet Scalability & Robustness Stress" as SIL_Fleet {
+    [Virtual Fleet Generator (100-1000 Nodes)] as Gen_Fleet
+    [Stochastic Noise Channel (3% Bit-Flip)] as Noise_Chan
+    [Supervisory Ingestion & Drift Convergence] as Sup_Ingest
+  }
+}
+
+package "Target Hardware-in-the-Loop (HIL) Tier [STM32F407RE Bare-Metal]" {
+  node "Deterministic Timing Metrology" as HIL_Time {
+    [ARM DWT->CYCCNT Cycle Counter (168 MHz)] as DWT_Timer
+    [WCET Ceiling Assertion (<= 50 us)] as WCET_Check
+  }
+
+  node "Memory Footprint & Placement" as HIL_Mem {
+    [Linker Script Inspection (arm-none-eabi-size)] as Size_Check
+    [Flash .rodata Immobility & Zero Heap] as RO_Check
+  }
+
+  node "Under-Load Coexistence" as HIL_Load {
+    [Continuous Background FPU MatMul Workload] as MatMul_Load
+    [GPIO Diagnostic Toggle for Logic Analyzer] as GPIO_Probe
+  }
+}
+
+C_Tests --> Diff_Framing
+Py_Tests --> Diff_Framing
+Diff_Framing --> Cov_Gate
+Cov_Gate --> Gen_Fleet
+
+Gen_Fleet -> Noise_Chan : Raw 32-byte Telemetry
+Noise_Chan -> Sup_Ingest : Demuxed COBS Frames
+
+Sup_Ingest .down.> DWT_Timer : In-Silico Timing Alignment
+Diff_Transpiler .down.> Size_Check : Generated transpiled_model.h
+
+@enduml
