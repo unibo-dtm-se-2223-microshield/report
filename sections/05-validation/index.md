@@ -8,16 +8,15 @@ nav_order: 6
 
 ## 5.1 Verification & Validation Strategy
 
-The verification and validation (V&V) framework of MicroShield follows a rigorous dual-tier engineering approach derived from the classical V-Model. Because cyber-physical security systems operate under hard real-time and physical resource boundaries, software correctness cannot be assessed solely on high-level application behavior. Verification must guarantee mathematical invariance, memory determinism, protocol compliance, and temporal boundaries.
+The verification and validation (V&V) framework of MicroShield follows a rigorous engineering approach derived from the classical V-Model. Because cyber-physical security systems operate under hard real-time and physical resource boundaries, software correctness cannot be assessed solely on high-level application behavior. Verification must guarantee mathematical invariance, memory determinism, protocol compliance, and temporal boundaries.
 
-[![MicroShield Dual-Tier Verification & Validation Architecture](../../pictures/validation_strategy.png)](../../pictures/validation_strategy.png)
+[![MicroShield Verification & Validation Architecture](../../pictures/validation_strategy.png)](../../pictures/validation_strategy.png)
 
-The verification lifecycle is structured into four sequential, non-overlapping evaluation stages:
+The verification lifecycle is structured into three sequential, non-overlapping evaluation stages:
 
 1. **Deterministic Unit Testing (Level 1):** Independent verification of algorithmic units in isolation. The C99 edge engine is validated under desktop GCC with strict memory assertions, verifying zero dynamic heap usage and natural 32-bit data alignment. The Python supervisory tier is verified using Pytest and strict static type checking (`mypy --strict`).
 2. **Differential & Integration Testing (Level 2):** Cross-language verification of wire protocols and transpilation parity. Diagnostic frames encoded by the C99 COBS/CRC32 implementation are piped into the Python supervisory deserializer to enforce end-to-end binary compatibility.
 3. **Software-in-the-Loop (SIL) Scalability Benchmarking (Level 3):** Stress-testing supervisory ingestion, drift detection convergence, and noise rejection under simulated fleets of 100, 500, and 1,000 concurrent edge devices transmitting across lossy communication channels.
-4. **Hardware-in-the-Loop (HIL) Metrology Protocol (Level 4):** A formal measurement protocol executed on the physical STM32F407RE microcontroller target (ARM Cortex-M4 @ 168 MHz), leveraging on-chip DWT cycle-counter instrumentation, memory map inspection, and background synthetic workloads.
 
 ---
 
@@ -33,7 +32,7 @@ The edge runtime suite comprises 12 deterministic unit tests executing natively 
 | **TEST_FEAT_MODULAR_DELTA** | Feature Extractor | Enforces modulo 2^32 timestamp subtraction across hardware DWT counter overflows. | **PASS** |
 | **TEST_FEAT_TWO_PASS_VARIANCE** | Feature Extractor | Asserts payload byte variance against known statistical distributions; verifies no IEEE 754 catastrophic cancellation. | **PASS** |
 | **TEST_FEAT_FLAG_MASKING** | Feature Extractor | Validates bitwise extraction and normalization of TCP/Ethernet control flags. | **PASS** |
-| **TEST_MODEL_FAST_PATH_BENIGN** | Decision Tree Engine | Asserts nominal Modbus traffic routes to Rule #1 (VERDICT_BENIGN) within 500 cycles. | **PASS** |
+| **TEST_MODEL_FAST_PATH_BENIGN** | Decision Tree Engine | Asserts nominal Modbus traffic routes to Rule #1 (VERDICT_BENIGN) within bounded cycles. | **PASS** |
 | **TEST_MODEL_FLOOD_ATTACK** | Decision Tree Engine | Asserts microsecond burst intervals route to Rule #14 (VERDICT_ATTACK, DROPPED). | **PASS** |
 | **TEST_MODEL_FUZZING_ATTACK** | Decision Tree Engine | Asserts high-entropy payloads route to Rule #22 (VERDICT_ATTACK, DROPPED). | **PASS** |
 | **TEST_MODEL_DRIFT_AMBIGUOUS** | Decision Tree Engine | Asserts boundary-layer packets route to Rule #4 (VERDICT_AMBIGUOUS, HELD). | **PASS** |
@@ -148,65 +147,9 @@ Tab 2 provides supervisory model management and telecom physical layer diagnosti
 
 ---
 
-## 5.6 Hardware-in-the-Loop (HIL) Target Metrology Protocol
+## 5.6 Summary of Empirical Validation Results
 
-While the SIL benchmark quantifies scalability on the host workstation, edge real-time guarantees require in-silico physical validation on the target microcontroller. This section defines the formal metrology protocol executed on the physical STM32F407RE development platform (ARM Cortex-M4 @ 168 MHz).
-
-### 5.6.1 On-Chip Cycle Counting Methodology (ARM DWT Instrumentation)
-
-Execution timing is measured at sub-microsecond resolution using the Data Watchpoint and Trace (DWT) cycle counter (`DWT->CYCCNT`):
-
-    CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;  /* Enable ARM trace subsystem */
-    DWT->CTRL |= DWT_CTRL_CYCCNTENA_Msk;             /* Start 32-bit cycle counter */
-
-    uint32_t start_cycles = DWT->CYCCNT;
-    microshield_verdict_t verdict = microshield_inspect_frame(&frame);
-    uint32_t elapsed_cycles = DWT->CYCCNT - start_cycles;
-
-    float elapsed_us = ((float)elapsed_cycles / 168000000.0f) * 1000000.0f;
-
-- **Measurement Resolution:** At 168 MHz, each processor clock cycle represents 5.95 nanoseconds.
-- **WCET Budget Gate:** The inspection pipeline must satisfy:
-  
-  elapsed_cycles <= 8400 clock cycles (WCET <= 50.0 µs)
-
-### 5.6.2 Physical Memory Layout Audit (ELF Binary Inspection)
-
-The target firmware is audited via `arm-none-eabi-size -A` to verify static memory placement constraints:
-
-    Section           Size (Bytes)    Target Memory Region    Operational Purpose
-    .text             12,416          Flash (0x08000000)      Executable instructions
-    .rodata            1,848          Flash (0x08000000)      Decision tree matrices & CRC32 table
-    .ccmram            2,048          CCM RAM (0x10000000)    Zero-wait-state IDS inspection buffer
-    .bss                 512          SRAM1 (0x20000000)      Operational state flags
-    .data                  0          SRAM1 (0x20000000)      Zero initialized mutable globals
-
-- **Flash Placement Invariant:** Decision matrices reside strictly in Flash `.rodata`. Dynamic allocation (`.heap`) is zero bytes.
-- **Bus Isolation:** The CCM Data RAM (0x10000000) is accessed exclusively by the core D-bus, eliminating contention with DMA transfers executing concurrently on the AHB bus matrix.
-
-### 5.6.3 Concurrent Background Workload (Synthetic Stress Testing)
-
-To verify that interrupt latency and cache contention do not induce timing jitter, the HIL benchmark executes under concurrent background load:
-- The main application loop executes continuous single-precision floating-point matrix multiplications (`arm_mat_mult_f32`, 32x32 matrices) utilizing the hardware FPU.
-- Ingress frames are injected via USART DMA interrupts at sustained line rates.
-- The protocol records maximum jitter, asserting that fast-path processing remains strictly bounded beneath the 50 µs ceiling even under 100% CPU core utilization.
-
-### 5.6.4 Dynamic Power Profiling Methodology
-
-Power consumption is quantified using an in-line current shunt measurement protocol:
-- A 1.0 Ohm, 0.1% precision shunt resistor is inserted between the 3.3V supply rail and the STM32 VDD pins.
-- A digital storage oscilloscope measures the voltage drop across the shunt during:
-  1. Quiescent Sleep Mode (WFI with peripheral clocks gated).
-  2. Active Inline Inspection (168 MHz core + FPU active).
-- Total energy per packet is verified against the Race-to-Sleep model:
-  
-  E_packet = (P_active * t_active) + (P_sleep * t_sleep)
-
----
-
-## 5.7 Summary of Validation Results
-
-The quantitative findings across all verification tiers are summarized below:
+The quantitative findings across all software and simulated system tiers are summarized below:
 
 | Verification Metric | Target Constraint / Threshold | Empirically Observed Result | Compliance Status |
 | :--- | :--- | :--- | :--- |
@@ -219,15 +162,13 @@ The quantitative findings across all verification tiers are summarized below:
 | **Noise Error Rejection** | 100% rejection of bad CRC | **100.0% rejected (0 leaks)** | **COMPLIANT** |
 | **Drift Detection Latency** | <= 10.0 ms | **0.13 - 0.20 ms** | **COMPLIANT** |
 | **UI Interactive Controls** | >= 2 tabs, >= 4 controls | 2 tabs, 4 interactive controls | **COMPLIANT** |
-| **WCET Bounded Execution** | <= 50.0 µs on Cortex-M4 | Protocol formalized (DWT @ 168 MHz) | **VERIFIED BY DESIGN** |
 
 ---
 
-## 5.8 References
+## 5.7 References
 
 - [1] I. Sommerville, *Software Engineering*, 10th ed. Boston, MA: Pearson, 2016.
 - [2] R. C. Martin, *Clean Architecture: A Craftsman's Guide to Software Structure and Design*. Boston, MA: Prentice Hall, 2017.
 - [3] European Commission, "Proposal for a Regulation on horizontal cybersecurity requirements for products with digital elements (Cyber Resilience Act)," COM(2022) 454 final, Brussels, 2022.
 - [4] N. Koroniotis, N. Moustafa, E. Sitnikova, and B. Turnbull, "Towards the Development of Realistic Botnet Dataset in the Internet of Things for Network Forensic Analytics: Bot-IoT Dataset," *Future Generation Computer Systems*, vol. 100, pp. 779-796, 2019.
 - [5] M. A. Ferrag, O. Friha, D. Hamouda, L. Maglaras, and H. Janicke, "Edge-IIoTset: A New Comprehensive Realistic Cyber Security Dataset of IoT and IIoT Applications for Centralized and Federated Learning," *IEEE Access*, vol. 10, pp. 40281-40306, 2022.
-- [6] STMicroelectronics, *STM32F405/415, STM32F407/417, STM32F427/437 and STM32F429/439 advanced Arm-based 32-bit MCUs Reference Manual*, RM0090 Rev 19, 2021.
