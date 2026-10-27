@@ -1,0 +1,72 @@
+@startuml
+left to right direction
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName SansSerif
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam linetype ortho
+skinparam nodesep 25
+skinparam ranksep 40
+skinparam Padding 4
+
+skinparam package {
+    BackgroundColor #FFFFFF
+    BorderColor #475569
+    BorderThickness 1.5
+    FontColor #0F172A
+    FontSize 12
+}
+
+skinparam rectangle {
+    BackgroundColor #F8FAFC
+    BorderColor #334155
+    BorderThickness 1.2
+    FontColor #0F172A
+    FontSize 11
+}
+
+skinparam arrow {
+    Color #334155
+    FontColor #0F172A
+    FontSize 10
+}
+
+package "Strategic DTM Drivers (Business Goals)" as BG {
+    rectangle "BG-01: Brownfield Legacy Retrofitting\n(Zero Hardware CapEx Replacement)" as BG1
+    rectangle "BG-02: Hard Real-Time Safety\n(Zero RTOS Task Starvation)" as BG2
+    rectangle "BG-03: Proactive Evasion Resilience\n(Unmasking Silent False Negatives)" as BG3
+    rectangle "BG-04: European Regulatory Compliance\n(EU CRA & NIS 2 Mandate)" as BG4
+}
+
+package "Stakeholder User Stories (Epics)" as US {
+    rectangle "Epic A: Embedded Firmware Integration\n(Taddeo Pallaba: US-01 .. US-05)" as USA
+    rectangle "Epic B: SecOps XAI & Shadow Auditing\n(Lentina Gigi: US-06 .. US-10)" as USB
+    rectangle "Epic C: OT Governance & Compliance\n(Zanni Giorgioni: US-11 .. US-15)" as USC
+}
+
+package "Formal System Requirements (ISO/IEC/IEEE 29148)" as REQ {
+    rectangle "Functional Requirements (FR-01 .. FR-06)\nPrimary Artifact: Core C99 IDS Library\n(Extraction, Tree Inference, Containment)" as FR_CORE
+    rectangle "Functional Requirements (FR-07 .. FR-12)\nAuxiliary Artifact: MLOps & Governance\n(UART Ingestion, Shadow Audit, Drift, UI)" as FR_AUX
+    rectangle "Non-Functional Requirements (NFR-01 .. NFR-08)\nQuality & Operational Invariants\n(WCET, Static RAM, F1-Score, XAI, Uptime)" as NFR
+    rectangle "Implementation Constraints (IR-01 .. IR-05)\nPolitico-Economic & Administrative Mandates\n(ANSI C99, Zero-Deps, Python/Poetry, Datasets)" as IR
+}
+
+BG1 --> USA
+BG1 --> USC
+BG2 --> USA
+BG3 --> USB
+BG4 --> USB
+BG4 --> USC
+
+USA --> FR_CORE
+USA --> NFR
+USA --> IR
+
+USB --> FR_AUX
+USB --> NFR
+
+USC --> FR_CORE
+USC --> FR_AUX
+USC --> IR
+
+@enduml

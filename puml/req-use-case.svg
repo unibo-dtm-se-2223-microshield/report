@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" contentScriptType="application/ecmascript" contentStyleType="text/css" height="778px" preserveAspectRatio="none" style="width:1282px;height:778px;" version="1.1" viewBox="0 0 1282 778" width="1282px" zoomAndPan="magnify"><defs/><g><!--MD5=[b083f8f6fd07f3b2d8c59fc5e00ecedb]
+cluster EdgeBoundary--><polygon fill="#FFFFFF" points="613.91,24.02,1006.91,24.02,1013.91,54.3641,1260.65,54.3641,1260.65,394.02,613.91,394.02,613.91,24.02" style="stroke: #334155; stroke-width: 1.5;"/><line style="stroke: #334155; stroke-width: 1.5;" x1="613.91" x2="1013.91" y1="54.3641" y2="54.3641"/><text fill="#0F172A" font-family="sans-serif" font-size="12" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="379" x="621.91" y="42.8481">Primary Boundary: Core Embedded C99 Library (libmicroshield)</text><!--MD5=[0aad37c5d04416891bf711f71ef2a6f0]
+cluster HostBoundary--><polygon fill="#FFFFFF" points="171,439.02,547,439.02,554,469.3641,880.28,469.3641,880.28,726.02,171,726.02,171,439.02" style="stroke: #334155; stroke-width: 1.5;"/><line style="stroke: #334155; stroke-width: 1.5;" x1="171" x2="554" y1="469.3641" y2="469.3641"/><text fill="#0F172A" font-family="sans-serif" font-size="12" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="362" x="179" y="457.8481">Auxiliary Boundary: Python MLOps &amp; Fleet Supervision Suite</text><ellipse cx="748.4458" cy="346.0208" fill="#F8FAFC" rx="112.5958" ry="31.9508" style="stroke: #334155; stroke-width: 1.2;"/><text fill="#0F172A" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="165" x="665.9458" y="338.4447">UC-01: Link Zero-Malloc Library</text><text fill="#0F172A" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="166" x="665.4458" y="361.4266">into Bare-Metal/RTOS Firmware</text><ellipse cx="748.4544" cy="263.0242" fill="#F8FAFC" rx="113.6944" ry="31.4242" style="stroke: #334155; stroke-width: 1.2;"/><text fill="#0F172A" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="158" x="669.4544" y="254.5956">UC-02: Inspect Ingress Frames</text><text fill="#0F172A" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="171" x="662.9544" y="277.5775">within Deterministic Time Bound</text><ellipse cx="1135.9653" cy="270.0176" fill="#F8FAFC" rx="108.6853" ry="31.4076" style="stroke: #334155; stroke-width: 1.2;"/><text fill="#0F172A" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="163" x="1054.4653" y="263.4139">UC-03: Extract 8-Feature Vector</text><text fill="#0F172A" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="151" x="1060.4653" y="286.3958">via Sliding Window Registers</text><ellipse cx="1135.975" cy="174.0217" fill="#F8FAFC" rx="102.195" ry="30.3017" style="stroke: #334155; stroke-width: 1.2;"/><text fill="#0F172A" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="159" x="1056.475" y="169.1755">UC-04: Evaluate Static Decision</text><text fill="#0F172A" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="121" x="1075.475" y="192.1574">Tree &amp; Emit XAI Rule ID</text><ellipse cx="748.4451" cy="98.0209" fill="#F8FAFC" rx="114.7351" ry="30.7609" style="stroke: #334155; stroke-width: 1.2;"/><text fill="#0F172A" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="177" x="659.9451" y="92.556">UC-05: Trigger Autonomous Local</text><text fill="#0F172A" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="146" x="675.4451" y="115.5379">Hardware Quarantine (FSM)</text><ellipse cx="748.4451" cy="180.018" fill="#F8FAFC" rx="118.5351" ry="31.398" style="stroke: #334155; stroke-width: 1.2;"/><text fill="#0F172A" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="179" x="658.9451" y="173.5415">UC-06: Dispatch Out-of-Band Alert</text><text fill="#0F172A" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="164" x="666.4451" y="196.5234">&amp; Circular Benign Audit Sample</text><ellipse cx="748.4501" cy="679.0232" fill="#F8FAFC" rx="109.9801" ry="31.4232" style="stroke: #334155; stroke-width: 1.2;"/><text fill="#0F172A" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="165" x="665.9501" y="672.4101">UC-07: Monitor Live Fleet Alerts</text><text fill="#0F172A" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="153" x="671.9501" y="695.392">&amp; XAI Boolean Decision Paths</text><ellipse cx="302.4602" cy="596.0152" fill="#F8FAFC" rx="104.6302" ry="31.8352" style="stroke: #334155; stroke-width: 1.2;"/><text fill="#0F172A" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="154" x="225.4602" y="588.6774">UC-08: Flag False Positive (FP)</text><text fill="#0F172A" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="152" x="226.4602" y="611.6593">&amp; Override Node Quarantine</text><ellipse cx="748.4473" cy="596.0244" fill="#F8FAFC" rx="115.8373" ry="31.9744" style="stroke: #334155; stroke-width: 1.2;"/><text fill="#0F172A" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="170" x="663.4473" y="588.4504">UC-09: Execute Shadow Auditing</text><text fill="#0F172A" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="171" x="662.9473" y="611.4323">to Unmask Silent False Negatives</text><ellipse cx="302.4564" cy="513.0174" fill="#F8FAFC" rx="106.1064" ry="30.8774" style="stroke: #334155; stroke-width: 1.2;"/><text fill="#0F172A" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="162" x="221.4564" y="507.2504">UC-10: Quantify Statistical Drift</text><text fill="#0F172A" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="138" x="233.4564" y="530.2323">(PSI / K-S) &amp; Retrain Model</text><ellipse cx="748.4524" cy="513.0247" fill="#F8FAFC" rx="107.3724" ry="31.0547" style="stroke: #334155; stroke-width: 1.2;"/><text fill="#0F172A" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="163" x="666.9524" y="506.9806">UC-11: Transpile Validated Tree</text><text fill="#0F172A" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="143" x="676.9524" y="529.9625">to Pure C99 Header Artifact</text><ellipse cx="302.4555" cy="679.0217" fill="#F8FAFC" rx="115.4555" ry="31.0917" style="stroke: #334155; stroke-width: 1.2;"/><text fill="#0F172A" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="154" x="225.4555" y="670.0301">UC-12: Export EU CRA &amp; NIS 2</text><text fill="#0F172A" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="176" x="214.4555" y="693.012">Compliance &amp; Availability Reports</text><!--MD5=[a52630634f9dab0e2d69413eb8ed90bf]
+entity Taddeo--><ellipse cx="302.46" cy="279.54" fill="#E2E8F0" rx="8" ry="8" style="stroke: #1E293B; stroke-width: 1.5;"/><path d="M302.46,287.54 L302.46,314.54 M289.46,295.54 L315.46,295.54 M302.46,314.54 L289.46,329.54 M302.46,314.54 L315.46,329.54 " fill="none" style="stroke: #1E293B; stroke-width: 1.5;"/><text fill="#0F172A" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="80" x="231.96" y="347.7989">Taddeo Pallaba</text><text fill="#0F172A" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="141" x="231.96" y="370.7808">(Embedded Firmware Eng.)</text><!--MD5=[ea3fe83875697214df4058f0031ad87c]
+entity Lentina--><ellipse cx="68.5" cy="437.54" fill="#E2E8F0" rx="8" ry="8" style="stroke: #1E293B; stroke-width: 1.5;"/><path d="M68.5,445.54 L68.5,472.54 M55.5,453.54 L81.5,453.54 M68.5,472.54 L55.5,487.54 M68.5,472.54 L81.5,487.54 " fill="none" style="stroke: #1E293B; stroke-width: 1.5;"/><text fill="#0F172A" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="63" x="16" y="505.7989">Lentina Gigi</text><text fill="#0F172A" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="105" x="16" y="528.7808">(IoT SecOps Analyst)</text><!--MD5=[6f2c18d42ad56a35856993bf92221c16]
+entity Zanni--><ellipse cx="68.5" cy="673.54" fill="#E2E8F0" rx="8" ry="8" style="stroke: #1E293B; stroke-width: 1.5;"/><path d="M68.5,681.54 L68.5,708.54 M55.5,689.54 L81.5,689.54 M68.5,708.54 L55.5,723.54 M68.5,708.54 L81.5,723.54 " fill="none" style="stroke: #1E293B; stroke-width: 1.5;"/><text fill="#0F172A" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="82" x="10" y="741.7989">Zanni Giorgioni</text><text fill="#0F172A" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="117" x="10" y="764.7808">(CDO &amp; Plant Director)</text><!--MD5=[e7658045243274fb0795e3adccc69fdb]
+entity FieldBus--><ellipse cx="302.46" cy="109.54" fill="#E2E8F0" rx="8" ry="8" style="stroke: #1E293B; stroke-width: 1.5;"/><path d="M302.46,117.54 L302.46,144.54 M289.46,125.54 L315.46,125.54 M302.46,144.54 L289.46,159.54 M302.46,144.54 L315.46,159.54 " fill="none" style="stroke: #1E293B; stroke-width: 1.5;"/><text fill="#0F172A" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="115" x="237.46" y="177.7989">Field Network &amp; RTOS</text><text fill="#0F172A" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="130" x="237.46" y="200.7808">(Physical Ingress Stream)</text><!--MD5=[58dfcf531b473cc45e18efcd8a80058d]
+link Taddeo to UC1--><path d="M377.27,327.68 C446.36,331.1 550.7,336.27 631.01,340.25 " fill="none" id="Taddeo-&gt;UC1" style="stroke: #334155; stroke-width: 1.0;"/><polygon fill="#334155" points="635.73,340.48,626.9353,336.0469,630.7359,340.2367,626.546,344.0374,635.73,340.48" style="stroke: #334155; stroke-width: 1.0;"/><!--MD5=[1a21f82912ec3e787279f9ef8214cefd]
+link Taddeo to UC2--><path d="M377.27,313.88 C448.89,304.04 558.37,289 639.71,277.82 " fill="none" id="Taddeo-&gt;UC2" style="stroke: #334155; stroke-width: 1.0;"/><polygon fill="#334155" points="644.51,277.16,635.0535,274.4078,639.5555,277.833,636.1303,282.335,644.51,277.16" style="stroke: #334155; stroke-width: 1.0;"/><!--MD5=[bd88ed2a6eb3db1c567d5506bc93fa6d]
+link Taddeo to UC11--><path d="M377.22,332.82 C438.66,342.22 527.2,360.66 597.91,395.02 C641.67,416.28 684.53,452.08 713.06,478.68 " fill="none" id="Taddeo-&gt;UC11" style="stroke: #334155; stroke-width: 1.0;"/><polygon fill="#334155" points="716.41,481.83,712.5799,472.7564,712.7623,478.4103,707.1084,478.5927,716.41,481.83" style="stroke: #334155; stroke-width: 1.0;"/><!--MD5=[e14cef5b67e8048d6c73aeb2442634c3]
+link FieldBus to UC2--><path d="M371.86,170.81 C448.03,189.51 571.54,219.83 655.97,240.56 " fill="none" id="FieldBus-&gt;UC2" style="stroke: #334155; stroke-width: 1.0;"/><polygon fill="#334155" points="660.77,241.74,652.9921,235.6981,655.9159,240.5408,651.0733,243.4646,660.77,241.74" style="stroke: #334155; stroke-width: 1.0;"/><!--MD5=[2a1bf603b621d01e13869a83d307b380]
+link FieldBus to UC5--><path d="M371.86,145.39 C442.62,136.47 554.23,122.39 637.42,111.9 " fill="none" id="FieldBus-&gt;UC5" style="stroke: #334155; stroke-width: 1.0;"/><polygon fill="#334155" points="642.36,111.27,632.9283,108.4339,637.3997,111.899,633.9347,116.3704,642.36,111.27" style="stroke: #334155; stroke-width: 1.0;"/><!--MD5=[594891eb4838d876d29f7ff5a36f2080]
+link UC2 to UC3--><path d="M860.47,268.87 C872.55,269.34 884.67,269.74 896.28,270.02 C936.88,270.99 981.38,271.21 1020.84,271.12 " fill="none" id="UC2-&gt;UC3" style="stroke: #334155; stroke-width: 1.0; stroke-dasharray: 7.0,7.0;"/><polygon fill="#334155" points="1025.61,271.11,1016.5986,267.1357,1020.61,271.1243,1016.6215,275.1357,1025.61,271.11" style="stroke: #334155; stroke-width: 1.0;"/><text fill="#1E293B" font-family="sans-serif" font-size="10" lengthAdjust="spacingAndGlyphs" textLength="45" x="927.78" y="262.71">«include»</text><!--MD5=[70fd0aa021e0672eb21bacda73a77dec]
+link UC2 to UC4--><path d="M838.59,243.54 C887.55,232.72 949.33,218.89 1004.28,206.02 C1019.24,202.51 1035.14,198.7 1050.51,194.96 " fill="none" id="UC2-&gt;UC4" style="stroke: #334155; stroke-width: 1.0; stroke-dasharray: 7.0,7.0;"/><polygon fill="#334155" points="1055.12,193.84,1045.4281,192.0885,1050.2626,195.0258,1047.3254,199.8603,1055.12,193.84" style="stroke: #334155; stroke-width: 1.0;"/><text fill="#1E293B" font-family="sans-serif" font-size="10" lengthAdjust="spacingAndGlyphs" textLength="45" x="927.78" y="198.71">«include»</text><!--MD5=[42d0fdfc7272d0e640e7206aad1439fa]
+link UC5 to UC4--><path d="M842.06,116.13 C890.41,125.6 950.54,137.4 1004.28,148.02 C1017.17,150.56 1030.78,153.26 1044.14,155.92 " fill="none" id="UC5-&gt;UC4" style="stroke: #334155; stroke-width: 1.0; stroke-dasharray: 7.0,7.0;"/><polygon fill="#334155" points="1048.78,156.84,1040.7297,151.1662,1043.8755,155.8677,1039.174,159.0134,1048.78,156.84" style="stroke: #334155; stroke-width: 1.0;"/><text fill="#1E293B" font-family="sans-serif" font-size="10" lengthAdjust="spacingAndGlyphs" textLength="43" x="928.78" y="106.04">«extend»</text><text fill="#1E293B" font-family="sans-serif" font-size="10" lengthAdjust="spacingAndGlyphs" textLength="98" x="901.28" y="119.66">[on anomaly verdict]</text><!--MD5=[aa51ccb7921928330ad442e765fe1063]
+link UC6 to UC4--><path d="M867.21,178.19 C918.18,177.39 977.43,176.47 1027.22,175.7 " fill="none" id="UC6-&gt;UC4" style="stroke: #334155; stroke-width: 1.0; stroke-dasharray: 7.0,7.0;"/><polygon fill="#334155" points="1032.04,175.62,1022.9728,171.7749,1027.0407,175.7057,1023.1099,179.7737,1032.04,175.62" style="stroke: #334155; stroke-width: 1.0;"/><text fill="#1E293B" font-family="sans-serif" font-size="10" lengthAdjust="spacingAndGlyphs" textLength="45" x="927.78" y="168.82">«include»</text><!--MD5=[3ffe60c22ad752bba342b7eb5fba7335]
+link Lentina to UC7--><path d="M125.07,472.98 C247.3,454.53 533.69,419.51 597.91,485.02 C609.83,497.17 595.33,624.68 605.91,638.02 C615.09,649.59 627.33,658.03 640.79,664.16 " fill="none" id="Lentina-&gt;UC7" style="stroke: #334155; stroke-width: 1.0;"/><polygon fill="#334155" points="645.23,666.06,638.5334,658.8381,640.6343,664.0904,635.382,666.1913,645.23,666.06" style="stroke: #334155; stroke-width: 1.0;"/><!--MD5=[10c0b09df5f04a128c19e6a437672740]
+link Lentina to UC8--><path d="M125.4,530.23 C137.3,538.98 150.16,547.41 163,554.02 C178.75,562.13 196.33,568.95 213.54,574.59 " fill="none" id="Lentina-&gt;UC8" style="stroke: #334155; stroke-width: 1.0;"/><polygon fill="#334155" points="217.92,576,210.5694,569.4449,213.1584,574.4746,208.1287,577.0635,217.92,576" style="stroke: #334155; stroke-width: 1.0;"/><!--MD5=[b008e0bc2ad231cf6e56d852196187e1]
+link Lentina to UC9--><path d="M125.11,446 C134.43,441.47 144.25,437.55 154,435.02 C249.49,410.25 525.86,367.64 597.91,435.02 C617.27,453.12 589.35,533.32 605.91,554.02 C614.59,564.87 625.94,573 638.43,579.09 " fill="none" id="Lentina-&gt;UC9" style="stroke: #334155; stroke-width: 1.0;"/><polygon fill="#334155" points="642.88,581.12,636.3506,573.7466,638.3306,579.0456,633.0316,581.0256,642.88,581.12" style="stroke: #334155; stroke-width: 1.0;"/><!--MD5=[1293d77ce0b78d3bdfc08f1fd4b1473d]
+link Lentina to UC10--><path d="M125.35,489.48 C147.48,492.44 173.63,495.93 198.92,499.31 " fill="none" id="Lentina-&gt;UC10" style="stroke: #334155; stroke-width: 1.0;"/><polygon fill="#334155" points="203.83,499.97,195.4337,494.822,198.8734,499.3129,194.3824,502.7526,203.83,499.97" style="stroke: #334155; stroke-width: 1.0;"/><!--MD5=[5cc2f83803362dbc742f594265acff9d]
+link UC8 to UC7--><path d="M370.2,620.74 C392.44,628.2 417.51,635.79 440.91,641.02 C504.53,655.24 576.86,664.52 635.27,670.35 " fill="none" id="UC8-&gt;UC7" style="stroke: #334155; stroke-width: 1.0; stroke-dasharray: 7.0,7.0;"/><polygon fill="#334155" points="640.09,670.82,631.5203,665.9662,635.1136,670.3352,630.7446,673.9285,640.09,670.82" style="stroke: #334155; stroke-width: 1.0;"/><text fill="#1E293B" font-family="sans-serif" font-size="10" lengthAdjust="spacingAndGlyphs" textLength="43" x="497.91" y="619.71">«extend»</text><text fill="#1E293B" font-family="sans-serif" font-size="10" lengthAdjust="spacingAndGlyphs" textLength="147" x="445.91" y="633.33">[on benign burst misclassified]</text><!--MD5=[7b04f786397b8cc95f0b8708307a0097]
+link UC10 to UC9--><path d="M389.92,530.95 C406.81,534.37 424.41,537.86 440.91,541.02 C508.29,553.92 584.19,567.55 643.6,578.01 " fill="none" id="UC10-&gt;UC9" style="stroke: #334155; stroke-width: 1.0; stroke-dasharray: 7.0,7.0;"/><polygon fill="#334155" points="648.18,578.81,639.9985,573.3271,643.2539,577.9533,638.6277,581.2088,648.18,578.81" style="stroke: #334155; stroke-width: 1.0;"/><text fill="#1E293B" font-family="sans-serif" font-size="10" lengthAdjust="spacingAndGlyphs" textLength="45" x="496.91" y="533.71">«include»</text><!--MD5=[2f043608e992351a742343fb5dbd2cbd]
+link UC10 to UC11--><path d="M408.96,513.02 C476.92,513.02 565.21,513.02 634.58,513.02 " fill="none" id="UC10-&gt;UC11" style="stroke: #334155; stroke-width: 1.0; stroke-dasharray: 7.0,7.0;"/><polygon fill="#334155" points="639.29,513.02,630.29,509.02,634.29,513.02,630.29,517.02,639.29,513.02" style="stroke: #334155; stroke-width: 1.0;"/><text fill="#1E293B" font-family="sans-serif" font-size="10" lengthAdjust="spacingAndGlyphs" textLength="45" x="496.91" y="505.71">«include»</text><!--MD5=[70c9431ef05db59091562fea98de3340]
+link Zanni to UC7--><path d="M131.36,719.53 C141.92,719.73 152.77,719.91 163,720.02 C276.29,721.23 304.83,727.03 417.91,720.02 C494.42,715.28 580.35,704.4 645.27,695.04 " fill="none" id="Zanni-&gt;UC7" style="stroke: #334155; stroke-width: 1.0;"/><polygon fill="#334155" points="649.99,694.36,640.5115,691.6845,645.0411,695.0731,641.6525,699.6027,649.99,694.36" style="stroke: #334155; stroke-width: 1.0;"/><!--MD5=[61dd9eb53d681d2aff57ffc0b0916917]
+link Zanni to UC12--><path d="M131.36,707.62 C151.72,704.19 174.95,700.29 197.57,696.49 " fill="none" id="Zanni-&gt;UC12" style="stroke: #334155; stroke-width: 1.0;"/><polygon fill="#334155" points="202.43,695.67,192.8914,693.2175,197.4992,696.4989,194.2177,701.1067,202.43,695.67" style="stroke: #334155; stroke-width: 1.0;"/><!--MD5=[8762196e672948af1c7bc9cf7228530d]
+@startuml
+left to right direction
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName SansSerif
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam nodesep 20
+skinparam ranksep 45
+skinparam Padding 4
+
+skinparam package {
+    BackgroundColor #FFFFFF
+    BorderColor #334155
+    BorderThickness 1.5
+    FontColor #0F172A
+    FontSize 12
+}
+
+skinparam usecase {
+    BackgroundColor #F8FAFC
+    BorderColor #334155
+    BorderThickness 1.2
+    FontColor #0F172A
+    FontSize 11
+}
+
+skinparam actor {
+    BackgroundColor #E2E8F0
+    BorderColor #1E293B
+    FontColor #0F172A
+    FontSize 11
+}
+
+skinparam arrow {
+    Color #334155
+    FontColor #1E293B
+    FontSize 10
+}
+
+actor "Taddeo Pallaba\n(Embedded Firmware Eng.)" as Taddeo
+actor "Lentina Gigi\n(IoT SecOps Analyst)" as Lentina
+actor "Zanni Giorgioni\n(CDO & Plant Director)" as Zanni
+actor "Field Network & RTOS\n(Physical Ingress Stream)" as FieldBus
+
+package "Primary Boundary: Core Embedded C99 Library (libmicroshield)" as EdgeBoundary {
+    usecase "UC-01: Link Zero-Malloc Library\ninto Bare-Metal/RTOS Firmware" as UC1
+    usecase "UC-02: Inspect Ingress Frames\nwithin Deterministic Time Bound" as UC2
+    usecase "UC-03: Extract 8-Feature Vector\nvia Sliding Window Registers" as UC3
+    usecase "UC-04: Evaluate Static Decision\nTree & Emit XAI Rule ID" as UC4
+    usecase "UC-05: Trigger Autonomous Local\nHardware Quarantine (FSM)" as UC5
+    usecase "UC-06: Dispatch Out-of-Band Alert\n& Circular Benign Audit Sample" as UC6
+}
+
+package "Auxiliary Boundary: Python MLOps & Fleet Supervision Suite" as HostBoundary {
+    usecase "UC-07: Monitor Live Fleet Alerts\n& XAI Boolean Decision Paths" as UC7
+    usecase "UC-08: Flag False Positive (FP)\n& Override Node Quarantine" as UC8
+    usecase "UC-09: Execute Shadow Auditing\nto Unmask Silent False Negatives" as UC9
+    usecase "UC-10: Quantify Statistical Drift\n(PSI / K-S) & Retrain Model" as UC10
+    usecase "UC-11: Transpile Validated Tree\nto Pure C99 Header Artifact" as UC11
+    usecase "UC-12: Export EU CRA & NIS 2\nCompliance & Availability Reports" as UC12
+}
+
+Taddeo - -> UC1
+Taddeo - -> UC2
+Taddeo - -> UC11
+
+FieldBus - -> UC2
+FieldBus - -> UC5
+
+UC2 ..> UC3 : <<include>>
+UC2 ..> UC4 : <<include>>
+UC5 ..> UC4 : <<extend>>\n[on anomaly verdict]
+UC6 ..> UC4 : <<include>>
+
+Lentina - -> UC7
+Lentina - -> UC8
+Lentina - -> UC9
+Lentina - -> UC10
+
+UC8 ..> UC7 : <<extend>>\n[on benign burst misclassified]
+UC10 ..> UC9 : <<include>>
+UC10 ..> UC11 : <<include>>
+
+Zanni - -> UC7
+Zanni - -> UC12
+
+@enduml
+
+PlantUML version 1.2020.02(Sun Mar 01 11:22:07 CET 2020)
+(GPL source distribution)
+Java Runtime: OpenJDK Runtime Environment
+JVM: OpenJDK 64-Bit Server VM
+Java Version: 25.0.4.1+1-1-26.04.4-Ubuntu
+Operating System: Linux
+Default Encoding: UTF-8
+Language: en
+Country: US
+--></g></svg>

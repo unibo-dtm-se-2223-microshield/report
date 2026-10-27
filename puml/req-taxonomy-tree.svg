@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" contentScriptType="application/ecmascript" contentStyleType="text/css" height="525px" preserveAspectRatio="none" style="width:962px;height:525px;" version="1.1" viewBox="0 0 962 525" width="962px" zoomAndPan="magnify"><defs/><g><!--MD5=[7427b37573f6a2c3528bb2730ab2c641]
+cluster BG--><polygon fill="#FFFFFF" points="22,95,266,95,273,125.3441,295,125.3441,295,493,22,493,22,95" style="stroke: #475569; stroke-width: 1.5;"/><line style="stroke: #475569; stroke-width: 1.5;" x1="22" x2="273" y1="125.3441" y2="125.3441"/><text fill="#0F172A" font-family="sans-serif" font-size="12" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="230" x="30" y="113.8281">Strategic DTM Drivers (Business Goals)</text><!--MD5=[0d3fb2cf91c0c13773a5e9df62683e6c]
+cluster US--><polygon fill="#FFFFFF" points="319,122,521,122,528,152.3441,588,152.3441,588,429,319,429,319,122" style="stroke: #475569; stroke-width: 1.5;"/><line style="stroke: #475569; stroke-width: 1.5;" x1="319" x2="528" y1="152.3441" y2="152.3441"/><text fill="#0F172A" font-family="sans-serif" font-size="12" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="188" x="327" y="140.8281">Stakeholder User Stories (Epics)</text><!--MD5=[098c77adf21fba962aa3aef0ceff0568]
+cluster REQ--><polygon fill="#FFFFFF" points="612,24,930,24,937,54.3441,940,54.3441,940,513,612,513,612,24" style="stroke: #475569; stroke-width: 1.5;"/><line style="stroke: #475569; stroke-width: 1.5;" x1="612" x2="937" y1="54.3441" y2="54.3441"/><text fill="#0F172A" font-family="sans-serif" font-size="12" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="304" x="620" y="42.8281">Formal System Requirements (ISO/IEC/IEEE 29148)</text><!--MD5=[5044d40c6541c61c76e0ae507b5b54cf]
+entity BG1--><rect fill="#F8FAFC" height="65.9638" style="stroke: #334155; stroke-width: 1.2;" width="226" x="45.5" y="320.02"/><text fill="#0F172A" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="198" x="59.5" y="345.7789">BG-01: Brownfield Legacy Retrofitting</text><text fill="#0F172A" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="190" x="59.5" y="368.7608">(Zero Hardware CapEx Replacement)</text><!--MD5=[ff56b5ffb5e50d554468989ce1545a17]
+entity BG2--><rect fill="#F8FAFC" height="65.9638" style="stroke: #334155; stroke-width: 1.2;" width="180" x="68.5" y="411.02"/><text fill="#0F172A" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="152" x="82.5" y="436.7789">BG-02: Hard Real-Time Safety</text><text fill="#0F172A" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="144" x="82.5" y="459.7608">(Zero RTOS Task Starvation)</text><!--MD5=[8e33ebb9d6330783ddb36cddb3773cb4]
+entity BG3--><rect fill="#F8FAFC" height="65.9638" style="stroke: #334155; stroke-width: 1.2;" width="211" x="53" y="138.02"/><text fill="#0F172A" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="183" x="67" y="163.7789">BG-03: Proactive Evasion Resilience</text><text fill="#0F172A" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="180" x="67" y="186.7608">(Unmasking Silent False Negatives)</text><!--MD5=[141f52d8e20666b855afc6813760b5ef]
+entity BG4--><rect fill="#F8FAFC" height="65.9638" style="stroke: #334155; stroke-width: 1.2;" width="241" x="38" y="229.02"/><text fill="#0F172A" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="213" x="52" y="254.7789">BG-04: European Regulatory Compliance</text><text fill="#0F172A" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="134" x="52" y="277.7608">(EU CRA &amp; NIS 2 Mandate)</text><!--MD5=[62feb899dbc51b699e14d0ec893fcd0d]
+entity USA--><rect fill="#F8FAFC" height="65.9638" style="stroke: #334155; stroke-width: 1.2;" width="237" x="335" y="347.02"/><text fill="#0F172A" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="209" x="349" y="372.7789">Epic A: Embedded Firmware Integration</text><text fill="#0F172A" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="164" x="349" y="395.7608">(Taddeo Pallaba: US-01 .. US-05)</text><!--MD5=[6adf806993c4fed3f755089b7e3c05bf]
+entity USB--><rect fill="#F8FAFC" height="65.9638" style="stroke: #334155; stroke-width: 1.2;" width="227" x="340" y="165.02"/><text fill="#0F172A" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="199" x="354" y="190.7789">Epic B: SecOps XAI &amp; Shadow Auditing</text><text fill="#0F172A" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="147" x="354" y="213.7608">(Lentina Gigi: US-06 .. US-10)</text><!--MD5=[c0fe4a0334a0f7294a5af5d4dfa188d8]
+entity USC--><rect fill="#F8FAFC" height="65.9638" style="stroke: #334155; stroke-width: 1.2;" width="221" x="343" y="256.02"/><text fill="#0F172A" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="193" x="357" y="281.7789">Epic C: OT Governance &amp; Compliance</text><text fill="#0F172A" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="166" x="357" y="304.7608">(Zanni Giorgioni: US-11 .. US-15)</text><!--MD5=[7c9151e4d172d8afe6ee14dbe39a7731]
+entity FR_CORE--><rect fill="#F8FAFC" height="88.9457" style="stroke: #334155; stroke-width: 1.2;" width="243" x="654" y="408.53"/><text fill="#0F172A" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="210" x="668" y="434.2889">Functional Requirements (FR-01 .. FR-06)</text><text fill="#0F172A" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="198" x="668" y="457.2708">Primary Artifact: Core C99 IDS Library</text><text fill="#0F172A" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="215" x="668" y="480.2527">(Extraction, Tree Inference, Containment)</text><!--MD5=[5b592cf99edba36af4e02f6973cee5bf]
+entity FR_AUX--><rect fill="#F8FAFC" height="88.9457" style="stroke: #334155; stroke-width: 1.2;" width="242" x="654.5" y="66.53"/><text fill="#0F172A" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="210" x="668.5" y="92.2889">Functional Requirements (FR-07 .. FR-12)</text><text fill="#0F172A" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="207" x="668.5" y="115.2708">Auxiliary Artifact: MLOps &amp; Governance</text><text fill="#0F172A" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="214" x="668.5" y="138.2527">(UART Ingestion, Shadow Audit, Drift, UI)</text><!--MD5=[05e568af73daee98f7e87ff8f9f15de0]
+entity NFR--><rect fill="#F8FAFC" height="88.9457" style="stroke: #334155; stroke-width: 1.2;" width="280" x="635.5" y="180.53"/><text fill="#0F172A" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="252" x="649.5" y="206.2889">Non-Functional Requirements (NFR-01 .. NFR-08)</text><text fill="#0F172A" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="171" x="649.5" y="229.2708">Quality &amp; Operational Invariants</text><text fill="#0F172A" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="214" x="649.5" y="252.2527">(WCET, Static RAM, F1-Score, XAI, Uptime)</text><!--MD5=[ef95eb2210feb4535357f6b1df740c69]
+entity IR--><rect fill="#F8FAFC" height="88.9457" style="stroke: #334155; stroke-width: 1.2;" width="274" x="638.5" y="294.53"/><text fill="#0F172A" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="222" x="652.5" y="320.2889">Implementation Constraints (IR-01 .. IR-05)</text><text fill="#0F172A" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="237" x="652.5" y="343.2708">Politico-Economic &amp; Administrative Mandates</text><text fill="#0F172A" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="246" x="652.5" y="366.2527">(ANSI C99, Zero-Deps, Python/Poetry, Datasets)</text><!--MD5=[3c512014737b54b12e8e1f7db9293a95]
+link BG1 to USA--><path d="M271.71,366.5 C271.71,366.5 328.21,366.5 328.21,366.5 " fill="none" id="BG1-&gt;USA" style="stroke: #334155; stroke-width: 1.0;"/><polygon fill="#334155" points="333.21,366.5,324.21,362.5,328.21,366.5,324.21,370.5,333.21,366.5" style="stroke: #334155; stroke-width: 1.0;"/><!--MD5=[fbe39198d8676690899244543f7a50af]
+link BG1 to USC--><path d="M271.94,334.5 C354.9,334.5 453,334.5 453,334.5 C453,334.5 453,328.58 453,328.58 " fill="none" id="BG1-&gt;USC" style="stroke: #334155; stroke-width: 1.0;"/><polygon fill="#334155" points="453,323.58,449,332.58,453,328.58,457,332.58,453,323.58" style="stroke: #334155; stroke-width: 1.0;"/><!--MD5=[feaeb19ccdf2cf8b051b354d6b89cb00]
+link BG2 to USA--><path d="M158,410.93 C158,403.88 158,398.5 158,398.5 C158,398.5 328.07,398.5 328.07,398.5 " fill="none" id="BG2-&gt;USA" style="stroke: #334155; stroke-width: 1.0;"/><polygon fill="#334155" points="333.07,398.5,324.07,394.5,328.07,398.5,324.07,402.5,333.07,398.5" style="stroke: #334155; stroke-width: 1.0;"/><!--MD5=[5f06b985e7221d37e2bbc55e63c44c0b]
+link BG3 to USB--><path d="M264.17,184.5 C264.17,184.5 333.07,184.5 333.07,184.5 " fill="none" id="BG3-&gt;USB" style="stroke: #334155; stroke-width: 1.0;"/><polygon fill="#334155" points="338.07,184.5,329.07,180.5,333.07,184.5,329.07,188.5,338.07,184.5" style="stroke: #334155; stroke-width: 1.0;"/><!--MD5=[1438c33768af12e4a7ae73d1723575f5]
+link BG4 to USB--><path d="M271,228.93 C271,221.88 271,216.5 271,216.5 C271,216.5 333.22,216.5 333.22,216.5 " fill="none" id="BG4-&gt;USB" style="stroke: #334155; stroke-width: 1.0;"/><polygon fill="#334155" points="338.22,216.5,329.22,212.5,333.22,216.5,329.22,220.5,338.22,216.5" style="stroke: #334155; stroke-width: 1.0;"/><!--MD5=[5b4417d2492bb45aabdd9c03d5415642]
+link BG4 to USC--><path d="M279.34,275.5 C279.34,275.5 336.29,275.5 336.29,275.5 " fill="none" id="BG4-&gt;USC" style="stroke: #334155; stroke-width: 1.0;"/><polygon fill="#334155" points="341.29,275.5,332.29,271.5,336.29,275.5,332.29,279.5,341.29,275.5" style="stroke: #334155; stroke-width: 1.0;"/><!--MD5=[8c69dc34c2d2aaf27d83b89d4d805515]
+link USA to FR_CORE--><path d="M572.3,396 C663.88,396 775,396 775,396 C775,396 775,401.57 775,401.57 " fill="none" id="USA-&gt;FR_CORE" style="stroke: #334155; stroke-width: 1.0;"/><polygon fill="#334155" points="775,406.57,779,397.57,775,401.57,771,397.57,775,406.57" style="stroke: #334155; stroke-width: 1.0;"/><!--MD5=[70cbbe6d4259e9b37d1e3e8e142367db]
+link USA to NFR--><path d="M572.29,371.32 C599.19,371.32 620,371.32 620,371.32 C620,371.32 620,264.99 620,264.99 C620,264.99 628.68,264.99 628.68,264.99 " fill="none" id="USA-&gt;NFR" style="stroke: #334155; stroke-width: 1.0;"/><polygon fill="#334155" points="633.68,264.99,624.68,260.99,628.68,264.99,624.68,268.99,633.68,264.99" style="stroke: #334155; stroke-width: 1.0;"/><!--MD5=[8b0af85bd785f6090572de356377621a]
+link USA to IR--><path d="M572.49,359.17 C572.49,359.17 631.73,359.17 631.73,359.17 " fill="none" id="USA-&gt;IR" style="stroke: #334155; stroke-width: 1.0;"/><polygon fill="#334155" points="636.73,359.17,627.73,355.17,631.73,359.17,627.73,363.17,636.73,359.17" style="stroke: #334155; stroke-width: 1.0;"/><!--MD5=[9c31a1cf920454218aef9de042d7f459]
+link USB to FR_AUX--><path d="M453,164.62 C453,153.48 453,143.84 453,143.84 C453,143.84 647.52,143.84 647.52,143.84 " fill="none" id="USB-&gt;FR_AUX" style="stroke: #334155; stroke-width: 1.0;"/><polygon fill="#334155" points="652.52,143.84,643.52,139.84,647.52,143.84,643.52,147.84,652.52,143.84" style="stroke: #334155; stroke-width: 1.0;"/><!--MD5=[ef4605199285129e302b4e38154a1125]
+link USB to NFR--><path d="M567.48,205.75 C567.48,205.75 628.63,205.75 628.63,205.75 " fill="none" id="USB-&gt;NFR" style="stroke: #334155; stroke-width: 1.0;"/><polygon fill="#334155" points="633.63,205.75,624.63,201.75,628.63,205.75,624.63,209.75,633.63,205.75" style="stroke: #334155; stroke-width: 1.0;"/><!--MD5=[5ed8bfb9918e84396018a6861d9fd726]
+link USC to FR_CORE--><path d="M564.46,312.83 C587.02,312.83 604,312.83 604,312.83 C604,312.83 604,444.98 604,444.98 C604,444.98 647.09,444.98 647.09,444.98 " fill="none" id="USC-&gt;FR_CORE" style="stroke: #334155; stroke-width: 1.0;"/><polygon fill="#334155" points="652.09,444.98,643.09,440.98,647.09,444.98,643.09,448.98,652.09,444.98" style="stroke: #334155; stroke-width: 1.0;"/><!--MD5=[4e52dad3f16299de4bc282a2c56ced2b]
+link USC to FR_AUX--><path d="M564.26,260.5 C578.37,260.5 588,260.5 588,260.5 C588,260.5 588,149.65 588,149.65 C588,149.65 647.59,149.65 647.59,149.65 " fill="none" id="USC-&gt;FR_AUX" style="stroke: #334155; stroke-width: 1.0;"/><polygon fill="#334155" points="652.59,149.65,643.59,145.65,647.59,149.65,643.59,153.65,652.59,149.65" style="stroke: #334155; stroke-width: 1.0;"/><!--MD5=[df351bf671fa8faab75c340b15c10f55]
+link USC to IR--><path d="M564.31,303.68 C564.31,303.68 631.51,303.68 631.51,303.68 " fill="none" id="USC-&gt;IR" style="stroke: #334155; stroke-width: 1.0;"/><polygon fill="#334155" points="636.51,303.68,627.51,299.68,631.51,303.68,627.51,307.68,636.51,303.68" style="stroke: #334155; stroke-width: 1.0;"/><!--MD5=[6d54b7db23711e7fb8a7308e6ab2e3fd]
+@startuml
+left to right direction
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName SansSerif
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam linetype ortho
+skinparam nodesep 25
+skinparam ranksep 40
+skinparam Padding 4
+
+skinparam package {
+    BackgroundColor #FFFFFF
+    BorderColor #475569
+    BorderThickness 1.5
+    FontColor #0F172A
+    FontSize 12
+}
+
+skinparam rectangle {
+    BackgroundColor #F8FAFC
+    BorderColor #334155
+    BorderThickness 1.2
+    FontColor #0F172A
+    FontSize 11
+}
+
+skinparam arrow {
+    Color #334155
+    FontColor #0F172A
+    FontSize 10
+}
+
+package "Strategic DTM Drivers (Business Goals)" as BG {
+    rectangle "BG-01: Brownfield Legacy Retrofitting\n(Zero Hardware CapEx Replacement)" as BG1
+    rectangle "BG-02: Hard Real-Time Safety\n(Zero RTOS Task Starvation)" as BG2
+    rectangle "BG-03: Proactive Evasion Resilience\n(Unmasking Silent False Negatives)" as BG3
+    rectangle "BG-04: European Regulatory Compliance\n(EU CRA & NIS 2 Mandate)" as BG4
+}
+
+package "Stakeholder User Stories (Epics)" as US {
+    rectangle "Epic A: Embedded Firmware Integration\n(Taddeo Pallaba: US-01 .. US-05)" as USA
+    rectangle "Epic B: SecOps XAI & Shadow Auditing\n(Lentina Gigi: US-06 .. US-10)" as USB
+    rectangle "Epic C: OT Governance & Compliance\n(Zanni Giorgioni: US-11 .. US-15)" as USC
+}
+
+package "Formal System Requirements (ISO/IEC/IEEE 29148)" as REQ {
+    rectangle "Functional Requirements (FR-01 .. FR-06)\nPrimary Artifact: Core C99 IDS Library\n(Extraction, Tree Inference, Containment)" as FR_CORE
+    rectangle "Functional Requirements (FR-07 .. FR-12)\nAuxiliary Artifact: MLOps & Governance\n(UART Ingestion, Shadow Audit, Drift, UI)" as FR_AUX
+    rectangle "Non-Functional Requirements (NFR-01 .. NFR-08)\nQuality & Operational Invariants\n(WCET, Static RAM, F1-Score, XAI, Uptime)" as NFR
+    rectangle "Implementation Constraints (IR-01 .. IR-05)\nPolitico-Economic & Administrative Mandates\n(ANSI C99, Zero-Deps, Python/Poetry, Datasets)" as IR
+}
+
+BG1 - -> USA
+BG1 - -> USC
+BG2 - -> USA
+BG3 - -> USB
+BG4 - -> USB
+BG4 - -> USC
+
+USA - -> FR_CORE
+USA - -> NFR
+USA - -> IR
+
+USB - -> FR_AUX
+USB - -> NFR
+
+USC - -> FR_CORE
+USC - -> FR_AUX
+USC - -> IR
+
+@enduml
+
+PlantUML version 1.2020.02(Sun Mar 01 11:22:07 CET 2020)
+(GPL source distribution)
+Java Runtime: OpenJDK Runtime Environment
+JVM: OpenJDK 64-Bit Server VM
+Java Version: 25.0.4.1+1-1-26.04.4-Ubuntu
+Operating System: Linux
+Default Encoding: UTF-8
+Language: en
+Country: US
+--></g></svg>

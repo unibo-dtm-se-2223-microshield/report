@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" contentScriptType="application/ecmascript" contentStyleType="text/css" height="345px" preserveAspectRatio="none" style="width:1665px;height:345px;" version="1.1" viewBox="0 0 1665 345" width="1665px" zoomAndPan="magnify"><defs/><g><!--MD5=[0ac70d5a357257da33ce88abad68f4a4]
+cluster S1--><polygon fill="#FFFFFF" points="22,116,250,116,257,146.3441,305,146.3441,305,333,22,333,22,116" style="stroke: #475569; stroke-width: 1.5;"/><line style="stroke: #475569; stroke-width: 1.5;" x1="22" x2="257" y1="146.3441" y2="146.3441"/><text fill="#0F172A" font-family="sans-serif" font-size="12" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="214" x="30" y="134.8281">Stage 1: Compile-Time &amp; Static Gate</text><!--MD5=[dc4eb2012487d12714526fe7f88b694b]
+cluster S2--><polygon fill="#FFFFFF" points="443,24,716,24,723,54.3441,726,54.3441,726,263,443,263,443,24" style="stroke: #475569; stroke-width: 1.5;"/><line style="stroke: #475569; stroke-width: 1.5;" x1="443" x2="723" y1="54.3441" y2="54.3441"/><text fill="#0F172A" font-family="sans-serif" font-size="12" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="259" x="451" y="42.8281">Stage 2: Runtime Deterministic Gate (Edge)</text><!--MD5=[addf083e429417be7ad7bace6a60d70a]
+cluster S3--><polygon fill="#FFFFFF" points="906,24,1198,24,1205,54.3441,1208,54.3441,1208,263,906,263,906,24" style="stroke: #475569; stroke-width: 1.5;"/><line style="stroke: #475569; stroke-width: 1.5;" x1="906" x2="1205" y1="54.3441" y2="54.3441"/><text fill="#0F172A" font-family="sans-serif" font-size="12" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="278" x="914" y="42.8281">Stage 3: Telemetry &amp; Shadow Audit Gate (Host)</text><!--MD5=[1b98782d04014fd996918d60b99c8b46]
+cluster S4--><polygon fill="#FFFFFF" points="1367,86,1616,86,1623,116.3441,1643,116.3441,1643,325,1367,325,1367,86" style="stroke: #475569; stroke-width: 1.5;"/><line style="stroke: #475569; stroke-width: 1.5;" x1="1367" x2="1623" y1="116.3441" y2="116.3441"/><text fill="#0F172A" font-family="sans-serif" font-size="12" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="235" x="1375" y="104.8281">Stage 4: MLOps Drift &amp; Regulatory Gate</text><!--MD5=[ae1baa0d8486312c3048caabcfe39c79]
+class Gate1--><rect fill="#F8FAFC" height="158.4437" id="Gate1" style="stroke: #334155; stroke-width: 1.2;" width="251" x="38" y="158.78"/><ellipse cx="77.75" cy="186.7619" fill="#ADD1B2" rx="9" ry="9" style="stroke: #334155; stroke-width: 1.0;"/><path d="M79.0625,190.5275 Q78.6875,190.7306 78.2656,190.8244 Q77.8594,190.9181 77.3906,190.9181 Q75.7813,190.9181 74.9219,189.8556 Q74.0625,188.7775 74.0625,186.7619 Q74.0625,184.7306 74.9219,183.6681 Q75.7813,182.59 77.3906,182.59 Q77.8594,182.59 78.2656,182.6994 Q78.6875,182.7931 79.0625,182.9806 L79.0625,184.7463 Q78.6406,184.3713 78.25,184.1994 Q77.875,184.0275 77.4688,184.0275 Q76.6094,184.0275 76.1563,184.715 Q75.7188,185.4025 75.7188,186.7619 Q75.7188,188.1213 76.1563,188.8088 Q76.6094,189.4963 77.4688,189.4963 Q77.875,189.4963 78.25,189.3244 Q78.6406,189.1525 79.0625,188.7619 L79.0625,190.5275 Z "/><text fill="#000000" font-family="sans-serif" font-size="11" font-style="italic" lengthAdjust="spacingAndGlyphs" textLength="88" x="133.25" y="179.5389">«Acceptance Gate»</text><text fill="#0F172A" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="156" x="99.25" y="202.5208">Static &amp; Toolchain Verification</text><line style="stroke: #334155; stroke-width: 1.2;" x1="39" x2="288" y1="214.7438" y2="214.7438"/><ellipse cx="49" cy="225.7438" fill="none" rx="3" ry="3" style="stroke: #038048; stroke-width: 1.0;"/><text fill="#1E293B" font-family="sans-serif" font-size="10" lengthAdjust="spacingAndGlyphs" textLength="132" x="60" y="233.4338">Target: IR-01, IR-02, NFR-02</text><ellipse cx="49" cy="247.3638" fill="none" rx="3" ry="3" style="stroke: #038048; stroke-width: 1.0;"/><text fill="#1E293B" font-family="sans-serif" font-size="10" lengthAdjust="spacingAndGlyphs" textLength="205" x="60" y="255.0538">Check 3: Static RAM/Flash footprint budget</text><line style="stroke: #334155; stroke-width: 1.2;" x1="39" x2="288" y1="265.9838" y2="265.9838"/><ellipse cx="49" cy="276.9838" fill="#84BE84" rx="3" ry="3" style="stroke: #038048; stroke-width: 1.0;"/><text fill="#1E293B" font-family="sans-serif" font-size="10" lengthAdjust="spacingAndGlyphs" textLength="207" x="60" y="284.6737">Check 1: ANSI C99 strict (-pedantic -Werror)</text><ellipse cx="49" cy="298.6037" fill="#84BE84" rx="3" ry="3" style="stroke: #038048; stroke-width: 1.0;"/><text fill="#1E293B" font-family="sans-serif" font-size="10" lengthAdjust="spacingAndGlyphs" textLength="219" x="60" y="306.2937">Check 2: Symbol table scan (Zero malloc/free)</text><!--MD5=[3ab18ed6d6fe725cc780222ee454015b]
+class Gate2--><rect fill="#F8FAFC" height="180.0637" id="Gate2" style="stroke: #334155; stroke-width: 1.2;" width="240" x="464" y="66.97"/><ellipse cx="492.3" cy="94.9519" fill="#ADD1B2" rx="9" ry="9" style="stroke: #334155; stroke-width: 1.0;"/><path d="M493.6125,98.7175 Q493.2375,98.9206 492.8156,99.0144 Q492.4094,99.1081 491.9406,99.1081 Q490.3313,99.1081 489.4719,98.0456 Q488.6125,96.9675 488.6125,94.9519 Q488.6125,92.9206 489.4719,91.8581 Q490.3313,90.78 491.9406,90.78 Q492.4094,90.78 492.8156,90.8894 Q493.2375,90.9831 493.6125,91.1706 L493.6125,92.9363 Q493.1906,92.5613 492.8,92.3894 Q492.425,92.2175 492.0188,92.2175 Q491.1594,92.2175 490.7063,92.905 Q490.2688,93.5925 490.2688,94.9519 Q490.2688,96.3113 490.7063,96.9988 Q491.1594,97.6863 492.0188,97.6863 Q492.425,97.6863 492.8,97.5144 Q493.1906,97.3425 493.6125,96.9519 L493.6125,98.7175 Z "/><text fill="#000000" font-family="sans-serif" font-size="11" font-style="italic" lengthAdjust="spacingAndGlyphs" textLength="88" x="552.7" y="87.7289">«Acceptance Gate»</text><text fill="#0F172A" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="170" x="511.7" y="110.7108">Real-Time Execution &amp; XAI Check</text><line style="stroke: #334155; stroke-width: 1.2;" x1="465" x2="703" y1="122.9338" y2="122.9338"/><ellipse cx="475" cy="133.9338" fill="none" rx="3" ry="3" style="stroke: #038048; stroke-width: 1.0;"/><text fill="#1E293B" font-family="sans-serif" font-size="10" lengthAdjust="spacingAndGlyphs" textLength="162" x="486" y="141.6238">Target: FR-01..06, NFR-01, NFR-04</text><ellipse cx="475" cy="155.5538" fill="none" rx="3" ry="3" style="stroke: #038048; stroke-width: 1.0;"/><text fill="#1E293B" font-family="sans-serif" font-size="10" lengthAdjust="spacingAndGlyphs" textLength="208" x="486" y="163.2438">Check 3: Deterministic FSM state transition</text><ellipse cx="475" cy="177.1738" fill="none" rx="3" ry="3" style="stroke: #038048; stroke-width: 1.0;"/><text fill="#1E293B" font-family="sans-serif" font-size="10" lengthAdjust="spacingAndGlyphs" textLength="188" x="486" y="184.8637">Check 4: Triggered XAI leaf ID emission</text><line style="stroke: #334155; stroke-width: 1.2;" x1="465" x2="703" y1="195.7937" y2="195.7937"/><ellipse cx="475" cy="206.7937" fill="#84BE84" rx="3" ry="3" style="stroke: #038048; stroke-width: 1.0;"/><text fill="#1E293B" font-family="sans-serif" font-size="10" lengthAdjust="spacingAndGlyphs" textLength="191" x="486" y="214.4837">Check 1: O(1) feature extraction latency</text><ellipse cx="475" cy="228.4137" fill="#84BE84" rx="3" ry="3" style="stroke: #038048; stroke-width: 1.0;"/><text fill="#1E293B" font-family="sans-serif" font-size="10" lengthAdjust="spacingAndGlyphs" textLength="196" x="486" y="236.1037">Check 2: O(tree_depth) worst-case cycles</text><!--MD5=[a6cc6e2a9914902ae943a6485296a815]
+class Gate3--><rect fill="#F8FAFC" height="180.0637" id="Gate3" style="stroke: #334155; stroke-width: 1.2;" width="260" x="926.5" y="66.97"/><ellipse cx="968.25" cy="94.9519" fill="#ADD1B2" rx="9" ry="9" style="stroke: #334155; stroke-width: 1.0;"/><path d="M969.5625,98.7175 Q969.1875,98.9206 968.7656,99.0144 Q968.3594,99.1081 967.8906,99.1081 Q966.2813,99.1081 965.4219,98.0456 Q964.5625,96.9675 964.5625,94.9519 Q964.5625,92.9206 965.4219,91.8581 Q966.2813,90.78 967.8906,90.78 Q968.3594,90.78 968.7656,90.8894 Q969.1875,90.9831 969.5625,91.1706 L969.5625,92.9363 Q969.1406,92.5613 968.75,92.3894 Q968.375,92.2175 967.9688,92.2175 Q967.1094,92.2175 966.6563,92.905 Q966.2188,93.5925 966.2188,94.9519 Q966.2188,96.3113 966.6563,96.9988 Q967.1094,97.6863 967.9688,97.6863 Q968.375,97.6863 968.75,97.5144 Q969.1406,97.3425 969.5625,96.9519 L969.5625,98.7175 Z "/><text fill="#000000" font-family="sans-serif" font-size="11" font-style="italic" lengthAdjust="spacingAndGlyphs" textLength="88" x="1026.25" y="87.7289">«Acceptance Gate»</text><text fill="#0F172A" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="161" x="989.75" y="110.7108">Efficacy &amp; Evasion Interception</text><line style="stroke: #334155; stroke-width: 1.2;" x1="927.5" x2="1185.5" y1="122.9338" y2="122.9338"/><ellipse cx="937.5" cy="133.9338" fill="none" rx="3" ry="3" style="stroke: #038048; stroke-width: 1.0;"/><text fill="#1E293B" font-family="sans-serif" font-size="10" lengthAdjust="spacingAndGlyphs" textLength="162" x="948.5" y="141.6238">Target: FR-07..10, NFR-03, NFR-05</text><ellipse cx="937.5" cy="155.5538" fill="none" rx="3" ry="3" style="stroke: #038048; stroke-width: 1.0;"/><text fill="#1E293B" font-family="sans-serif" font-size="10" lengthAdjust="spacingAndGlyphs" textLength="205" x="948.5" y="163.2438">Check 2: Macro F1-score &gt;= 0.92 on corpus</text><ellipse cx="937.5" cy="177.1738" fill="none" rx="3" ry="3" style="stroke: #038048; stroke-width: 1.0;"/><text fill="#1E293B" font-family="sans-serif" font-size="10" lengthAdjust="spacingAndGlyphs" textLength="228" x="948.5" y="184.8637">Check 3: Shadow ensemble catches injected FN</text><ellipse cx="937.5" cy="198.7937" fill="none" rx="3" ry="3" style="stroke: #038048; stroke-width: 1.0;"/><text fill="#1E293B" font-family="sans-serif" font-size="10" lengthAdjust="spacingAndGlyphs" textLength="183" x="948.5" y="206.4837">Check 4: Operator FP override queued</text><line style="stroke: #334155; stroke-width: 1.2;" x1="927.5" x2="1185.5" y1="217.4137" y2="217.4137"/><ellipse cx="937.5" cy="228.4137" fill="#84BE84" rx="3" ry="3" style="stroke: #038048; stroke-width: 1.0;"/><text fill="#1E293B" font-family="sans-serif" font-size="10" lengthAdjust="spacingAndGlyphs" textLength="224" x="948.5" y="236.1037">Check 1: UART bandwidth cap (&lt;= 2% link load)</text><!--MD5=[d72aaa9d68b5c08cf67d306dce181ad1]
+class Gate4--><rect fill="#F8FAFC" height="180.0637" id="Gate4" style="stroke: #334155; stroke-width: 1.2;" width="244" x="1383" y="128.97"/><ellipse cx="1396.45" cy="156.9519" fill="#ADD1B2" rx="9" ry="9" style="stroke: #334155; stroke-width: 1.0;"/><path d="M1397.7625,160.7175 Q1397.3875,160.9206 1396.9656,161.0144 Q1396.5594,161.1081 1396.0906,161.1081 Q1394.4813,161.1081 1393.6219,160.0456 Q1392.7625,158.9675 1392.7625,156.9519 Q1392.7625,154.9206 1393.6219,153.8581 Q1394.4813,152.78 1396.0906,152.78 Q1396.5594,152.78 1396.9656,152.8894 Q1397.3875,152.9831 1397.7625,153.1706 L1397.7625,154.9363 Q1397.3406,154.5613 1396.95,154.3894 Q1396.575,154.2175 1396.1688,154.2175 Q1395.3094,154.2175 1394.8563,154.905 Q1394.4188,155.5925 1394.4188,156.9519 Q1394.4188,158.3113 1394.8563,158.9988 Q1395.3094,159.6863 1396.1688,159.6863 Q1396.575,159.6863 1396.95,159.5144 Q1397.3406,159.3425 1397.7625,158.9519 L1397.7625,160.7175 Z "/><text fill="#000000" font-family="sans-serif" font-size="11" font-style="italic" lengthAdjust="spacingAndGlyphs" textLength="88" x="1472.05" y="149.7289">«Acceptance Gate»</text><text fill="#0F172A" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="207" x="1412.55" y="172.7108">Closed-Loop Governance &amp; Compliance</text><line style="stroke: #334155; stroke-width: 1.2;" x1="1384" x2="1626" y1="184.9338" y2="184.9338"/><ellipse cx="1394" cy="195.9338" fill="none" rx="3" ry="3" style="stroke: #038048; stroke-width: 1.0;"/><text fill="#1E293B" font-family="sans-serif" font-size="10" lengthAdjust="spacingAndGlyphs" textLength="188" x="1405" y="203.6238">Target: FR-11..12, NFR-07..08, IR-03..05</text><ellipse cx="1394" cy="217.5538" fill="none" rx="3" ry="3" style="stroke: #038048; stroke-width: 1.0;"/><text fill="#1E293B" font-family="sans-serif" font-size="10" lengthAdjust="spacingAndGlyphs" textLength="185" x="1405" y="225.2438">Check 1: Drift trigger when PSI &gt;= 0.20</text><ellipse cx="1394" cy="239.1738" fill="none" rx="3" ry="3" style="stroke: #038048; stroke-width: 1.0;"/><text fill="#1E293B" font-family="sans-serif" font-size="10" lengthAdjust="spacingAndGlyphs" textLength="205" x="1405" y="246.8637">Check 2: Automated C99 tree transpilation</text><ellipse cx="1394" cy="260.7937" fill="none" rx="3" ry="3" style="stroke: #038048; stroke-width: 1.0;"/><text fill="#1E293B" font-family="sans-serif" font-size="10" lengthAdjust="spacingAndGlyphs" textLength="193" x="1405" y="268.4837">Check 3: NIS 2 24h incident audit export</text><ellipse cx="1394" cy="282.4137" fill="none" rx="3" ry="3" style="stroke: #038048; stroke-width: 1.0;"/><text fill="#1E293B" font-family="sans-serif" font-size="10" lengthAdjust="spacingAndGlyphs" textLength="212" x="1405" y="290.1037">Check 4: EU CRA SBOM &amp; lifecycle validation</text><line style="stroke: #334155; stroke-width: 1.2;" x1="1384" x2="1626" y1="301.0337" y2="301.0337"/><!--MD5=[1e979271c909a52511409a44be64573c]
+link Gate1 to Gate2--><path d="M289.38,202.91 C289.38,202.91 457.03,202.91 457.03,202.91 " fill="none" id="Gate1-&gt;Gate2" style="stroke: #334155; stroke-width: 1.0;"/><polygon fill="#334155" points="462.03,202.9,453.03,198.9,457.03,202.9,453.03,206.9,462.03,202.9" style="stroke: #334155; stroke-width: 1.0;"/><text fill="#0F172A" font-family="sans-serif" font-size="10" lengthAdjust="spacingAndGlyphs" textLength="96" x="326" y="201.69">passes binary check</text><!--MD5=[5cdd3f4d8e842019ea98bed410412738]
+link Gate2 to Gate3--><path d="M704.45,157 C704.45,157 919.8,157 919.8,157 " fill="none" id="Gate2-&gt;Gate3" style="stroke: #334155; stroke-width: 1.0;"/><polygon fill="#334155" points="924.8,157,915.8,153,919.8,157,915.8,161,924.8,157" style="stroke: #334155; stroke-width: 1.0;"/><text fill="#0F172A" font-family="sans-serif" font-size="10" lengthAdjust="spacingAndGlyphs" textLength="117" x="757.5" y="149.69">streams UART telemetry</text><!--MD5=[d4366b15a788c2240348c9e605b82c8f]
+link Gate3 to Gate4--><path d="M1186.83,188 C1186.83,188 1376.3,188 1376.3,188 " fill="none" id="Gate3-&gt;Gate4" style="stroke: #334155; stroke-width: 1.0;"/><polygon fill="#334155" points="1381.3,188,1372.3,184,1376.3,188,1372.3,192,1381.3,188" style="stroke: #334155; stroke-width: 1.0;"/><text fill="#0F172A" font-family="sans-serif" font-size="10" lengthAdjust="spacingAndGlyphs" textLength="117" x="1229" y="180.69">feeds FP/FN &amp; drift stats</text><!--MD5=[a198a48304e64a641e56ea533a34faa2]
+link Gate4 to Gate1--><path d="M1382.69,278.03 C1382.69,278.03 295.82,278.03 295.82,278.03 " fill="none" id="Gate4-&gt;Gate1" style="stroke: #334155; stroke-width: 1.0;"/><polygon fill="#334155" points="290.82,278.03,299.82,282.03,295.82,278.03,299.82,274.03,290.82,278.03" style="stroke: #334155; stroke-width: 1.0;"/><text fill="#0F172A" font-family="sans-serif" font-size="10" lengthAdjust="spacingAndGlyphs" textLength="138" x="747" y="284.69">deploys updated C99 header</text><!--MD5=[acb72eff1317f15de351b61d0051646e]
+@startuml
+left to right direction
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName SansSerif
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam linetype ortho
+skinparam nodesep 25
+skinparam ranksep 35
+skinparam Padding 4
+
+skinparam package {
+    BackgroundColor #FFFFFF
+    BorderColor #475569
+    BorderThickness 1.5
+    FontColor #0F172A
+    FontSize 12
+}
+
+skinparam class {
+    BackgroundColor #F8FAFC
+    BorderColor #334155
+    BorderThickness 1.2
+    FontColor #0F172A
+    AttributeFontColor #1E293B
+    AttributeFontSize 10
+}
+
+skinparam arrow {
+    Color #334155
+    FontColor #0F172A
+    FontSize 10
+}
+
+package "Stage 1: Compile-Time & Static Gate" as S1 {
+    class "Static & Toolchain Verification" as Gate1 <<Acceptance Gate>> {
+        + Target: IR-01, IR-02, NFR-02
+        + Check 1: ANSI C99 strict (-pedantic -Werror)
+        + Check 2: Symbol table scan (Zero malloc/free)
+        + Check 3: Static RAM/Flash footprint budget
+    }
+}
+
+package "Stage 2: Runtime Deterministic Gate (Edge)" as S2 {
+    class "Real-Time Execution & XAI Check" as Gate2 <<Acceptance Gate>> {
+        + Target: FR-01..06, NFR-01, NFR-04
+        + Check 1: O(1) feature extraction latency
+        + Check 2: O(tree_depth) worst-case cycles
+        + Check 3: Deterministic FSM state transition
+        + Check 4: Triggered XAI leaf ID emission
+    }
+}
+
+package "Stage 3: Telemetry & Shadow Audit Gate (Host)" as S3 {
+    class "Efficacy & Evasion Interception" as Gate3 <<Acceptance Gate>> {
+        + Target: FR-07..10, NFR-03, NFR-05
+        + Check 1: UART bandwidth cap (<= 2% link load)
+        + Check 2: Macro F1-score >= 0.92 on corpus
+        + Check 3: Shadow ensemble catches injected FN
+        + Check 4: Operator FP override queued
+    }
+}
+
+package "Stage 4: MLOps Drift & Regulatory Gate" as S4 {
+    class "Closed-Loop Governance & Compliance" as Gate4 <<Acceptance Gate>> {
+        + Target: FR-11..12, NFR-07..08, IR-03..05
+        + Check 1: Drift trigger when PSI >= 0.20
+        + Check 2: Automated C99 tree transpilation
+        + Check 3: NIS 2 24h incident audit export
+        + Check 4: EU CRA SBOM & lifecycle validation
+    }
+}
+
+Gate1 - -> Gate2 : passes binary check
+Gate2 - -> Gate3 : streams UART telemetry
+Gate3 - -> Gate4 : feeds FP/FN & drift stats
+Gate4 - -> Gate1 : deploys updated C99 header
+
+@enduml
+
+PlantUML version 1.2020.02(Sun Mar 01 11:22:07 CET 2020)
+(GPL source distribution)
+Java Runtime: OpenJDK Runtime Environment
+JVM: OpenJDK 64-Bit Server VM
+Java Version: 25.0.4.1+1-1-26.04.4-Ubuntu
+Operating System: Linux
+Default Encoding: UTF-8
+Language: en
+Country: US
+--></g></svg>
