@@ -1,0 +1,126 @@
+@startuml
+top to bottom direction
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName SansSerif
+skinparam defaultFontSize 12
+skinparam shadowing false
+skinparam linetype ortho
+skinparam nodesep 35
+skinparam ranksep 45
+skinparam Padding 4
+
+skinparam package {
+    BackgroundColor #FFFFFF
+    BorderColor #475569
+    BorderThickness 1.5
+    FontColor #0F172A
+    FontSize 13
+}
+
+skinparam class {
+    BackgroundColor #F8FAFC
+    BorderColor #334155
+    BorderThickness 1.2
+    FontColor #0F172A
+    AttributeFontColor #1E293B
+    AttributeFontSize 11
+    StereotypeFontColor #334155
+    StereotypeFontSize 10
+}
+
+skinparam arrow {
+    Color #334155
+    FontColor #0F172A
+    FontSize 11
+}
+
+package "Physical Field Domain (Constrained Cyber-Physical Node)" as FieldDomain {
+
+    class IngressFrame <<Domain Entity>> {
+        + raw_payload : ByteSequence
+        + frame_length : Integer
+        + arrival_ts : Timestamp
+        + phy_interface : InterfaceId
+    }
+
+    class FeatureExtractor <<Deterministic Boundary>> {
+        + extract_metrics() : NormalizedVector
+        .. Domain Invariants ..
+        + Time bound: O(1)
+        + Memory: Zero heap alloc
+    }
+
+    class NormalizedVector <<Value Object>> {
+        + payload_size : Integer
+        + protocol_id : Category
+        + transport_flags : BitMask
+        + iat_delta : Duration
+        + packet_rate : RateMetric
+        + jitter_variance : TimeVariance
+        + conn_fan_in : Cardinality
+        + payload_entropy : NormMetric
+    }
+
+    class EdgeInferenceEngine <<Deterministic Boundary>> {
+        + evaluate_vector() : Verdict
+        .. Domain Invariants ..
+        + Bound: O(tree_depth)
+        + Logic: Static branch tree
+    }
+
+    enum ClassificationVerdict <<Value Object>> {
+        BENIGN_TRAFFIC
+        ANOMALY_DOS_FLOOD
+        ANOMALY_SCAN_PROBE
+        ANOMALY_INJECTION
+    }
+
+    class EdgeMitigationController <<Control Boundary>> {
+        + apply_containment() : void
+        + emit_incident_alert() : void
+        + sample_benign_frame() : void
+    }
+}
+
+package "Fleet Supervision & MLOps Domain (Auxiliary Governance Tier)" as FleetDomain {
+
+    class TelemetryCollector <<Ingestion Service>> {
+        + ingest_alert_stream() : Stream
+        + collect_audit_sample() : Stream
+    }
+
+    class ShadowAuditAnalyzer <<Analytical Verifier>> {
+        + verify_benign_sample() : Report
+        .. FN Interception ..
+        + Heavy ensemble verification
+        + Unmasks silent evasion
+    }
+
+    class DriftRetrainingOrchestrator <<MLOps Core>> {
+        + evaluate_drift() : DriftMetrics
+        + retrain_model() : ModelArtifact
+        + transpile_tree() : StaticCodeAsset
+    }
+
+    class SecuritySupervisionConsole <<User Interface>> {
+        + render_heatmap() : void
+        + flag_false_positive() : void
+        + inspect_fn_discrepancy() : void
+    }
+}
+
+IngressFrame --> FeatureExtractor : wire stream
+FeatureExtractor --> NormalizedVector : maps to
+NormalizedVector --> EdgeInferenceEngine : feeds
+EdgeInferenceEngine --> ClassificationVerdict : yields
+ClassificationVerdict --> EdgeMitigationController : drives
+
+EdgeMitigationController --> TelemetryCollector : alerts & circular audit
+TelemetryCollector --> SecuritySupervisionConsole : live alerts
+TelemetryCollector --> ShadowAuditAnalyzer : benign sample stream
+ShadowAuditAnalyzer --> SecuritySupervisionConsole : flags unmasked FN
+SecuritySupervisionConsole --> DriftRetrainingOrchestrator : operator FP feedback
+ShadowAuditAnalyzer --> DriftRetrainingOrchestrator : verified FN telemetry
+DriftRetrainingOrchestrator --> EdgeInferenceEngine : deploys static C tree
+
+@enduml
