@@ -66,7 +66,8 @@ Historically, embedded device manufacturers treated field-level cybersecurity as
 
 To maintain strict separation of concerns between hard real-time embedded execution and high-capacity analytical governance, the MicroShield domain ontology is partitioned into two distinct Bounded Contexts: the **Physical Field Domain** and the **Fleet Supervision & MLOps Domain**.
 
-![MicroShield Domain Concept Ontology](../../puml/domain-concept.svg)
+[![MicroShield Domain Concept Ontology](../../puml/domain-concept.svg)](../../puml/domain-concept.svg)
+*(Click on the diagram to open the full-resolution vector graphic)*
 *Figure 1.1: Domain-Driven Design (DDD) ontology of the MicroShield architecture, illustrating the deterministic edge inspection boundary and the closed-loop MLOps shadow auditing lifecycle.*
 
 ### 1.3.1 Physical Field Domain (Constrained Cyber-Physical Node)

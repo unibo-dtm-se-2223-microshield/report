@@ -1,0 +1,87 @@
+@startuml
+left to right direction
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName SansSerif
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam nodesep 20
+skinparam ranksep 45
+skinparam Padding 4
+
+skinparam package {
+    BackgroundColor #FFFFFF
+    BorderColor #334155
+    BorderThickness 1.5
+    FontColor #0F172A
+    FontSize 12
+}
+
+skinparam usecase {
+    BackgroundColor #F8FAFC
+    BorderColor #334155
+    BorderThickness 1.2
+    FontColor #0F172A
+    FontSize 11
+}
+
+skinparam actor {
+    BackgroundColor #E2E8F0
+    BorderColor #1E293B
+    FontColor #0F172A
+    FontSize 11
+}
+
+skinparam arrow {
+    Color #334155
+    FontColor #1E293B
+    FontSize 10
+}
+
+actor "Taddeo Pallaba\n(Embedded Firmware Eng.)" as Taddeo
+actor "Lentina Gigi\n(IoT SecOps Analyst)" as Lentina
+actor "Zanni Giorgioni\n(CDO & Plant Director)" as Zanni
+actor "Field Network & RTOS\n(Physical Ingress Stream)" as FieldBus
+
+package "Primary Boundary: Core Embedded C99 Library (libmicroshield)" as EdgeBoundary {
+    usecase "UC-01: Link Zero-Malloc Library\ninto Bare-Metal/RTOS Firmware" as UC1
+    usecase "UC-02: Inspect Ingress Frames\nwithin Deterministic Time Bound" as UC2
+    usecase "UC-03: Extract 8-Feature Vector\nvia Sliding Window Registers" as UC3
+    usecase "UC-04: Evaluate Static Decision\nTree & Emit XAI Rule ID" as UC4
+    usecase "UC-05: Trigger Autonomous Local\nHardware Quarantine (FSM)" as UC5
+    usecase "UC-06: Dispatch Out-of-Band Alert\n& Circular Benign Audit Sample" as UC6
+}
+
+package "Auxiliary Boundary: Python MLOps & Fleet Supervision Suite" as HostBoundary {
+    usecase "UC-07: Monitor Live Fleet Alerts\n& XAI Boolean Decision Paths" as UC7
+    usecase "UC-08: Flag False Positive (FP)\n& Override Node Quarantine" as UC8
+    usecase "UC-09: Execute Shadow Auditing\nto Unmask Silent False Negatives" as UC9
+    usecase "UC-10: Quantify Statistical Drift\n(PSI / K-S) & Retrain Model" as UC10
+    usecase "UC-11: Transpile Validated Tree\nto Pure C99 Header Artifact" as UC11
+    usecase "UC-12: Export EU CRA & NIS 2\nCompliance & Availability Reports" as UC12
+}
+
+Taddeo --> UC1
+Taddeo --> UC2
+Taddeo --> UC11
+
+FieldBus --> UC2
+FieldBus --> UC5
+
+UC2 ..> UC3 : <<include>>
+UC2 ..> UC4 : <<include>>
+UC5 ..> UC4 : <<extend>>\n[on anomaly verdict]
+UC6 ..> UC4 : <<include>>
+
+Lentina --> UC7
+Lentina --> UC8
+Lentina --> UC9
+Lentina --> UC10
+
+UC8 ..> UC7 : <<extend>>\n[on benign burst misclassified]
+UC10 ..> UC9 : <<include>>
+UC10 ..> UC11 : <<include>>
+
+Zanni --> UC7
+Zanni --> UC12
+
+@enduml

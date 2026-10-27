@@ -1,0 +1,79 @@
+@startuml
+left to right direction
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName SansSerif
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam linetype ortho
+skinparam nodesep 25
+skinparam ranksep 35
+skinparam Padding 4
+
+skinparam package {
+    BackgroundColor #FFFFFF
+    BorderColor #475569
+    BorderThickness 1.5
+    FontColor #0F172A
+    FontSize 12
+}
+
+skinparam class {
+    BackgroundColor #F8FAFC
+    BorderColor #334155
+    BorderThickness 1.2
+    FontColor #0F172A
+    AttributeFontColor #1E293B
+    AttributeFontSize 10
+}
+
+skinparam arrow {
+    Color #334155
+    FontColor #0F172A
+    FontSize 10
+}
+
+package "Stage 1: Compile-Time & Static Gate" as S1 {
+    class "Static & Toolchain Verification" as Gate1 <<Acceptance Gate>> {
+        + Target: IR-01, IR-02, NFR-02
+        + Check 1: ANSI C99 strict (-pedantic -Werror)
+        + Check 2: Symbol table scan (Zero malloc/free)
+        + Check 3: Static RAM/Flash footprint budget
+    }
+}
+
+package "Stage 2: Runtime Deterministic Gate (Edge)" as S2 {
+    class "Real-Time Execution & XAI Check" as Gate2 <<Acceptance Gate>> {
+        + Target: FR-01..06, NFR-01, NFR-04
+        + Check 1: O(1) feature extraction latency
+        + Check 2: O(tree_depth) worst-case cycles
+        + Check 3: Deterministic FSM state transition
+        + Check 4: Triggered XAI leaf ID emission
+    }
+}
+
+package "Stage 3: Telemetry & Shadow Audit Gate (Host)" as S3 {
+    class "Efficacy & Evasion Interception" as Gate3 <<Acceptance Gate>> {
+        + Target: FR-07..10, NFR-03, NFR-05
+        + Check 1: UART bandwidth cap (<= 2% link load)
+        + Check 2: Macro F1-score >= 0.92 on corpus
+        + Check 3: Shadow ensemble catches injected FN
+        + Check 4: Operator FP override queued
+    }
+}
+
+package "Stage 4: MLOps Drift & Regulatory Gate" as S4 {
+    class "Closed-Loop Governance & Compliance" as Gate4 <<Acceptance Gate>> {
+        + Target: FR-11..12, NFR-07..08, IR-03..05
+        + Check 1: Drift trigger when PSI >= 0.20
+        + Check 2: Automated C99 tree transpilation
+        + Check 3: NIS 2 24h incident audit export
+        + Check 4: EU CRA SBOM & lifecycle validation
+    }
+}
+
+Gate1 --> Gate2 : passes binary check
+Gate2 --> Gate3 : streams UART telemetry
+Gate3 --> Gate4 : feeds FP/FN & drift stats
+Gate4 --> Gate1 : deploys updated C99 header
+
+@enduml
