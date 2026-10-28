@@ -1,0 +1,73 @@
+@startuml
+left to right direction
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName SansSerif
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam linetype ortho
+skinparam nodesep 25
+skinparam ranksep 40
+skinparam Padding 4
+
+skinparam node {
+    BackgroundColor #FFFFFF
+    BorderColor #334155
+    BorderThickness 1.5
+    FontColor #0F172A
+    FontSize 11
+}
+
+skinparam artifact {
+    BackgroundColor #F8FAFC
+    BorderColor #475569
+    BorderThickness 1.2
+    FontColor #0F172A
+    FontSize 10
+}
+
+skinparam database {
+    BackgroundColor #F1F5F9
+    BorderColor #334155
+    FontColor #0F172A
+}
+
+skinparam arrow {
+    Color #334155
+    FontColor #0F172A
+    FontSize 10
+}
+
+node "Physical Hardware-in-the-Loop Tier\n(Real Industrial Field Option)" as HWNode {
+    node "STM32F407RE Nucleo / Eval Board\n[ARM Cortex-M4F @ 168 MHz, 192KB SRAM]" as STM32 {
+        artifact "libmicroshield.a\n(Compiled via arm-none-eabi-gcc)" as FWLib
+        artifact "DWT CYCCNT Profiler\n& MatMul FPU vs Int8 Testbed" as FWBench
+    }
+}
+
+node "Docker Engine Host (Virtualized Verification Cluster - bridge net: 172.28.0.0/16)" as DockerHost {
+
+    node "Container 1..N: edge-node-01 .. edge-node-0N\n[Ubuntu / GCC C99 Runtime]" as EdgeContainers {
+        artifact "ms_edge_node_daemon (C99 Binary)" as EdgeDaemon
+        artifact "libmicroshield.a + libmicroshield.so" as EdgeLib
+        artifact "Synthetic Workload Thread\n(Idle vs. Heavy MatMul + Flood Gen)" as EdgeLoad
+    }
+
+    node "Container 0: dashield-orchestrator\n[Python 3.11 + Poetry Virtualenv]" as DashieldContainer {
+        artifact "dashield-web (Streamlit Server :8501)" as DashWeb
+        artifact "dashield-collector (Async Bridge Daemon)" as DashDaemon
+        artifact "scikit-learn / scipy / pyserial" as DashDeps
+        database "dashield_audit.db (SQLite WAL)\n+ Bot-IoT & Edge-IIoTset Corpora" as DashDB
+    }
+}
+
+node "Operator Workstation\n(SecOps / CDO / Firmware Eng.)" as ClientPC {
+    artifact "Web Browser\n(http://localhost:8501)" as Browser
+}
+
+STM32 <==> DashDaemon : Physical UART (/dev/ttyACM0)\n115200 bps, 24B CRC-16 Frames
+EdgeDaemon <==> DashDaemon : Virtual Serial over TCP Socket\n(DNS: dashield-orchestrator:9999)
+DashDaemon --> DashDB : Concurrent WAL Writes
+DashWeb <--> DashDB : Analytical Queries
+Browser <==> DashWeb : HTTP / WebSocket (:8501)
+
+@enduml

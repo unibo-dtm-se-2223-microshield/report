@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" contentScriptType="application/ecmascript" contentStyleType="text/css" height="955px" preserveAspectRatio="none" style="width:1282px;height:955px;" version="1.1" viewBox="0 0 1282 955" width="1282px" zoomAndPan="magnify"><defs/><g><!--MD5=[1abf6d891afde838e77011876b362037]
+cluster HWNode--><polygon fill="#FFFFFF" points="16.5,34,26.5,24,395.5,24,395.5,382,385.5,392,16.5,392,16.5,34" style="stroke: #334155; stroke-width: 1.5;"/><line style="stroke: #334155; stroke-width: 1.5;" x1="385.5" x2="394.5" y1="34" y2="25"/><line style="stroke: #334155; stroke-width: 1.5;" x1="16.5" x2="385.5" y1="34" y2="34"/><line style="stroke: #334155; stroke-width: 1.5;" x1="385.5" x2="385.5" y1="34" y2="392"/><text fill="#0F172A" font-family="sans-serif" font-size="11" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="194" x="105" y="52.7589">Physical Hardware-in-the-Loop Tier</text><text fill="#0F172A" font-family="sans-serif" font-size="11" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="158" x="123" y="67.7408">(Real Industrial Field Option)</text><!--MD5=[08beea0922c3a48de4054b7fd5dd02f6]
+cluster STM32--><polygon fill="#FFFFFF" points="48.5,111,58.5,101,363.5,101,363.5,350,353.5,360,48.5,360,48.5,111" style="stroke: #334155; stroke-width: 1.5;"/><line style="stroke: #334155; stroke-width: 1.5;" x1="353.5" x2="362.5" y1="111" y2="102"/><line style="stroke: #334155; stroke-width: 1.5;" x1="48.5" x2="353.5" y1="111" y2="111"/><line style="stroke: #334155; stroke-width: 1.5;" x1="353.5" x2="353.5" y1="111" y2="360"/><text fill="#0F172A" font-family="sans-serif" font-size="11" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="182" x="111" y="129.7589">STM32F407RE Nucleo / Eval Board</text><text fill="#0F172A" font-family="sans-serif" font-size="11" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="231" x="86.5" y="144.7408">[ARM Cortex-M4F @ 168 MHz, 192KB SRAM]</text><!--MD5=[10743d77d8cf341f021f34b9a32b944c]
+cluster DockerHost--><polygon fill="#FFFFFF" points="14,426,24,416,1260,416,1260,766,1250,776,14,776,14,426" style="stroke: #334155; stroke-width: 1.5;"/><line style="stroke: #334155; stroke-width: 1.5;" x1="1250" x2="1259" y1="426" y2="417"/><line style="stroke: #334155; stroke-width: 1.5;" x1="14" x2="1250" y1="426" y2="426"/><line style="stroke: #334155; stroke-width: 1.5;" x1="1250" x2="1250" y1="426" y2="776"/><text fill="#0F172A" font-family="sans-serif" font-size="11" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="429" x="418.5" y="444.7589">Docker Engine Host (Virtualized Verification Cluster - bridge net: 172.28.0.0/16)</text><!--MD5=[cce4cc766e2ded47b67c0389adec1518]
+cluster EdgeContainers--><polygon fill="#FFFFFF" points="38,480,48,470,374,470,374,742,364,752,38,752,38,480" style="stroke: #334155; stroke-width: 1.5;"/><line style="stroke: #334155; stroke-width: 1.5;" x1="364" x2="373" y1="480" y2="471"/><line style="stroke: #334155; stroke-width: 1.5;" x1="38" x2="364" y1="480" y2="480"/><line style="stroke: #334155; stroke-width: 1.5;" x1="364" x2="364" y1="480" y2="752"/><text fill="#0F172A" font-family="sans-serif" font-size="11" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="252" x="76" y="498.7589">Container 1..N: edge-node-01 .. edge-node-0N</text><text fill="#0F172A" font-family="sans-serif" font-size="11" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="154" x="125" y="513.7408">[Ubuntu / GCC C99 Runtime]</text><!--MD5=[5ba9682642d1a7157bde2c1e4458a717]
+cluster DashieldContainer--><polygon fill="#FFFFFF" points="603,501,613,491,1236,491,1236,742,1226,752,603,752,603,501" style="stroke: #334155; stroke-width: 1.5;"/><line style="stroke: #334155; stroke-width: 1.5;" x1="1226" x2="1235" y1="501" y2="492"/><line style="stroke: #334155; stroke-width: 1.5;" x1="603" x2="1226" y1="501" y2="501"/><line style="stroke: #334155; stroke-width: 1.5;" x1="1226" x2="1226" y1="501" y2="752"/><text fill="#0F172A" font-family="sans-serif" font-size="11" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="191" x="820" y="519.7589">Container 0: dashield-orchestrator</text><text fill="#0F172A" font-family="sans-serif" font-size="11" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="180" x="825.5" y="534.7408">[Python 3.11 + Poetry Virtualenv]</text><!--MD5=[21aef30b177c18e82af724ff8f175041]
+cluster ClientPC--><polygon fill="#FFFFFF" points="77.5,810,87.5,800,334.5,800,334.5,933,324.5,943,77.5,943,77.5,810" style="stroke: #334155; stroke-width: 1.5;"/><line style="stroke: #334155; stroke-width: 1.5;" x1="324.5" x2="333.5" y1="810" y2="801"/><line style="stroke: #334155; stroke-width: 1.5;" x1="77.5" x2="324.5" y1="810" y2="810"/><line style="stroke: #334155; stroke-width: 1.5;" x1="324.5" x2="324.5" y1="810" y2="943"/><text fill="#0F172A" font-family="sans-serif" font-size="11" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="124" x="140" y="828.7589">Operator Workstation</text><text fill="#0F172A" font-family="sans-serif" font-size="11" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="173" x="115.5" y="843.7408">(SecOps / CDO / Firmware Eng.)</text><!--MD5=[31acdad2fe8d8182ce588bd3fbb86eba]
+entity FWLib--><rect fill="#F8FAFC" height="66.24" style="stroke: #475569; stroke-width: 1.5;" width="198" x="106.5" y="269.88"/><polygon fill="#F8FAFC" points="287.5,274.88,287.5,288.88,299.5,288.88,299.5,280.88,293.5,274.88,287.5,274.88" style="stroke: #475569; stroke-width: 1.5;"/><line style="stroke: #475569; stroke-width: 1.5;" x1="293.5" x2="293.5" y1="274.88" y2="280.88"/><line style="stroke: #475569; stroke-width: 1.5;" x1="299.5" x2="293.5" y1="280.88" y2="280.88"/><text fill="#0F172A" font-family="sans-serif" font-size="10" lengthAdjust="spacingAndGlyphs" textLength="77" x="120.5" y="297.57">libmicroshield.a</text><text fill="#0F172A" font-family="sans-serif" font-size="10" lengthAdjust="spacingAndGlyphs" textLength="160" x="120.5" y="319.19">(Compiled via arm-none-eabi-gcc)</text><!--MD5=[17ee6450914ba058a41c0e0a662cccad]
+entity FWBench--><rect fill="#F8FAFC" height="66.24" style="stroke: #475569; stroke-width: 1.5;" width="183" x="114" y="178.88"/><polygon fill="#F8FAFC" points="280,183.88,280,197.88,292,197.88,292,189.88,286,183.88,280,183.88" style="stroke: #475569; stroke-width: 1.5;"/><line style="stroke: #475569; stroke-width: 1.5;" x1="286" x2="286" y1="183.88" y2="189.88"/><line style="stroke: #475569; stroke-width: 1.5;" x1="292" x2="286" y1="189.88" y2="189.88"/><text fill="#0F172A" font-family="sans-serif" font-size="10" lengthAdjust="spacingAndGlyphs" textLength="101" x="128" y="206.57">DWT CYCCNT Profiler</text><text fill="#0F172A" font-family="sans-serif" font-size="10" lengthAdjust="spacingAndGlyphs" textLength="145" x="128" y="228.19">&amp; MatMul FPU vs Int8 Testbed</text><!--MD5=[2885ea84abdd5865506c06119f5aa07a]
+entity EdgeDaemon--><rect fill="#F8FAFC" height="44.62" style="stroke: #475569; stroke-width: 1.5;" width="212" x="99.5" y="691.69"/><polygon fill="#F8FAFC" points="294.5,696.69,294.5,710.69,306.5,710.69,306.5,702.69,300.5,696.69,294.5,696.69" style="stroke: #475569; stroke-width: 1.5;"/><line style="stroke: #475569; stroke-width: 1.5;" x1="300.5" x2="300.5" y1="696.69" y2="702.69"/><line style="stroke: #475569; stroke-width: 1.5;" x1="306.5" x2="300.5" y1="702.69" y2="702.69"/><text fill="#0F172A" font-family="sans-serif" font-size="10" lengthAdjust="spacingAndGlyphs" textLength="174" x="113.5" y="719.38">ms_edge_node_daemon (C99 Binary)</text><!--MD5=[e61675456b39428532ad4d5ecd3e0bbe]
+entity EdgeLib--><rect fill="#F8FAFC" height="44.62" style="stroke: #475569; stroke-width: 1.5;" width="209" x="101" y="621.69"/><polygon fill="#F8FAFC" points="293,626.69,293,640.69,305,640.69,305,632.69,299,626.69,293,626.69" style="stroke: #475569; stroke-width: 1.5;"/><line style="stroke: #475569; stroke-width: 1.5;" x1="299" x2="299" y1="626.69" y2="632.69"/><line style="stroke: #475569; stroke-width: 1.5;" x1="305" x2="299" y1="632.69" y2="632.69"/><text fill="#0F172A" font-family="sans-serif" font-size="10" lengthAdjust="spacingAndGlyphs" textLength="171" x="115" y="649.38">libmicroshield.a + libmicroshield.so</text><!--MD5=[48c9c818ba599ad153a25d0a801f724d]
+entity EdgeLoad--><rect fill="#F8FAFC" height="66.24" style="stroke: #475569; stroke-width: 1.5;" width="210" x="100.5" y="530.88"/><polygon fill="#F8FAFC" points="293.5,535.88,293.5,549.88,305.5,549.88,305.5,541.88,299.5,535.88,293.5,535.88" style="stroke: #475569; stroke-width: 1.5;"/><line style="stroke: #475569; stroke-width: 1.5;" x1="299.5" x2="299.5" y1="535.88" y2="541.88"/><line style="stroke: #475569; stroke-width: 1.5;" x1="305.5" x2="299.5" y1="541.88" y2="541.88"/><text fill="#0F172A" font-family="sans-serif" font-size="10" lengthAdjust="spacingAndGlyphs" textLength="129" x="114.5" y="558.57">Synthetic Workload Thread</text><text fill="#0F172A" font-family="sans-serif" font-size="10" lengthAdjust="spacingAndGlyphs" textLength="172" x="114.5" y="580.19">(Idle vs. Heavy MatMul + Flood Gen)</text><!--MD5=[6ac8e7b2b0b9e5811f0549e3ce520cd5]
+entity DashWeb--><rect fill="#F8FAFC" height="44.62" style="stroke: #475569; stroke-width: 1.5;" width="218" x="629" y="691.69"/><polygon fill="#F8FAFC" points="830,696.69,830,710.69,842,710.69,842,702.69,836,696.69,830,696.69" style="stroke: #475569; stroke-width: 1.5;"/><line style="stroke: #475569; stroke-width: 1.5;" x1="836" x2="836" y1="696.69" y2="702.69"/><line style="stroke: #475569; stroke-width: 1.5;" x1="842" x2="836" y1="702.69" y2="702.69"/><text fill="#0F172A" font-family="sans-serif" font-size="10" lengthAdjust="spacingAndGlyphs" textLength="180" x="643" y="719.38">dashield-web (Streamlit Server :8501)</text><!--MD5=[d8a1da8c20744f5162af680aef5c3e84]
+entity DashDaemon--><rect fill="#F8FAFC" height="44.62" style="stroke: #475569; stroke-width: 1.5;" width="238" x="619" y="621.69"/><polygon fill="#F8FAFC" points="840,626.69,840,640.69,852,640.69,852,632.69,846,626.69,840,626.69" style="stroke: #475569; stroke-width: 1.5;"/><line style="stroke: #475569; stroke-width: 1.5;" x1="846" x2="846" y1="626.69" y2="632.69"/><line style="stroke: #475569; stroke-width: 1.5;" x1="852" x2="846" y1="632.69" y2="632.69"/><text fill="#0F172A" font-family="sans-serif" font-size="10" lengthAdjust="spacingAndGlyphs" textLength="200" x="633" y="649.38">dashield-collector (Async Bridge Daemon)</text><!--MD5=[e359f161de9255c4750cb2550c411c49]
+entity DashDeps--><rect fill="#F8FAFC" height="44.62" style="stroke: #475569; stroke-width: 1.5;" width="173" x="651.5" y="551.69"/><polygon fill="#F8FAFC" points="807.5,556.69,807.5,570.69,819.5,570.69,819.5,562.69,813.5,556.69,807.5,556.69" style="stroke: #475569; stroke-width: 1.5;"/><line style="stroke: #475569; stroke-width: 1.5;" x1="813.5" x2="813.5" y1="556.69" y2="562.69"/><line style="stroke: #475569; stroke-width: 1.5;" x1="819.5" x2="813.5" y1="562.69" y2="562.69"/><text fill="#0F172A" font-family="sans-serif" font-size="10" lengthAdjust="spacingAndGlyphs" textLength="135" x="665.5" y="579.38">scikit-learn / scipy / pyserial</text><!--MD5=[34fb9e870a3521e403e6aa32faea7607]
+entity DashDB--><path d="M1017,646.52 C1017,636.52 1118.5,636.52 1118.5,636.52 C1118.5,636.52 1220,636.52 1220,646.52 L1220,701.4838 C1220,711.4838 1118.5,711.4838 1118.5,711.4838 C1118.5,711.4838 1017,711.4838 1017,701.4838 L1017,646.52 " fill="#F1F5F9" style="stroke: #334155; stroke-width: 1.5;"/><path d="M1017,646.52 C1017,656.52 1118.5,656.52 1118.5,656.52 C1118.5,656.52 1220,656.52 1220,646.52 " fill="none" style="stroke: #334155; stroke-width: 1.5;"/><text fill="#0F172A" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="162" x="1031" y="676.2789">dashield_audit.db (SQLite WAL)</text><text fill="#0F172A" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="175" x="1031" y="699.2608">+ Bot-IoT &amp; Edge-IIoTset Corpora</text><!--MD5=[e9dede37b31fdda9664526f66258b036]
+entity Browser--><rect fill="#F8FAFC" height="66.24" style="stroke: #475569; stroke-width: 1.5;" width="146" x="132.5" y="860.88"/><polygon fill="#F8FAFC" points="261.5,865.88,261.5,879.88,273.5,879.88,273.5,871.88,267.5,865.88,261.5,865.88" style="stroke: #475569; stroke-width: 1.5;"/><line style="stroke: #475569; stroke-width: 1.5;" x1="267.5" x2="267.5" y1="865.88" y2="871.88"/><line style="stroke: #475569; stroke-width: 1.5;" x1="273.5" x2="267.5" y1="871.88" y2="871.88"/><text fill="#0F172A" font-family="sans-serif" font-size="10" lengthAdjust="spacingAndGlyphs" textLength="64" x="146.5" y="888.57">Web Browser</text><text fill="#0F172A" font-family="sans-serif" font-size="10" lengthAdjust="spacingAndGlyphs" textLength="108" x="146.5" y="910.19">(http://localhost:8501)</text><!--MD5=[2a89154e30e79ec88674272a826b1888]
+link STM32 to DashDaemon--><path d="M364.4785,154 C366.0668,154 367.6594,154 369.2561,154 C375.6426,154 382.093,154 388.5828,154 C401.5625,154 414.7,154 427.8,154 C532.6,154 635,154 635,154 C635,154 635,614.84 635,614.84 " fill="none" id="STM32-DashDaemon" style="stroke: #334155; stroke-width: 2.0;"/><polygon fill="#334155" points="635,619.84,639,610.84,635,614.84,631,610.84,635,619.84" style="stroke: #334155; stroke-width: 2.0;"/><polygon fill="#334155" points="364.4785,154,373.4785,158,369.4785,154,373.4785,150,364.4785,154" style="stroke: #334155; stroke-width: 2.0;"/><text fill="#0F172A" font-family="sans-serif" font-size="10" lengthAdjust="spacingAndGlyphs" textLength="141" x="430" y="377.69">Physical UART (/dev/ttyACM0)</text><text fill="#0F172A" font-family="sans-serif" font-size="10" lengthAdjust="spacingAndGlyphs" textLength="155" x="423" y="391.31">115200 bps, 24B CRC-16 Frames</text><!--MD5=[f403e08e95c406cfa989a7b93d7ea9f7]
+link EdgeDaemon to DashDaemon--><path d="M318.43,714 C318.43,714 624,714 624,714 C624,714 624,673.05 624,673.05 " fill="none" id="EdgeDaemon-DashDaemon" style="stroke: #334155; stroke-width: 2.0;"/><polygon fill="#334155" points="624,668.05,620,677.05,624,673.05,628,677.05,624,668.05" style="stroke: #334155; stroke-width: 2.0;"/><polygon fill="#334155" points="313.43,714,322.43,718,318.43,714,322.43,710,313.43,714" style="stroke: #334155; stroke-width: 2.0;"/><text fill="#0F172A" font-family="sans-serif" font-size="10" lengthAdjust="spacingAndGlyphs" textLength="141" x="430" y="691.69">Virtual Serial over TCP Socket</text><text fill="#0F172A" font-family="sans-serif" font-size="10" lengthAdjust="spacingAndGlyphs" textLength="163" x="419" y="705.31">(DNS: dashield-orchestrator:9999)</text><!--MD5=[fff3ef151d181f7eecc8ee0ffe2eadda]
+link DashDaemon to DashDB--><path d="M857.35,651.41 C857.35,651.41 1010.04,651.41 1010.04,651.41 " fill="none" id="DashDaemon-&gt;DashDB" style="stroke: #334155; stroke-width: 1.0;"/><polygon fill="#334155" points="1015.04,651.41,1006.04,647.41,1010.04,651.41,1006.04,655.41,1015.04,651.41" style="stroke: #334155; stroke-width: 1.0;"/><text fill="#0F172A" font-family="sans-serif" font-size="10" lengthAdjust="spacingAndGlyphs" textLength="110" x="882" y="640.69">Concurrent WAL Writes</text><!--MD5=[a866628a3d292fd251ccb1f1d1af0149]
+link DashWeb to DashDB--><path d="M853.8,701.59 C853.8,701.59 1010.25,701.59 1010.25,701.59 " fill="none" id="DashWeb-DashDB" style="stroke: #334155; stroke-width: 1.0;"/><polygon fill="#334155" points="1015.25,701.59,1006.25,697.59,1010.25,701.59,1006.25,705.59,1015.25,701.59" style="stroke: #334155; stroke-width: 1.0;"/><polygon fill="#334155" points="848.8,701.59,857.8,705.59,853.8,701.59,857.8,697.59,848.8,701.59" style="stroke: #334155; stroke-width: 1.0;"/><text fill="#0F172A" font-family="sans-serif" font-size="10" lengthAdjust="spacingAndGlyphs" textLength="88" x="893" y="697.69">Analytical Queries</text><!--MD5=[81291ef1fd101956ae21fc03428dbe44]
+link Browser to DashWeb--><path d="M285.5,894 C285.5,894 738,894 738,894 C738,894 738,743.31 738,743.31 " fill="none" id="Browser-DashWeb" style="stroke: #334155; stroke-width: 2.0;"/><polygon fill="#334155" points="738,738.31,734,747.31,738,743.31,742,747.31,738,738.31" style="stroke: #334155; stroke-width: 2.0;"/><polygon fill="#334155" points="280.5,894,289.5,898,285.5,894,289.5,890,280.5,894" style="stroke: #334155; stroke-width: 2.0;"/><text fill="#0F172A" font-family="sans-serif" font-size="10" lengthAdjust="spacingAndGlyphs" textLength="123" x="439" y="823.69">HTTP / WebSocket (:8501)</text><!--MD5=[dcbbc8cb2e83921bd8cbd65354187a3a]
+@startuml
+left to right direction
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName SansSerif
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam linetype ortho
+skinparam nodesep 25
+skinparam ranksep 40
+skinparam Padding 4
+
+skinparam node {
+    BackgroundColor #FFFFFF
+    BorderColor #334155
+    BorderThickness 1.5
+    FontColor #0F172A
+    FontSize 11
+}
+
+skinparam artifact {
+    BackgroundColor #F8FAFC
+    BorderColor #475569
+    BorderThickness 1.2
+    FontColor #0F172A
+    FontSize 10
+}
+
+skinparam database {
+    BackgroundColor #F1F5F9
+    BorderColor #334155
+    FontColor #0F172A
+}
+
+skinparam arrow {
+    Color #334155
+    FontColor #0F172A
+    FontSize 10
+}
+
+node "Physical Hardware-in-the-Loop Tier\n(Real Industrial Field Option)" as HWNode {
+    node "STM32F407RE Nucleo / Eval Board\n[ARM Cortex-M4F @ 168 MHz, 192KB SRAM]" as STM32 {
+        artifact "libmicroshield.a\n(Compiled via arm-none-eabi-gcc)" as FWLib
+        artifact "DWT CYCCNT Profiler\n& MatMul FPU vs Int8 Testbed" as FWBench
+    }
+}
+
+node "Docker Engine Host (Virtualized Verification Cluster - bridge net: 172.28.0.0/16)" as DockerHost {
+
+    node "Container 1..N: edge-node-01 .. edge-node-0N\n[Ubuntu / GCC C99 Runtime]" as EdgeContainers {
+        artifact "ms_edge_node_daemon (C99 Binary)" as EdgeDaemon
+        artifact "libmicroshield.a + libmicroshield.so" as EdgeLib
+        artifact "Synthetic Workload Thread\n(Idle vs. Heavy MatMul + Flood Gen)" as EdgeLoad
+    }
+
+    node "Container 0: dashield-orchestrator\n[Python 3.11 + Poetry Virtualenv]" as DashieldContainer {
+        artifact "dashield-web (Streamlit Server :8501)" as DashWeb
+        artifact "dashield-collector (Async Bridge Daemon)" as DashDaemon
+        artifact "scikit-learn / scipy / pyserial" as DashDeps
+        database "dashield_audit.db (SQLite WAL)\n+ Bot-IoT & Edge-IIoTset Corpora" as DashDB
+    }
+}
+
+node "Operator Workstation\n(SecOps / CDO / Firmware Eng.)" as ClientPC {
+    artifact "Web Browser\n(http://localhost:8501)" as Browser
+}
+
+STM32 <==> DashDaemon : Physical UART (/dev/ttyACM0)\n115200 bps, 24B CRC-16 Frames
+EdgeDaemon <==> DashDaemon : Virtual Serial over TCP Socket\n(DNS: dashield-orchestrator:9999)
+DashDaemon - -> DashDB : Concurrent WAL Writes
+DashWeb <- -> DashDB : Analytical Queries
+Browser <==> DashWeb : HTTP / WebSocket (:8501)
+
+@enduml
+
+PlantUML version 1.2020.02(Sun Mar 01 11:22:07 CET 2020)
+(GPL source distribution)
+Java Runtime: OpenJDK Runtime Environment
+JVM: OpenJDK 64-Bit Server VM
+Java Version: 25.0.4.1+1-1-26.04.4-Ubuntu
+Operating System: Linux
+Default Encoding: UTF-8
+Language: en
+Country: US
+--></g></svg>
