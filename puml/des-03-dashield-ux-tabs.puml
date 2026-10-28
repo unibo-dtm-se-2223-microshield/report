@@ -42,33 +42,33 @@ actor "Taddeo Pallaba\n(Embedded Firmware Eng.)" as Taddeo
 actor "Lentina Gigi\n(IoT SecOps Analyst)" as Lentina
 actor "Zanni Giorgioni\n(CDO & Plant Director)" as Zanni
 
-package "Dashield Unified Pure-Python Console (Streamlit OOP Controller)" as DashieldUI {
+package "Dashield Unified Console (Object-Oriented Stateful View Hierarchy)" as DashieldUI {
 
-    rectangle "Global Persistent Header: Retraining Readiness Gauge (0% -> 100%)\n[Combines Verified FPs + Shadow Unmasked FNs + Live PSI Drift Index]\nStatus: GREEN (<40% Stable) | AMBER (40-79% Degrading) | RED (>=80% Retrain Required)" as GlobalGauge
+    rectangle "Global Persistent Header: Hybrid Drift & Retraining Readiness Gauge (0% -> 100%)\n[Synthesizes Supervised Error Rates (FP/FN - Gama et al.) + Unsupervised Shift (PSI - Siddiqi)]\nStatus: GREEN (<40% Stable) | AMBER (40-79% Degrading) | RED (>=80% Retrain Required)" as GlobalGauge
 
-    rectangle "Tab 1: Telecom Link & Edge FSM Monitor\n- Live IAT, Packet Rate & Q8 Entropy Charts\n- UART Bandwidth Load Meter (<= 2.0% Cap)\n- 5-State FSM Status (Normal -> Lockdown L3)\n- Idle vs. Stress WCET Cycle Counter (FPU vs Int)" as Tab1
+    rectangle "Tab 1: Telecom Link & Edge FSM Monitor\n- Live IAT, Packet Rate & Entropy Telemetry\n- UART Bandwidth Load Meter (<= 2.0% Cap)\n- 5-State FSM Status (Normal -> Lockdown L3)\n- Worst-Case Cycle Profiler (Ref. Appendix A)" as Tab1
 
-    rectangle "Tab 2: White-Box XAI Alert Inspector\n- Live Anomaly Table with 8-Feature Vector\n- Visual Boolean Decision Path Highlighting\n- Action: [Flag as False Positive (FP)]\n- Action: [Send CMD_RESET_FSM to Unlock Node]" as Tab2
+    rectangle "Tab 2: Intrinsic Glass-Box Rule Inspector\n- Live Anomaly Table with 8-Feature Vector\n- Direct Ante-Hoc Boolean Decision Path View\n- Action: [Flag as False Positive (FP)]\n- Action: [Send CMD_RESET_FSM to Unlock Node]" as Tab2
 
-    rectangle "Tab 3: Asymmetric Shadow Audit & FN Hunter\n- Stream of Sampled Benign Frames (1:K & Boundary)\n- Side-by-Side Verdict: C99 Tree vs. 100-Tree RF\n- Automatic Red Alert on Unmasked False Negatives\n- Auto-Queue Verified FNs into Retraining Buffer" as Tab3
+    rectangle "Tab 3: Asymmetric Shadow Audit & FN Hunter\n- Stream of Sampled Benign Frames (1:K & Boundary)\n- Side-by-Side Verdict: C99 Tree vs. 100-Tree RF\n- Automatic Alert on Unmasked False Negatives\n- Auto-Queue Verified FNs into Retraining Buffer" as Tab3
 
     rectangle "Tab 4: Concept Drift & Live C99 Transpiler\n- Per-Feature PSI & Kolmogorov-Smirnov Histograms\n- Action: [Retrain Tree & Transpile to C99]\n- Live Preview of Generated ms_tree_node_t[] Array\n- Action: [Broadcast New Tree to Edge Fleet]" as Tab4
 
-    rectangle "Tab 5: Red-Team Injector & CRA/NIS 2 Dossier\n- Traffic Scenario Generator (Benign, DoS, Scan, Evasive)\n- CPU Stress Toggle (Idle vs. 64x64 MatMul Load)\n- One-Click Export: NIS 2 24h Forensic Report (JSON/MD)\n- One-Click Export: EU CRA Zero-Malloc & Memory Certificate" as Tab5
+    rectangle "Tab 5: Red-Team Injector & CRA/NIS 2 Dossier\n- Traffic Scenario Generator (Benign, DoS, Scan, Evasive)\n- Synthetic CPU Load Toggle (Idle vs. Stress)\n- One-Click Export: NIS 2 24h Forensic Report\n- One-Click Export: EU CRA Memory & WCET Certificate" as Tab5
 }
 
-Taddeo --> Tab1 : audits WCET, FPU vs Int & RAM
+Taddeo --> Tab1 : audits WCET bounds & RAM
 Taddeo --> Tab4 : inspects C99 transpiled header
 Lentina --> GlobalGauge : monitors model health
-Lentina --> Tab2 : audits XAI rules & flags FPs
+Lentina --> Tab2 : audits glass-box rules & flags FPs
 Lentina --> Tab3 : hunts silent FNs via Shadow Audit
 Lentina --> Tab4 : triggers retraining & OTA push
 Zanni --> GlobalGauge : oversees fleet resilience
 Zanni --> Tab1 : checks plant node availability
 Zanni --> Tab5 : exports EU CRA & NIS 2 dossiers
 
-Tab2 --> GlobalGauge : increments FP counter
-Tab3 --> GlobalGauge : increments FN counter
+Tab2 --> GlobalGauge : increments supervised FP counter
+Tab3 --> GlobalGauge : increments supervised FN counter
 GlobalGauge --> Tab4 : triggers retraining alert at 100%
 
 @enduml

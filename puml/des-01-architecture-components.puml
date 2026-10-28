@@ -25,12 +25,6 @@ skinparam component {
     FontSize 11
 }
 
-skinparam interface {
-    BackgroundColor #E2E8F0
-    BorderColor #1E293B
-    FontColor #0F172A
-}
-
 skinparam arrow {
     Color #334155
     FontColor #0F172A
@@ -39,28 +33,28 @@ skinparam arrow {
 
 package "Tier 1: Constrained Edge Node (Event-Driven Pipelined C99 Architecture)" as Tier1 {
     component "Physical Network / ISR Ingress\n(UART / SPI / Ethernet MAC)" as NetIngress
-    component "CPU Stress & Benchmark Harness\n(Idle vs. 64x64 MatMul Load + DWT CYCCNT)" as StressGen
+    component "Empirical Stress Harness (See Appendix A)\n(Idle vs. Concurrent Load Profiler)" as StressGen
 
     package "libmicroshield (ANSI C99 Static Library - Zero Malloc)" as CoreLib {
-        component "ms_extract_features()\n[O(1) Sliding Window & Q8 Entropy LUT]" as CompExtract
-        component "ms_evaluate_tree()\n[O(depth) Static Node Array Interpreter]" as CompTree
+        component "ms_extract_features()\n[O(1) Sliding Window & Entropy Engine]" as CompExtract
+        component "ms_evaluate_tree()\n[O(depth) Glass-Box Node Array Interpreter]" as CompTree
         component "ms_update_fsm()\n[5-State Leaky Bucket & Exp. Backoff FSM]" as CompFSM
         component "ms_pack_telemetry_frame()\n[24-Byte Binary Serializer + CRC-16]" as CompCodec
     }
 
     NetIngress --> CompExtract : raw frame event
-    StressGen ..> CoreLib : contends for CPU/FPU registers
+    StressGen ..> CoreLib : measures worst-case bounds under load
     CompExtract --> CompTree : ms_feature_vec_t (12B aligned)
-    CompTree --> CompFSM : ms_verdict_t + XAI rule_id
+    CompTree --> CompFSM : ms_verdict_t + Glass-Box rule_id
     CompFSM --> NetIngress : hardware action (Allow / Drop / Lockdown RX)
     CompFSM --> CompCodec : alerts (100%) & boundary benign (1:K)
 }
 
-package "Tier 2: Dashield Fleet Orchestrator (100% Pure Python Hexagonal OOP + Poetry)" as Tier2 {
+package "Tier 2: Dashield Fleet Orchestrator (Unified Python Hexagonal OOP Architecture)" as Tier2 {
 
     package "Inbound & Outbound Adapters (Ports & Adapters Layer)" as Adapters {
         component "TelemetryTransportPort\n<<Strategy Pattern>>\n(PySerial UART / TCP Socket Bridge)" as PortTransport
-        component "Dashield 5-Tab Streamlit UI\n<<MVC View Adapter>>\n(Pure Python Interactive Console)" as PortUI
+        component "Dashield 5-Tab Console\n<<MVC View Adapter>>\n(Stateful OOP Controller Hierarchy)" as PortUI
         component "SQLite & JSON Audit Adapter\n<<Repository Pattern>>\n(NIS 2 / EU CRA Persistence)" as PortRepo
     }
 
@@ -68,8 +62,8 @@ package "Tier 2: Dashield Fleet Orchestrator (100% Pure Python Hexagonal OOP + P
         component "DashieldOrchestratorFacade\n<<Facade Pattern>>" as CoreFacade
         component "TelemetryEventBus\n<<Observer Pattern>>" as CoreBus
         component "ShadowAuditEnsembleService\n(100-Tree Random Forest FN Hunter)" as CoreShadow
-        component "ConceptDriftAndGaugeService\n(PSI / K-S & Retraining Readiness Gauge)" as CoreDrift
-        component "C99TreeTranspilerFactory\n<<Builder / Factory Pattern>>\n(Scikit-Learn -> ms_tree_node_t[])" as CoreTranspiler
+        component "ConceptDriftAndGaugeService\n(Hybrid DDM + PSI Readiness Gauge)" as CoreDrift
+        component "C99TreeTranspilerFactory\n<<Builder / Factory Pattern>>\n(CART -> ms_tree_node_t[])" as CoreTranspiler
     }
 
     CompCodec ==> PortTransport : 24-Byte Binary Stream (CRC-16)
