@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" contentScriptType="application/ecmascript" contentStyleType="text/css" height="978px" preserveAspectRatio="none" style="width:1378px;height:978px;" version="1.1" viewBox="0 0 1378 978" width="1378px" zoomAndPan="magnify"><defs/><g><!--MD5=[602c2a62d26825258c1b0164e29f82b4]
+cluster Crisis--><polygon fill="#FFFFFF" points="22,24.34,528,24.34,535,54.6841,1356,54.6841,1356,218.25,22,218.25,22,24.34" style="stroke: #334155; stroke-width: 1.5;"/><line style="stroke: #334155; stroke-width: 1.5;" x1="22" x2="535" y1="54.6841" y2="54.6841"/><text fill="#0F172A" font-family="sans-serif" font-size="12" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="492" x="30" y="43.1681">November 2-7, 2026 European Cyber-Physical Crisis (Real-World Threat Landscape)</text><!--MD5=[ff397e5c4b3483fab819963652657bb5]
+cluster Paradox--><polygon fill="#FFFFFF" points="449,273.25,946,273.25,953,303.5941,956,303.5941,956,398.22,449,398.22,449,273.25" style="stroke: #334155; stroke-width: 1.5;"/><line style="stroke: #334155; stroke-width: 1.5;" x1="449" x2="953" y1="303.5941" y2="303.5941"/><text fill="#0F172A" font-family="sans-serif" font-size="12" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="483" x="457" y="292.0781">The Brownfield Paradox ('If Everything Is Connected, Everything Can Be Hacked')</text><!--MD5=[9d20ff42cef3d304e9e6871c69f22ea6]
+cluster Solution--><polygon fill="#FFFFFF" points="462,453.22,951,453.22,958,483.5641,961,483.5641,961,966,462,966,462,453.22" style="stroke: #334155; stroke-width: 1.5;"/><line style="stroke: #334155; stroke-width: 1.5;" x1="462" x2="958" y1="483.5641" y2="483.5641"/><text fill="#0F172A" font-family="sans-serif" font-size="12" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="475" x="470" y="472.0481">MicroShield &amp; Dashield Engineering Countermeasures (Continuous CI/CD Loop)</text><!--MD5=[1052b1d474665af5d3a1ea5a17c1a0a3]
+entity Case1--><rect fill="#F8FAFC" height="134.9094" style="stroke: #334155; stroke-width: 1.2;" width="427" x="38.5" y="67.34"/><text fill="#0F172A" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="255" x="52.5" y="93.0989">Case 1: Cold-Chain &amp; Blood Banks (Nov 2-5, 2026)</text><text fill="#0F172A" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="399" x="52.5" y="116.0808">- Targets: French Blood Service (EFS) &amp; EU Supermarkets (Coop/Intermarche)</text><text fill="#0F172A" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="384" x="52.5" y="139.0627">- Vector: Unpatched Danfoss AK-SM 800A / Dixell (CVE-2025-41450 / 41451)</text><text fill="#0F172A" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="281" x="52.5" y="162.0446">- Impact: Cryo-setpoints hijacked from -30 C to +110 C</text><text fill="#0F172A" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="315" x="52.5" y="185.0265">- Mandate: ACN Italy Urgent Cold-Chain Alert (Nov 3-5, 2026)</text><!--MD5=[b46f32dd688933090cd2f3881f12ad55]
+entity Case2--><rect fill="#F8FAFC" height="134.9094" style="stroke: #334155; stroke-width: 1.2;" width="422" x="491" y="67.34"/><text fill="#0F172A" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="326" x="505" y="93.0989">Case 2: Critical Transport &amp; Tunnel Infrastructure (Nov 7, 2026)</text><text fill="#0F172A" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="300" x="505" y="116.0808">- Target: Brenner Base Tunnel (BBT SE - Everest Intrusion)</text><text fill="#0F172A" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="322" x="505" y="139.0627">- Vector: Targeted network reconnaissance &amp; data exfiltration</text><text fill="#0F172A" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="394" x="505" y="162.0446">- Impact: Emergency IT/OT perimeter isolation required to protect worksite</text><text fill="#0F172A" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="316" x="505" y="185.0265">- Mandate: NIS 2 Art. 21/23 Supply-Chain &amp; 24h Containment</text><!--MD5=[9158641019d6b9b27f509688cb49c326]
+entity Case3--><rect fill="#F8FAFC" height="134.9094" style="stroke: #334155; stroke-width: 1.2;" width="402" x="938" y="67.34"/><text fill="#0F172A" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="305" x="952" y="93.0989">Case 3: European Civil Aviation Hoax Storm (Nov 4-6, 2026)</text><text fill="#0F172A" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="268" x="952" y="116.0808">- Target: 35+ Commercial Flights across EU Airspace</text><text fill="#0F172A" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="374" x="952" y="139.0627">- Vector: Coordinated spoofed bomb alerts (Induced False Positive DoS)</text><text fill="#0F172A" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="357" x="952" y="162.0446">- Impact: Forced diversions, NATO scrambles &amp; operational paralysis</text><text fill="#0F172A" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="339" x="952" y="185.0265">- Lesson: Security systems must resist alert-fatigue self-lockdown</text><!--MD5=[27abe1d964560d0ce3d7fe18573c6916]
+entity Gap--><rect fill="#F8FAFC" height="65.9638" style="stroke: #334155; stroke-width: 1.2;" width="418" x="493" y="316.25"/><text fill="#0F172A" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="388" x="507" y="342.0089">Legacy OT Constraints: Millions of deployed MCUs without timely patches,</text><text fill="#0F172A" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="390" x="507" y="364.9908">zero CapEx for hardware replacement, and hard real-time safety deadlines</text><!--MD5=[1df8145f4137939fcd7c4742f722c86d]
+entity SolEdge--><rect fill="#F8FAFC" height="111.9276" style="stroke: #334155; stroke-width: 1.2;" width="409" x="488.5" y="667.14"/><text fill="#0F172A" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="275" x="502.5" y="692.8989">1. C99 Edge Library (libmicroshield on STM32F407RE)</text><text fill="#0F172A" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="284" x="502.5" y="715.8808">- High-Entropy Command Injection Detection (Q8 LUT)</text><text fill="#0F172A" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="381" x="502.5" y="738.8627">- 5-State Leaky Bucket &amp; Exp. Backoff FSM (Absorbs Spoofed Alert Storms</text><text fill="#0F172A" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="379" x="502.5" y="761.8446">while Enforcing Autonomous Hardware Lockdown on Sustained Attacks)</text><!--MD5=[c7e6137c12ce65c2ea8d1013d65ddb2c]
+entity SolHost--><rect fill="#F8FAFC" height="111.9276" style="stroke: #334155; stroke-width: 1.2;" width="446" x="488" y="838.07"/><text fill="#0F172A" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="312" x="502" y="863.8289">2. Dashield Asymmetric Shadow Auditor (Pure Python OOP)</text><text fill="#0F172A" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="288" x="502" y="886.8108">- 1:K &amp; Boundary-Adjacent Benign Sampling over UART</text><text fill="#0F172A" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="418" x="502" y="909.7927">- 100-Tree Random Forest Ensemble Unmasks Stealthy Setpoint Tampering (FNs)</text><text fill="#0F172A" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="332" x="502" y="932.7746">- Intrinsic Glass-Box Rule Inspector Enables Instant FP Override</text><!--MD5=[2045e509bab4663a8bf53edeed160f57]
+entity SolCICD--><rect fill="#F8FAFC" height="111.9276" style="stroke: #334155; stroke-width: 1.2;" width="422" x="492" y="496.22"/><text fill="#0F172A" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="318" x="506" y="521.9789">3. Threat-Driven CI/CD Gate (ACN / CSIRT Advisory Ingestion)</text><text fill="#0F172A" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="363" x="506" y="544.9608">- Codifies ACN &amp; CISA CVE Bulletins into Automated Regression Suites</text><text fill="#0F172A" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="379" x="506" y="567.9427">- Verifies Detection Recall, Zero-Malloc &amp; WCET Bounds on Every Commit</text><text fill="#0F172A" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="394" x="506" y="590.9246">- Auto-Transpiles Updated C99 Node Array (ms_tree_node_t[]) for OTA Push</text><!--MD5=[553c1dba10b51c92b4594a03ed9df6a9]
+link Case1 to Gap--><path d="M252,202.74 C252,261.82 252,338 252,338 C252,338 486.3,338 486.3,338 " fill="none" id="Case1-&gt;Gap" style="stroke: #334155; stroke-width: 1.0;"/><polygon fill="#334155" points="491.3,338,482.3,334,486.3,338,482.3,342,491.3,338" style="stroke: #334155; stroke-width: 1.0;"/><text fill="#0F172A" font-family="sans-serif" font-size="10" lengthAdjust="spacingAndGlyphs" textLength="165" x="380" y="249.94">exposes unpatched OT controllers</text><!--MD5=[e793410ce9843406b071b46688c3c703]
+link Case2 to Gap--><path d="M702,202.65 C702,202.65 702,309.45 702,309.45 " fill="none" id="Case2-&gt;Gap" style="stroke: #334155; stroke-width: 1.0;"/><polygon fill="#334155" points="702,314.45,706,305.45,702,309.45,698,305.45,702,314.45" style="stroke: #334155; stroke-width: 1.0;"/><text fill="#0F172A" font-family="sans-serif" font-size="10" lengthAdjust="spacingAndGlyphs" textLength="148" x="707" y="249.94">exposes lateral movement risk</text><!--MD5=[3160bc522498be5b4cd74d6c58c6d934]
+link Case3 to Gap--><path d="M1139,202.74 C1139,261.82 1139,338 1139,338 C1139,338 917.73,338 917.73,338 " fill="none" id="Case3-&gt;Gap" style="stroke: #334155; stroke-width: 1.0;"/><polygon fill="#334155" points="912.73,338,921.73,342,917.73,338,921.73,334,912.73,338" style="stroke: #334155; stroke-width: 1.0;"/><text fill="#0F172A" font-family="sans-serif" font-size="10" lengthAdjust="spacingAndGlyphs" textLength="168" x="1019" y="249.94">exposes induced self-lockdown risk</text><!--MD5=[c5f195ea215d549b7d87885aa53e4a86]
+link Gap to SolEdge--><path d="M492.59,360 C482.67,360 476.75,360 476.75,360 C476.75,360 476.75,723 476.75,723 C476.75,723 481.56,723 481.56,723 " fill="none" id="Gap-&gt;SolEdge" style="stroke: #334155; stroke-width: 1.0;"/><polygon fill="#334155" points="486.56,723,477.56,719,481.56,723,477.56,727,486.56,723" style="stroke: #334155; stroke-width: 1.0;"/><text fill="#0F172A" font-family="sans-serif" font-size="10" lengthAdjust="spacingAndGlyphs" textLength="193" x="269" y="556.37">retrofitted via zero-malloc C99 firmware</text><!--MD5=[d02f59b3ac900f1dc530d063fbb6d808]
+link Gap to SolHost--><path d="M911.43,360 C919.36,360 924,360 924,360 C924,360 924,831.13 924,831.13 " fill="none" id="Gap-&gt;SolHost" style="stroke: #334155; stroke-width: 1.0;"/><polygon fill="#334155" points="924,836.13,928,827.13,924,831.13,920,827.13,924,836.13" style="stroke: #334155; stroke-width: 1.0;"/><text fill="#0F172A" font-family="sans-serif" font-size="10" lengthAdjust="spacingAndGlyphs" textLength="195" x="957" y="641.83">supervised via out-of-band shadow audit</text><!--MD5=[0d4b03d73dcae149e1bcba0d36eeca5d]
+link Gap to SolCICD--><path d="M702,382.29 C702,382.29 702,489.22 702,489.22 " fill="none" id="Gap-&gt;SolCICD" style="stroke: #334155; stroke-width: 1.0;"/><polygon fill="#334155" points="702,494.22,706,485.22,702,489.22,698,485.22,702,494.22" style="stroke: #334155; stroke-width: 1.0;"/><text fill="#0F172A" font-family="sans-serif" font-size="10" lengthAdjust="spacingAndGlyphs" textLength="222" x="707" y="429.91">immunized via continuous ACN advisory gates</text><!--MD5=[7360dd87f36bfca9abc43c1c99d0d89a]
+link SolCICD to SolEdge--><path d="M694.75,608.62 C694.75,608.62 694.75,660.21 694.75,660.21 " fill="none" id="SolCICD-&gt;SolEdge" style="stroke: #334155; stroke-width: 1.0;"/><polygon fill="#334155" points="694.75,665.21,698.75,656.21,694.75,660.21,690.75,656.21,694.75,665.21" style="stroke: #334155; stroke-width: 1.0;"/><text fill="#0F172A" font-family="sans-serif" font-size="10" lengthAdjust="spacingAndGlyphs" textLength="196" x="703" y="641.83">deploys verified ms_tree_node_t[] header</text><!--MD5=[ca3d2f7c67fe9cdac2be4286a10764cb]
+link SolEdge to SolHost--><path d="M693,779.55 C693,779.55 693,831.14 693,831.14 " fill="none" id="SolEdge-&gt;SolHost" style="stroke: #334155; stroke-width: 1.0;"/><polygon fill="#334155" points="693,836.14,697,827.14,693,831.14,689,827.14,693,836.14" style="stroke: #334155; stroke-width: 1.0;"/><text fill="#0F172A" font-family="sans-serif" font-size="10" lengthAdjust="spacingAndGlyphs" textLength="239" x="690" y="812.76">streams 24-Byte CRC-16 alerts &amp; shadow samples</text><!--MD5=[99ced15c2b1b878b70a21f36f5638ee3]
+@startuml
+top to bottom direction
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName SansSerif
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam linetype ortho
+skinparam nodesep 25
+skinparam ranksep 35
+skinparam Padding 4
+
+skinparam package {
+    BackgroundColor #FFFFFF
+    BorderColor #334155
+    BorderThickness 1.5
+    FontColor #0F172A
+    FontSize 12
+}
+
+skinparam rectangle {
+    BackgroundColor #F8FAFC
+    BorderColor #334155
+    BorderThickness 1.2
+    FontColor #0F172A
+    FontSize 11
+}
+
+skinparam arrow {
+    Color #334155
+    FontColor #0F172A
+    FontSize 10
+}
+
+package "November 2-7, 2026 European Cyber-Physical Crisis (Real-World Threat Landscape)" as Crisis {
+    rectangle "Case 1: Cold-Chain & Blood Banks (Nov 2-5, 2026)\n- Targets: French Blood Service (EFS) & EU Supermarkets (Coop/Intermarche)\n- Vector: Unpatched Danfoss AK-SM 800A / Dixell (CVE-2025-41450 / 41451)\n- Impact: Cryo-setpoints hijacked from -30 C to +110 C\n- Mandate: ACN Italy Urgent Cold-Chain Alert (Nov 3-5, 2026)" as Case1
+
+    rectangle "Case 2: Critical Transport & Tunnel Infrastructure (Nov 7, 2026)\n- Target: Brenner Base Tunnel (BBT SE - Everest Intrusion)\n- Vector: Targeted network reconnaissance & data exfiltration\n- Impact: Emergency IT/OT perimeter isolation required to protect worksite\n- Mandate: NIS 2 Art. 21/23 Supply-Chain & 24h Containment" as Case2
+
+    rectangle "Case 3: European Civil Aviation Hoax Storm (Nov 4-6, 2026)\n- Target: 35+ Commercial Flights across EU Airspace\n- Vector: Coordinated spoofed bomb alerts (Induced False Positive DoS)\n- Impact: Forced diversions, NATO scrambles & operational paralysis\n- Lesson: Security systems must resist alert-fatigue self-lockdown" as Case3
+}
+
+package "The Brownfield Paradox ('If Everything Is Connected, Everything Can Be Hacked')" as Paradox {
+    rectangle "Legacy OT Constraints: Millions of deployed MCUs without timely patches,\nzero CapEx for hardware replacement, and hard real-time safety deadlines" as Gap
+}
+
+package "MicroShield & Dashield Engineering Countermeasures (Continuous CI/CD Loop)" as Solution {
+    rectangle "1. C99 Edge Library (libmicroshield on STM32F407RE)\n- High-Entropy Command Injection Detection (Q8 LUT)\n- 5-State Leaky Bucket & Exp. Backoff FSM (Absorbs Spoofed Alert Storms\n  while Enforcing Autonomous Hardware Lockdown on Sustained Attacks)" as SolEdge
+
+    rectangle "2. Dashield Asymmetric Shadow Auditor (Pure Python OOP)\n- 1:K & Boundary-Adjacent Benign Sampling over UART\n- 100-Tree Random Forest Ensemble Unmasks Stealthy Setpoint Tampering (FNs)\n- Intrinsic Glass-Box Rule Inspector Enables Instant FP Override" as SolHost
+
+    rectangle "3. Threat-Driven CI/CD Gate (ACN / CSIRT Advisory Ingestion)\n- Codifies ACN & CISA CVE Bulletins into Automated Regression Suites\n- Verifies Detection Recall, Zero-Malloc & WCET Bounds on Every Commit\n- Auto-Transpiles Updated C99 Node Array (ms_tree_node_t[]) for OTA Push" as SolCICD
+}
+
+Case1 - -> Gap : exposes unpatched OT controllers
+Case2 - -> Gap : exposes lateral movement risk
+Case3 - -> Gap : exposes induced self-lockdown risk
+
+Gap - -> SolEdge : retrofitted via zero-malloc C99 firmware
+Gap - -> SolHost : supervised via out-of-band shadow audit
+Gap - -> SolCICD : immunized via continuous ACN advisory gates
+
+SolCICD - -> SolEdge : deploys verified ms_tree_node_t[] header
+SolEdge - -> SolHost : streams 24-Byte CRC-16 alerts & shadow samples
+
+@enduml
+
+PlantUML version 1.2020.02(Sun Mar 01 11:22:07 CET 2020)
+(GPL source distribution)
+Java Runtime: OpenJDK Runtime Environment
+JVM: OpenJDK 64-Bit Server VM
+Java Version: 25.0.4.1+1-1-26.04.4-Ubuntu
+Operating System: Linux
+Default Encoding: UTF-8
+Language: en
+Country: US
+--></g></svg>

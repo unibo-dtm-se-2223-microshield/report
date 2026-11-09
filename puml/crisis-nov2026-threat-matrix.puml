@@ -1,0 +1,65 @@
+@startuml
+top to bottom direction
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName SansSerif
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam linetype ortho
+skinparam nodesep 25
+skinparam ranksep 35
+skinparam Padding 4
+
+skinparam package {
+    BackgroundColor #FFFFFF
+    BorderColor #334155
+    BorderThickness 1.5
+    FontColor #0F172A
+    FontSize 12
+}
+
+skinparam rectangle {
+    BackgroundColor #F8FAFC
+    BorderColor #334155
+    BorderThickness 1.2
+    FontColor #0F172A
+    FontSize 11
+}
+
+skinparam arrow {
+    Color #334155
+    FontColor #0F172A
+    FontSize 10
+}
+
+package "November 2-7, 2026 European Cyber-Physical Crisis (Real-World Threat Landscape)" as Crisis {
+    rectangle "Case 1: Cold-Chain & Blood Banks (Nov 2-5, 2026)\n- Targets: French Blood Service (EFS) & EU Supermarkets (Coop/Intermarche)\n- Vector: Unpatched Danfoss AK-SM 800A / Dixell (CVE-2025-41450 / 41451)\n- Impact: Cryo-setpoints hijacked from -30 C to +110 C\n- Mandate: ACN Italy Urgent Cold-Chain Alert (Nov 3-5, 2026)" as Case1
+
+    rectangle "Case 2: Critical Transport & Tunnel Infrastructure (Nov 7, 2026)\n- Target: Brenner Base Tunnel (BBT SE - Everest Intrusion)\n- Vector: Targeted network reconnaissance & data exfiltration\n- Impact: Emergency IT/OT perimeter isolation required to protect worksite\n- Mandate: NIS 2 Art. 21/23 Supply-Chain & 24h Containment" as Case2
+
+    rectangle "Case 3: European Civil Aviation Hoax Storm (Nov 4-6, 2026)\n- Target: 35+ Commercial Flights across EU Airspace\n- Vector: Coordinated spoofed bomb alerts (Induced False Positive DoS)\n- Impact: Forced diversions, NATO scrambles & operational paralysis\n- Lesson: Security systems must resist alert-fatigue self-lockdown" as Case3
+}
+
+package "The Brownfield Paradox ('If Everything Is Connected, Everything Can Be Hacked')" as Paradox {
+    rectangle "Legacy OT Constraints: Millions of deployed MCUs without timely patches,\nzero CapEx for hardware replacement, and hard real-time safety deadlines" as Gap
+}
+
+package "MicroShield & Dashield Engineering Countermeasures (Continuous CI/CD Loop)" as Solution {
+    rectangle "1. C99 Edge Library (libmicroshield on STM32F407RE)\n- High-Entropy Command Injection Detection (Q8 LUT)\n- 5-State Leaky Bucket & Exp. Backoff FSM (Absorbs Spoofed Alert Storms\n  while Enforcing Autonomous Hardware Lockdown on Sustained Attacks)" as SolEdge
+
+    rectangle "2. Dashield Asymmetric Shadow Auditor (Pure Python OOP)\n- 1:K & Boundary-Adjacent Benign Sampling over UART\n- 100-Tree Random Forest Ensemble Unmasks Stealthy Setpoint Tampering (FNs)\n- Intrinsic Glass-Box Rule Inspector Enables Instant FP Override" as SolHost
+
+    rectangle "3. Threat-Driven CI/CD Gate (ACN / CSIRT Advisory Ingestion)\n- Codifies ACN & CISA CVE Bulletins into Automated Regression Suites\n- Verifies Detection Recall, Zero-Malloc & WCET Bounds on Every Commit\n- Auto-Transpiles Updated C99 Node Array (ms_tree_node_t[]) for OTA Push" as SolCICD
+}
+
+Case1 --> Gap : exposes unpatched OT controllers
+Case2 --> Gap : exposes lateral movement risk
+Case3 --> Gap : exposes induced self-lockdown risk
+
+Gap --> SolEdge : retrofitted via zero-malloc C99 firmware
+Gap --> SolHost : supervised via out-of-band shadow audit
+Gap --> SolCICD : immunized via continuous ACN advisory gates
+
+SolCICD --> SolEdge : deploys verified ms_tree_node_t[] header
+SolEdge --> SolHost : streams 24-Byte CRC-16 alerts & shadow samples
+
+@enduml
