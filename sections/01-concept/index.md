@@ -4,160 +4,184 @@ has_children: false
 nav_order: 2
 ---
 
-# Chapter 1: System Concept & Domain Ontology
+# Chapter 1: System Concept, Threat Landscape & Domain Ontology
 
 ---
 
 ## 1.1 Executive Vision & Product Taxonomy
 
-The proliferation of connected sensing and actuation nodes across industrial automation, smart energy grids, and telecommunications infrastructure has fundamentally altered the threat landscape of cyber-physical systems (CPS). At the physical perimeter of these infrastructures lie millions of deeply resource-constrained microcontrollers (MCUs)—such as ARM Cortex-M and ultra-low-power RISC-V architectures—operating either on bare-metal loops or under deterministic Real-Time Operating Systems (RTOS). While these edge nodes execute safety-critical control loops and fieldbus translations, they remain historically devoid of onboard runtime security primitives due to stringent memory, power, and real-time execution constraints.
+The pervasive deployment of connected sensing, refrigeration, and actuation nodes across industrial Operational Technology (OT), healthcare supply chains, smart grid infrastructures, and transportation networks has fundamentally expanded the cyber-physical attack surface. At the foundation of this modernization lies an acute structural vulnerability: while organizations connect field apparatus to IP networks and fieldbuses, resource-constrained field controllers rarely receive software updates, creating a persistent brownfield exposure gap.
 
-**MicroShield** addresses this architectural vulnerability by introducing a **Deterministic Ultra-Low-Power Embedded C Intrusion Detection System (IDS)**. Rather than adapting heavyweight enterprise security appliances or computationally opaque neural networks to constrained targets, MicroShield is conceived primarily as a **hardware-agnostic, ANSI C99-compliant static software library** engineered for direct integration into embedded firmware.
+At the physical perimeter of these operational networks, microcontrollers (such as ARM Cortex-M and ultra-low-power RISC-V devices) run bare-metal control loops or lightweight Real-Time Operating Systems (RTOS). These units execute time-critical physical tasks, thermal regulation, and protocol conversions without hardware memory protection units (MMUs) or onboard intrusion detection primitives.
 
-To support the embedded core across its entire operational lifecycle without burdening the microcontroller with training or storage overhead, the library is complemented by an **auxiliary Python MLOps Governance and Fleet Supervision Suite**. Consequently, from a software engineering taxonomy standpoint, the complete MicroShield ecosystem is classified as a **Dual-Tier Asymmetric Cyber-Physical Security Architecture** comprising:
+**MicroShield** introduces an inline security architecture specifically tailored to these constrained execution environments through a **Deterministic Ultra-Low-Power Embedded C Intrusion Detection System (IDS)**. Rather than attempting to scale down heavyweight enterprise detection frameworks or deploying resource-intensive neural networks, MicroShield is structured as a **hardware-agnostic, ANSI C99 static library (`libmicroshield`)** engineered for direct firmware integration.
 
-1. **Primary Artifact — Core Embedded C99 Detection Library (`libmicroshield`):** A zero-dependency, statically allocated packet inspection and anomaly classification library executing directly on the target MCU. It enforces strict Worst-Case Execution Time (WCET) bounds (`O(tree_depth)`) and zero dynamic heap allocation (`malloc`-free), guaranteeing immunity against memory fragmentation and non-deterministic latency spikes.
-2. **Auxiliary Artifact — Offline Training & C-Transpilation CLI Toolkit:** A scientific data-processing pipeline that ingests industrial network intrusion corpora (**Bot-IoT** [1] and **Edge-IIoTset** [2]), performs feature selection and hyperparameter pruning, and transpiles validated Decision Tree models into pure, branch-predictable C99 lookup structures.
-3. **Auxiliary Artifact — Fleet Telemetry Daemon, Shadow Auditor & Web Console:** An out-of-band supervision service and interactive graphical dashboard that ingests real-time incident alerts and circular traffic samples over isolated serial links (UART), unmasks evasive False Negatives via heavy ensemble verification, monitors statistical concept drift, and orchestrates closed-loop model retraining.
+To maintain the operational integrity of the microcontroller without burdening the physical device with model training, telemetry storage, or high-level governance, the core embedded engine operates in symbiosis with **`Dashield`**, an **auxiliary Pure-Python Fleet Supervision, Shadow Auditing, and MLOps Suite**. The overall ecosystem establishes an **Asymmetric Dual-Tier Cyber-Physical Security Architecture**:
 
-| Architectural Dimension | Enterprise Network IDS (e.g., Snort, Suricata, Zeek) | Deep Edge TinyML IDS (e.g., TFLite Micro, CMSIS-NN) | Host-Based Linux Security Agents | **MicroShield Core Library (`libmicroshield`)** |
+1. **Primary Artifact — Core Embedded C99 Detection Library (`libmicroshield`):** A zero-dependency, statically allocated frame inspection and autonomous containment library deployed on the target MCU. It guarantees deterministic execution bounds with worst-case execution time bounded by tree depth (`O(tree_depth)`), operates strictly through fixed-point integer arithmetic (`Q8`), and adheres to a zero dynamic heap allocation model (`malloc`-free) to eliminate runtime fragmentation and latency nondeterminism.
+2. **Auxiliary Artifact — MLOps Pipeline & C Transpilation Toolkit:** An analytical processing pipeline that ingests established industrial benchmark corpora (**Bot-IoT** and **Edge-IIoTset**) alongside machine-readable national cybersecurity agency threat descriptors. It conducts feature selection, performs depth-constrained optimization, and transpiles validated Decision Tree models into immutable, branch-predictable C99 node arrays (`ms_tree_node_t[]`).
+3. **Auxiliary Artifact — `Dashield` Fleet Telemetry Daemon, Shadow Auditor & Console:** An out-of-band supervision service that captures real-time diagnostic alerts and circular traffic samples over dedicated serial channels (UART). It detects silent False Negatives through higher-capacity reference ensemble verification, monitors statistical concept drift, models industrial threat profiles, and coordinates retraining cycles.
+
+| Architectural Dimension | Enterprise Network IDS (Snort, Suricata, Zeek) | Deep Edge TinyML Frameworks (TFLite Micro) | Host-Based OS Security Agents | **MicroShield Core (`libmicroshield`) + `Dashield`** |
 | :--- | :--- | :--- | :--- | :--- |
-| **Primary Product Form** | Monolithic network appliance / daemon | Quantized neural runtime interpreter | OS-level background service | **Zero-dependency C99 static library** |
-| **Target Hardware Tier** | Multi-core x86/ARM64 servers (GBs RAM) | High-end MCUs / NPUs (Hundreds KB SRAM) | Embedded Linux Gateways (Cortex-A, MMU) | **Ultra-constrained MCUs (Cortex-M, Bare-Metal/RTOS)** |
-| **Memory Allocation Model** | Dynamic heap allocation & garbage collection | Static tensor arena + runtime scratchpads | Virtual memory paging & dynamic heap | **Strictly static compile-time footprint (Zero `malloc`)** |
-| **Execution Time Bound (WCET)** | Non-deterministic (regex/state-table explosion) | High latency (`O(layers * neurons^2)` MACs) | Preemptible OS scheduling jitter | **Strictly deterministic `O(tree_depth)` comparisons** |
-| **Explainability (XAI)** | Rule-signature match (blind to zero-day drift) | Black-box activation weights (non-auditable) | System-call heuristic logs | **Intrinsic White-Box Boolean decision path** |
-| **False Negative (FN) Recovery** | Manual signature database updates | Full offline neural retraining | Cloud threat-intelligence sync | **Asymmetric Shadow Auditing & closed-loop transpilation** |
+| **Primary Form Factor** | Monolithic server application / daemon | Quantized neural runtime interpreter | OS-level kernel/user daemon | **Zero-dependency C99 static library + Python MLOps suite** |
+| **Target Hardware Tier** | Multi-core x86/ARM64 servers (Gigabytes RAM) | High-end microcontrollers (Hundreds KB SRAM) | Embedded Linux Gateways (Cortex-A, MMU) | **Resource-constrained MCUs (Cortex-M4F, Bare-Metal/RTOS)** |
+| **Memory Allocation** | Dynamic heap allocation & garbage collection | Static tensor arena + execution scratchpad | Virtual memory paging & dynamic heap | **Strictly static compile-time footprint (`0 Bytes` heap `malloc`)** |
+| **Worst-Case Latency** | Non-deterministic state-table parsing | High execution latency (Matrix operations) | Preemptible OS scheduling jitter | **Strictly deterministic `O(tree_depth)` integer comparisons** |
+| **Model Interpretability** | Rule-signature matching (rigid thresholds) | Black-box weights (post-hoc explanation required) | System-call trace heuristics | **Intrinsic Ante-Hoc Glass-Box Decision Paths (Rudin, 2019)** |
+| **False Negative Handling** | Signature updates pushed post-breach | Periodic offline retraining | Central threat-intel synchronizations | **Asymmetric Shadow Auditing & Threat-Driven CI/CD Verification** |
 
-*Table 1.1: Architectural taxonomy and comparative positioning of MicroShield against established intrusion detection paradigms.*
+*Table 1.1: Comparative architectural classification of MicroShield against conventional detection approaches.*
 
 ---
 
-## 1.2 Cyber-Physical Threat Landscape & Regulatory Mandate
+## 1.2 Cyber-Physical Threat Landscape, The November 2026 Crisis & Continuous Threat-Driven Integration
 
-### 1.2.1 The Embedded Perimeter Vulnerability
-Modern Industrial Internet of Things (IIoT) and telecommunications field deployments rely heavily on hierarchical topologies where edge microcontrollers interface directly with physical transducers and actuators while communicating upstream via serial fieldbuses (UART, RS-485, CAN) or lightweight IP stacks (lwIP, uIP). Once an adversary breaches the outer perimeter or compromises a local wireless link, field MCUs are exposed to four primary classes of network-borne attacks:
+### 1.2.1 Physical Layer Vulnerabilities & Cyber-Physical Threat Dynamics
+Industrial Internet of Things (IIoT), healthcare cold-chain logistics, and transport automation topologies connect edge microcontrollers directly to physical actuators (compressors, switches, valves) while routing operational data over serial fieldbuses (RS-485, Modbus) or lightweight network stacks. As established in the seminal cyber-physical security literature by Cárdenas et al. (2011) and Urbina et al. (2016), once an attacker gains ingress to an industrial network perimeter, edge devices become susceptible to four primary attack classes:
 
-* **Volumetric and Protocol Denial of Service (DoS/DDoS):** High-frequency packet floods (SYN floods, UDP storms, or serial frame saturation) designed to exhaust interrupt service routines (ISRs), starve RTOS task schedulers, or trigger watchdog resets.
-* **Network Reconnaissance and Topology Probing:** Systematic port scanning, address sweeping, and malformed protocol handshakes aimed at fingerprinting firmware versions and discovering unauthenticated command registers.
-* **Malicious Payload and Command Injection:** Insertion of crafted byte sequences, buffer-overflow exploits, or unauthorized actuation commands within legitimate protocol frames, characterized by anomalous payload length distributions and elevated Shannon entropy.
-* **Adversarial Evasion and Concept Drift:** Gradual shifts in legitimate operational traffic profiles (due to seasonal industrial workloads or topology changes) or deliberate slow-rate adversarial mutations engineered to slip beneath static threshold filters.
+* **Volumetric & Protocol Denial of Service (DoS/DDoS):** High-throughput frame floods targeted at saturating Interrupt Service Routines (ISRs) and exhausting real-time scheduling allocations.
+* **Network Reconnaissance & Lateral Sweeping:** Systematic bus probing and Modbus/TCP register scans designed to enumerate field controllers and locate unauthenticated interfaces.
+* **Command Injection & Semantic Setpoint Tampering:** Arbitrary payload injection or manipulation of physical setpoint thresholds within control commands, altering process behavior without disrupting basic framing integrity.
+* **Induced Alert Storms & Evasion Dynamics:** Exploiting naive threshold monitors by generating synthetic boundary traffic to provoke self-lockdowns, or pacing attacks slowly to slip under edge heuristics.
 
-### 1.2.2 European and International Regulatory Drivers
-Historically, embedded device manufacturers treated field-level cybersecurity as an optional post-deployment feature. However, recent binding legislative frameworks in the European Union and international industrial standards have elevated embedded runtime anomaly detection to a mandatory legal requirement for market access:
+### 1.2.2 The November 2026 European Cyber-Physical Incidents
+The operational vulnerability of connected brownfield controllers transitioned from theoretical modeling to widespread disruption during the incidents across Europe in early November 2026:
 
-* **EU Cyber Resilience Act (CRA — Regulation (EU) 2024/2847) [3]:** Mandates that all *products with digital elements* placed on the European market be designed with security-by-default architectures (Annex I, Part I). Specifically, the CRA requires embedded systems to protect the availability of essential functions against Denial of Service attacks, monitor internal security states, and provide automated mechanisms for vulnerability remediation and security updates throughout the product lifecycle.
-* **NIS 2 Directive (Directive (EU) 2022/2555) [4]:** Enforces strict supervisory and incident-reporting obligations (Article 21 and Article 23) across critical sectors (energy, transport, digital infrastructure, manufacturing). Organizations must implement continuous anomaly monitoring, rapid containment of compromised operational technology (OT) nodes, and documented audit trails within 24 hours of incident awareness.
-* **IEC 62443-4-2 (Security for Industrial Automation and Control Systems) [5]:** Defines technical component-level requirements (CRs), specifically mandating **Resource Availability (CR 7.1)** against DoS degradation, **Continuous Monitoring (CR 6.2)** of security events at the device boundary, and **Deterministic Safety Preservation** ensuring that security controls never jeopardize physical real-time actuation deadlines.
+1. **Refrigeration & Healthcare Cold-Chain Sabotage (November 2–5, 2026):**
+   Automated campaigns targeted connected commercial refrigeration systems and biological storage centers across France (affecting regional distribution hubs of the *Établissement Français du Sang* — EFS) and commercial networks in Italy, Belgium, and Sweden. Attackers targeted exposed industrial refrigeration units (specifically Danfoss AK-SM 800A and Dixell platforms vulnerable to authentication bypass and remote command injection under `CVE-2025-41450` and `CVE-2025-41451`). By overriding temperature setpoints—attempting shifts from critical storage temperatures of `-30 °C` up to extreme positive values—the campaign demonstrated the critical vulnerability of physical inventory to unauthorized remote commands. Following these disruptions, national cybersecurity authorities, including the Italian National Cybersecurity Agency (ACN / CSIRT Italia), issued urgent advisories stressing that unpatched industrial controllers exposed on tele-maintenance interfaces represent an active systemic hazard.
+2. **Alpine Transport Infrastructure Perimeter Defense (November 7, 2026):**
+   The Austro-Italian joint entity BBT SE, overseeing the construction and engineering of the Brenner Base Tunnel, reported a cyber intrusion targeting administrative systems, necessitating immediate network isolation of engineering perimeters to ensure that operational systems managing worksite ventilation and drainage remained physically segregated and protected.
+3. **Induced Operational Paralysis via Spoofed Warning Waves (November 4–6, 2026):**
+   Dozens of commercial flights across European airspace were diverted or grounded due to coordinated false threat alerts. In systems engineering terms, this campaign illustrates an asymmetric Denial of Service driven by forced false positives: inducing security monitors to execute safety quarantines and shutdowns without introducing a functional kinetic payload.
 
-| Regulatory Standard / Clause | Core Mandate | MicroShield Architectural Realization |
-| :--- | :--- | :--- |
-| **EU CRA (Annex I, Part I, §1)** | Security-by-design and protection against unauthorized access and payload corruption. | Inline `O(1)` feature extraction and `O(tree_depth)` classification of every ingress frame prior to application-layer parsing. |
-| **EU CRA (Annex I, Part I, §3(f))** | Resilience of essential functions and mitigation of Denial of Service (DoS) effects. | Deterministic execution bounds and hardware-level FSM quarantine (`EdgeMitigationController`) isolating flooded interfaces. |
-| **EU CRA (Annex I, Part II)** | Continuous vulnerability handling and field updateability across the support period. | Closed-loop MLOps pipeline capable of transpiling and deploying updated Decision Tree logic as drift emerges. |
-| **NIS 2 Directive (Article 21.2)** | Incident detection, operational continuity, and supply-chain cyber hygiene. | Out-of-band UART telemetry streaming structured explainable alerts (`ClassificationVerdict` + feature vector) to SecOps consoles. |
-| **IEC 62443-4-2 (CR 6.1 & CR 7.1)** | Audit log accessibility and deterministic resource protection on embedded components. | Zero-heap static memory allocation preventing memory exhaustion, paired with white-box XAI decision path traceability. |
+[![November 2026 European Threat Matrix](../../puml/crisis-nov2026-threat-matrix.svg)](../../puml/crisis-nov2026-threat-matrix.svg)  
+*(Click on the diagram to open the full-resolution vector graphic)*  
+*Figure 1.1: Structural mapping of the early November 2026 cyber-physical incidents and agency advisories to the MicroShield dual-tier countermeasure pipeline.*
 
-*Table 1.2: Mapping of binding regulatory and industrial security mandates to MicroShield core capabilities.*
+| Operational Incident | Target Profile & Exploit Vector | Failure Mode in Legacy Deployments | MicroShield Defense Strategy |
+| :--- | :--- | :--- | :--- |
+| **Cold-Chain & Biological Storage** *(Nov 2–5, 2026)* | Industrial cooling controllers; Command Injection (`CVE-2025-41451`) altering thermal setpoints. | **The Unpatched Edge Gap:** Legacy controllers remain unpatched due to operational uptime requirements and lack of runtime inspection. | **Zero-CapEx Inline Inspection & Shadow Auditing:** High-entropy payloads are halted inline (`O(depth)`), while stealthy tampering attempts are captured via out-of-band ensemble auditing. |
+| **Strategic Transport Infrastructure** *(Nov 7, 2026)* | Reconnaissance sweeps and risk of lateral movement into critical control networks (BBT SE). | **Lateral Movement Propagation:** Peripheral network breaches threaten operational technology when gateways lack local quarantine. | **Deterministic Escalation FSM:** Sustained scanning probes trigger local hardware interface isolation (`LOCKDOWN_L3`), severing lateral infiltration. |
+| **Civil Transport Alert Storms** *(Nov 4–6, 2026)* | Coordinated spoofed threat notifications designed to trigger precautionary shutoffs. | **Induced Operational Stoppage:** Binary detection triggers cause costly self-inflicted shutdowns upon encountering transient anomalies. | **5-State Leaky Bucket Filtering:** Sporadic anomalies drop individual frames without closing interfaces, backed by glass-box decision path transparency. |
+
+*Table 1.2: Technical categorization of the November 2026 cyber-physical disruptions and corresponding architectural defenses.*
+
+---
+
+### 1.2.3 European Regulatory Directives & Threat-Driven CI/CD Integration
+European regulatory standards mandate formal technical controls for connected operational technology:
+
+* **EU Cyber Resilience Act (CRA — Regulation (EU) 2024/2847):** Mandates cybersecurity by design across digital products (Annex I, Part I), requiring resilience against Denial of Service, internal health monitoring, minimal third-party software dependencies, and verified update pathways.
+* **NIS 2 Directive (Directive (EU) 2022/2555) & National Transposition:** Establishes rigorous monitoring and 24-hour early-warning reporting obligations for critical infrastructure operators across healthcare, essential food distribution, and transport sectors.
+* **IEC 62443-4-2:** Specifies industrial component-level criteria, including Resource Availability (CR 7.1) and continuous boundary event monitoring (CR 6.2).
+* **Continuous Threat-Driven Integration:** MicroShield integrates published vulnerability bulletins directly into its software quality assurance lifecycle. Threat descriptors derived from agency advisories are versioned as structured regression suites. On every automated build, test pipelines evaluate the C99 library and Python Shadow Auditor against these attack models, ensuring that detection performance and deterministic execution bounds are maintained before deploying updated decision trees.
 
 ---
 
 ## 1.3 Domain Ontology & Operational Mechanics
 
-To maintain strict separation of concerns between hard real-time embedded execution and high-capacity analytical governance, the MicroShield domain ontology is partitioned into two distinct Bounded Contexts: the **Physical Field Domain** and the **Fleet Supervision & MLOps Domain**.
+The MicroShield domain ontology is structured into two formal Bounded Contexts: the **Physical Field Domain** and the **Fleet Supervision & MLOps Domain**.
 
-[![MicroShield Domain Concept Ontology](../../puml/domain-concept.svg)](../../puml/domain-concept.svg)
-*(Click on the diagram to open the full-resolution vector graphic)*
-*Figure 1.1: Domain-Driven Design (DDD) ontology of the MicroShield architecture, illustrating the deterministic edge inspection boundary and the closed-loop MLOps shadow auditing lifecycle.*
+[![MicroShield Domain Concept Ontology](../../puml/domain-concept.svg)](../../puml/domain-concept.svg)  
+*(Click on the diagram to open the full-resolution vector graphic)*  
+*Figure 1.2: Domain-Driven Design (DDD) ontology of MicroShield, illustrating the deterministic inspection boundary and closed-loop telemetry lifecycle.*
 
 ### 1.3.1 Physical Field Domain (Constrained Cyber-Physical Node)
-The Physical Field Domain encapsulates the pure C99 runtime environment executing on the microcontroller. Every incoming communication unit is modeled as an `IngressFrame` entity carrying raw byte sequences, arrival timestamps, and physical interface identifiers.
+The Physical Field Domain models the runtime execution environment on the target microcontroller. Ingress network data is handled as discrete `IngressFrame` entities comprising raw payload references, frame lengths, arrival timestamps, and interface identifiers.
 
-1. **Constant-Time Feature Extraction (`FeatureExtractor`):** Rather than buffering entire multi-packet sessions—which would introduce unbounded memory growth—the extractor computes a compact, fixed-size `NormalizedVector` in strictly constant time (`O(1)`) using circular sliding registers and incremental bit-level arithmetic. The vector captures eight orthogonal physical and statistical telemetry dimensions:
-   * *Structural Header Metrics:* `payload_size`, `protocol_id`, and `transport_flags`.
-   * *Temporal & Volumetric Dynamics:* `iat_delta` (inter-arrival time delta), `packet_rate` over the active sliding window, and `jitter_variance` (temporal dispersion).
-   * *Topological & Information-Theoretic Metrics:* `conn_fan_in` (source dispersion cardinality) and `payload_entropy` (normalized Shannon byte entropy to detect encrypted shells or binary exploit sleds).
-2. **Deterministic Tree Inference (`EdgeInferenceEngine`):** The normalized vector is evaluated by a transpiled Decision Tree [6]. Unlike neural classifiers requiring floating-point matrix multiplications, a Decision Tree of maximum depth `D` executes at most `D` scalar threshold comparisons. This guarantees a hard, mathematically provable worst-case execution time of `O(tree_depth)` using purely static branching logic.
-3. **Autonomous Containment (`EdgeMitigationController`):** Upon yielding a `ClassificationVerdict` (`BENIGN_TRAFFIC`, `ANOMALY_DOS_FLOOD`, `ANOMALY_SCAN_PROBE`, or `ANOMALY_INJECTION`), the local mitigation finite-state machine (FSM) immediately enforces physical containment (e.g., dropping the frame, throttling the ingress interface, or asserting a hardware quarantine GPIO pin) while dispatching a compact telemetry record over a dedicated diagnostic UART channel.
+1. **Constant-Time Feature Extraction (`FeatureExtractor`):** To avoid buffering multi-frame sessions in memory, the engine updates a fixed-size `NormalizedVector` in strictly constant time (`O(1)`) using sliding accumulators and fixed-point integer arithmetic (`Q8`). The extracted vector encodes eight physical and statistical dimensions:
+   * *Structural Header Fields:* `payload_size`, `protocol_id`, and `transport_flags`.
+   * *Temporal Dynamics:* `iat_delta` (inter-arrival time), sliding-window packet throughput, and arrival jitter variance.
+   * *Information-Theoretic Attributes:* source connection cardinality (`conn_fan_in`) and normalized Shannon byte entropy (`payload_entropy_q8`), computed via a Flash Look-Up Table to capture binary injections and high-entropy exploits.
+2. **Deterministic Glass-Box Tree Inference (`EdgeInferenceEngine`):** Extracted vectors are evaluated by a transpiled Decision Tree. In contrast to opaque models, shallow Decision Trees are intrinsically interpretable by design (Rudin, 2019). Traversal of a tree with maximum depth `D <= 8` executes at most `D` integer comparison operations, guaranteeing a strict worst-case bound of `O(tree_depth)`.
+3. **Autonomous Multi-Stage Mitigation (`EdgeMitigationController`):** The output `ClassificationVerdict` drives a deterministic Finite-State Machine (FSM). Rather than relying on simple binary drop logic, the FSM provides proportional escalation across five operational levels: absorptive drops (`SUSPICIOUS`), micro-throttling (`THROTTLED_L1`), exponential backoff (`QUARANTINED_L2`), and complete hardware receiver lockdown (`LOCKDOWN_L3`).
 
 ### 1.3.2 Epistemology of Detection Errors: False Positives, False Negatives & Shadow Auditing
-A rigorous intrusion detection treatise must confront the fundamental asymmetry between the two primary classification errors in a distributed edge environment:
+Edge-deployed security models exhibit fundamentally asymmetric error visibility:
 
-* **The Visibility of False Positives (FP):** When the `EdgeInferenceEngine` misclassifies legitimate industrial traffic as an attack (`FP`), the operational impact is immediate and observable: a valid telemetry update is blocked or a node enters precautionary quarantine. A Security Operations (SecOps) analyst inspecting the `SecuritySupervisionConsole` can directly examine the white-box decision path that triggered the alert, verify the benign nature of the payload, and invoke `flag_false_positive()` to queue the misclassified vector for model correction.
-* **The Epistemological Silence of False Negatives (FN):** Conversely, when a novel or mutated attack evades the decision tree and is classified as `BENIGN_TRAFFIC` (`FN`), the edge library takes no containment action and raises no alarm. If the edge node only transmitted detected anomalies to the supervision server, **False Negatives would remain permanently invisible**, rendering the system blind to evasive zero-day mutations until catastrophic physical damage occurred.
-* **Resolution via Asymmetric Shadow Auditing (`ShadowAuditAnalyzer`):** To break this epistemological blindness without saturating the low-bandwidth telemetry link, MicroShield implements **Statistical Shadow Auditing**. Alongside real-time anomaly alerts, the `EdgeMitigationController` periodically extracts a non-blocking, stratified circular sample (e.g., 1 out of every `K` frames, plus boundary-adjacent benign frames that passed close to decision split thresholds) of traffic labeled `BENIGN_TRAFFIC` and transmits it over the out-of-band audit stream.
-  On the host tier, the `ShadowAuditAnalyzer` evaluates these sampled vectors against computationally heavy reference ensembles—such as high-depth Random Forests, Isolation Forests, and Deep Autoencoders—that cannot fit on an MCU. When the reference ensemble identifies an attack signature within a sample that the edge classified as benign, an **unmasked False Negative discrepancy** is automatically raised on the `SecuritySupervisionConsole` and routed to the retraining pipeline.
+* **Observable False Positives:** When legitimate industrial telemetry is misclassified as anomalous, operations are impacted immediately. In `Dashield`, analysts inspect the exact boolean path triggered (`matched_rule_id`), verify operational context, and execute an operator override that unblocks the node and records the vector for future model adjustment.
+* **Silent False Negatives:** Conversely, when stealthy manipulation commands or low-rate probes bypass edge thresholds, the edge system takes no action. Left unchecked, evasive payloads remain completely undetected until physical operational disruption occurs.
+* **Resolution via Asymmetric Shadow Auditing:** To intercept stealthy evasions without saturating communication links, the edge controller periodically extracts a lightweight, stratified sample (`1:K` frames plus boundary-adjacent frames that evaluated close to threshold splits) of traffic marked as benign. The `ShadowAuditAnalyzer` in `Dashield` evaluates these samples against a higher-capacity reference ensemble (100-tree Random Forest and statistical consistency verifiers). If the reference ensemble classifies a sampled frame as malicious, an unmasked discrepancy alert (`UNMASKED_FN`) is raised, alerting operators and queueing the vector for retraining.
 
-### 1.3.3 Concept Drift Detection & Closed-Loop Retraining
-Industrial networks are non-stationary environments: firmware upgrades, new sensor rollouts, and evolving attack toolkits induce **Concept Drift** (shifts in the underlying joint probability distribution `P(X, Y)` of feature vectors `X` and threat classes `Y`). 
+### 1.3.3 Concept Drift Monitoring & Model Retraining
+Operational conditions in industrial networks evolve due to software updates, operational load changes, and modified threat tooling, inducing statistical drift in the underlying feature distribution. 
 
-The `DriftRetrainingOrchestrator` continuously monitors three convergence signals:
-1. **Cumulative Operator FP Overrides:** The rate of manual False Positive corrections submitted via the console.
-2. **Unmasked FN Discrepancy Rate:** The frequency of silent evasions caught by the `ShadowAuditAnalyzer`.
-3. **Statistical Distribution Divergence:** Quantitative drift metrics—specifically the **Population Stability Index (PSI)** and two-sample **Kolmogorov-Smirnov (K-S) statistics**—computed over sliding windows of incoming telemetry relative to the baseline training distribution (**Bot-IoT** and **Edge-IIoTset**).
+The `DriftRetrainingOrchestrator` tracks model stability through a composite Retraining Readiness Index synthesizing three signals:
+1. Accumulated operator-confirmed False Positive overrides.
+2. Intercepted False Negative discrepancies identified via Shadow Auditing.
+3. Distributional divergence quantified through the Population Stability Index (PSI) and Kolmogorov-Smirnov statistics computed against baseline distributions.
 
-When any of these indicators breaches its calibrated tolerance threshold, the orchestrator merges the newly labeled FP/FN telemetry into the historical corpus, trains and prunes an updated reference Decision Tree, verifies its F1-score and depth invariants, and transpiles a new static C99 code asset ready for deterministic edge deployment.
+When the readiness index crosses its target boundary, the retraining engine integrates verified operational telemetry into baseline datasets, trains a depth-bounded Decision Tree, verifies classification invariants, and transpiles an updated static C99 node array for deployment.
 
 ---
 
-## 1.4 Operational Environments, Interaction Topologies & Data Lifecycle
+## 1.4 Operational Environments, Topologies & Data Lifecycle
 
-MicroShield operates across heterogeneous physical environments and interaction timescales, requiring a disciplined multi-tier data governance strategy that respects the volatile nature of embedded SRAM while preserving forensic auditability on the supervision tier.
+MicroShield partitions operational responsibilities across discrete physical tiers to balance deterministic edge execution with comprehensive central auditability.
 
-| Operational Tier | Physical Deployment Location | Interacting Actors / Subsystems | Interaction Frequency & Modality | Data Stored & Persistence Policy |
+| Operational Tier | Deployment Environment | Interacting Entities | Operating Cadence | Data Persistence & Boundary Policies |
 | :--- | :--- | :--- | :--- | :--- |
-| **Tier 1: Hard Real-Time Edge Runtime** | Industrial field cabinets, PLC backplanes, telecom base stations (MCU SRAM/Flash). | Physical network interfaces, RTOS kernel tasks, hardware timers/watchdogs. | **Continuous Wire-Speed (Microseconds):** Synchronous C99 API calls per ingress frame (`O(tree_depth)`). | **Volatile Static RAM Only:** Circular sliding-window counters (tens of bytes) and compiled read-only tree thresholds in Flash. Zero persistent user/payload storage on edge. |
-| **Tier 2: Out-of-Band Telemetry & Shadow Bus** | Isolated diagnostic UART / RS-485 serial link between field MCU and local gateway. | `EdgeMitigationController` (producer) and `TelemetryCollector` daemon (consumer). | **Event-Driven & Periodic (Milliseconds to Seconds):** Asynchronous emission on attack detection + periodic circular benign sampling. | **Transient Ring Buffers:** Compact binary frames encapsulating timestamp, 8-feature vector, tree verdict, and triggered leaf ID. |
-| **Tier 3: Fleet Supervision & SecOps Console** | Enterprise Security Operations Center (SOC) or plant control room (Browser / Workstation). | IoT Security Analysts, Plant Directors, and incident response teams. | **Interactive & On-Demand (Minutes to Hours):** Visual heatmap inspection, XAI path auditing, and manual FP flagging. | **Persistent Time-Series & Incident Store:** Structured audit logs (JSON/SQLite/Parquet) retained for NIS 2 forensic compliance and regulatory reporting. |
-| **Tier 4: Offline MLOps & CI/CD Pipeline** | On-premise compute server or containerized cloud CI/CD runner (Docker / Poetry). | Firmware Engineers, Data Scientists, and automated `DriftRetrainingOrchestrator`. | **Batch & Threshold-Triggered (Days to Weeks):** Invoked upon statistical drift detection or scheduled release cycles. | **Versioned Benchmark & Artifact Repository:** Curated **Bot-IoT** / **Edge-IIoTset** subsets, validated FP/FN feedback matrices, and versioned `.c`/`.h` transpiled tree assets. |
+| **Tier 1: Real-Time Edge Runtime** | Field controllers, automation cabinets, telemetry interfaces (ARM Cortex-M4F). | Network interfaces, RTOS tasks, interrupt controllers. | **Synchronous Wire-Speed (Microseconds):** Frame inspection within deterministic bounds (`O(tree_depth)`). | **Volatile Static Memory:** Sliding-window registers (`<= 128 Bytes`) and immutable Flash structures (`<= 4 KB`). Zero dynamic heap. |
+| **Tier 2: Out-of-Band Telemetry Link** | Dedicated serial links (UART) or virtual container sockets. | `EdgeMitigationController` and host `TelemetryCollector`. | **Event-Driven & Periodic (Milliseconds to Seconds):** Continuous incident alerts and stratified audit samples. | **Transient Buffering:** Fixed-size 24-byte binary frames protected by CRC-16 checksums. |
+| **Tier 3: Supervision & SOC Console** | Plant operations rooms and central monitoring consoles. | Security analysts, operational engineers, plant supervisors. | **Interactive / Real-Time (Seconds to Hours):** Telemetry visualization, glass-box rule inspection, and manual override. | **Persistent Storage (SQLite WAL):** Structured audit logs, discrepancy records, and compliance artifacts. |
+| **Tier 4: MLOps & Verification Pipeline** | Automated CI/CD runners and local training environments. | Firmware maintainers, data engineers, automated testing tools. | **Triggered on Events / Periodic:** Executed on threat bulletin updates or detected statistical drift. | **Versioned Artifacts:** Curated reference datasets, regression suites, and compiled C99 header files. |
 
-*Table 1.3: Multi-tier operational topology, interaction frequency, and data persistence governance across the MicroShield ecosystem.*
+*Table 1.3: Distributed operational environment boundaries and data retention characteristics.*
 
 ---
 
 ## 1.5 Stakeholder Taxonomy & Engineering Personas
 
-Because MicroShield bridges low-level embedded firmware engineering, operational cybersecurity analysis, and executive regulatory governance, its requirements are driven by three distinct stakeholder archetypes. Rather than generic end-users, these personas represent specialized engineering and leadership roles with rigorous, occasionally competing technical constraints.
+MicroShield is engineered to address the specific technical requirements and operational constraints of three core industrial stakeholder roles:
 
 ### 1.5.1 Persona 1: Taddeo Pallabà — *Senior Embedded Firmware & RTOS Engineer*
-* **Professional Profile:** 42 years old, M.Sc. in Electronic Engineering. Possesses 15 years of bare-metal and FreeRTOS firmware development experience on ARM Cortex-M4/M7 microcontrollers (such as STM32F4/H7 families) for industrial motion control and fieldbus gateways.
-* **Operational Context & Pain Points:** Taddeo manages firmware where every kilobyte of SRAM and every microsecond of interrupt latency is strictly budgeted. He distrusts third-party security libraries that introduce external dependencies, dynamic memory allocation (`malloc`/`free`), or unpredictable execution loops that could starve critical motor-control timers and trigger hardware watchdog resets.
-* **Core Expectations from MicroShield:**
-  * A clean, self-contained **ANSI C99 API** (`microshield_init()`, `microshield_evaluate()`) that compiles cleanly under `-Wall -Wextra -Werror -pedantic` without external OS dependencies.
-  * **Strict Determinism & Zero Heap Usage:** Mathematical guarantee that packet evaluation completes within a fixed number of CPU clock cycles (`O(tree_depth)`) using exclusively stack or static BSS memory.
-  * **Automated Cross-Compilation & Verification:** Containerized CI/CD pipelines that automatically verify memory footprints and unit tests before any transpiled tree update touches his firmware repository.
+* **Profile:** Experienced engineer managing bare-metal and RTOS firmware across industrial controllers and fieldbus interfaces.
+* **Operational Context:** Responsible for maintaining real-time control loops where available memory and interrupt response windows are tightly constrained. Avoids external dependencies, dynamic memory allocation, or non-deterministic loops that could jeopardize critical task deadlines.
+* **System Requirements:**
+  * Clean ANSI C99 library interfaces with zero external OS dependencies.
+  * Deterministic worst-case execution time (`WCET <= 1,500 clock cycles`) verified on target hardware.
+  * Static memory layout enforcing a strict zero-malloc model with bounded stack utilization.
 
-### 1.5.2 Persona 2: Lentina Gigi — *Industrial IoT Security Operations (SecOps) Analyst*
-* **Professional Profile:** 31 years old, M.Sc. in Cybersecurity. Leads threat monitoring inside a converged IT/OT Security Operations Center overseeing thousands of distributed field sensors and telecommunications relay nodes.
-* **Operational Context & Pain Points:** Lentina is overwhelmed by alert fatigue caused by opaque anomaly detectors that output unintelligible probability scores (e.g., *"Anomaly Score: 0.87"*) without explaining *why* a frame was blocked. Furthermore, she is acutely aware that resource-constrained edge rules can suffer from silent False Negatives when attackers slightly mutate packet rates or payload padding.
-* **Core Expectations from MicroShield:**
-  * **Intrinsic Explainable AI (XAI):** Every alert on her supervision console must expose the exact boolean decision path traversed in the C tree (e.g., `iat_delta <= 120us AND payload_entropy > 0.82 -> ANOMALY_DOS_FLOOD`).
-  * **Actionable False Positive Mitigation:** A streamlined workflow to flag False Positives directly from the live telemetry stream when legitimate burst traffic is misclassified.
-  * **Automated False Negative Discovery:** Visibility into **Shadow Audit Discrepancy Reports**, allowing her to see when the server-side ensemble catches evasive attacks that slipped past the edge MCU, and to trigger closed-loop model retraining with a single command.
+### 1.5.2 Persona 2: Lentina Gigi — *Industrial IoT Security Operations Analyst*
+* **Profile:** Security analyst monitoring telemetry across distributed industrial plants, utilities, and logistics networks.
+* **Operational Context:** Seeks to avoid alert fatigue caused by opaque statistical scoring while maintaining visibility into stealthy threats that attempt to bypass perimeter controls.
+* **System Requirements:**
+  * Transparent, ante-hoc explainable decision paths detailing the exact feature conditions that triggered each alert.
+  * Rapid manual override mechanisms for operator-verified benign traffic bursts.
+  * Out-of-band shadow auditing to unmask evasive False Negatives and track statistical concept drift.
 
-### 1.5.3 Persona 3: Zanni Giorgioni — *Chief Digital Officer (CDO) & Plant Operations Director*
-* **Professional Profile:** 54 years old, M.Sc. in Industrial Engineering & MBA. Accountable for plant-wide operational availability, capital expenditure (CapEx), and legal compliance with European cybersecurity directives across multiple production facilities.
-* **Operational Context & Pain Points:** Zanni faces strict deadlines to bring legacy industrial installations into compliance with the **EU Cyber Resilience Act (CRA)** and **NIS 2 Directive**. Replacing thousands of deployed microcontrollers with expensive Linux-capable edge gateways is financially prohibitive, yet a single successful ransomware or DoS outage on the factory floor costs tens of thousands of euros per hour in halted production.
-* **Core Expectations from MicroShield:**
-  * **Zero-CapEx Legacy Retrofitting:** The ability to deploy enterprise-grade intrusion detection via a lightweight firmware update onto existing low-cost microcontrollers.
-  * **Autonomous Fault Containment:** Immediate, localized quarantine of compromised edge nodes to prevent lateral threat propagation across the plant network without requiring human latency.
-  * **Auditable Regulatory Compliance:** Exportable incident timelines, drift stability metrics, and vulnerability handling logs demonstrating full due diligence under EU CRA and NIS 2 audits.
+### 1.5.3 Persona 3: Zanni Giorgioni — *Chief Digital Officer & Industrial Operations Director*
+* **Profile:** Operations executive responsible for plant availability, digital transformation roadmaps, and regulatory alignment.
+* **Operational Context:** Faces regulatory deadlines under European cybersecurity frameworks while needing to secure existing brownfield assets without incurring massive capital replacement expenditures.
+* **System Requirements:**
+  * Firmware-level retrofitting of legacy hardware platforms without physical board redesign.
+  * Autonomous local fault containment that isolates compromised interfaces before lateral propagation occurs.
+  * Automated compliance reporting supporting 24-hour incident documentation under NIS 2 and CRA guidelines.
 
-| Persona & Role | Primary Technical Domain | Non-Negotiable System Invariant | Primary Interface with MicroShield | Key Performance Indicator (KPI) |
+| Persona & Role | Primary Technical Domain | Non-Negotiable Invariant | Primary System Interface | Core Performance Indicator |
 | :--- | :--- | :--- | :--- | :--- |
-| **Taddeo Pallabà** (*Embedded Firmware Engineer*) | Physical Field Domain (C99 / MCU / RTOS) | Zero dynamic allocation (`malloc`-free) & hard `O(tree_depth)` WCET bound. | C99 header/source library (`libmicroshield`) & transpiled static tree headers. | Worst-case CPU cycle count per frame & static Flash/SRAM byte footprint. |
-| **Lentina Gigi** (*IoT SecOps Analyst*) | Fleet Supervision & MLOps Domain (SOC / Analytics) | White-box XAI rule traceability & Shadow Audit interception of silent False Negatives. | Interactive `SecuritySupervisionConsole` & `DriftRetrainingOrchestrator` CLI. | Macro F1-score, False Positive Rate (FPR), and Mean Time to Detect (MTTD) drift. |
-| **Zanni Giorgioni** (*CDO & Plant Director*) | Executive Governance & Regulatory Compliance | Operational continuity (Zero unplanned downtime) & EU CRA / NIS 2 alignment. | Executive risk heatmaps, quarantine status boards, and compliance audit reports. | Fleet availability percentage, regulatory audit pass rate, and avoided CapEx. |
+| **Taddeo Pallabà** (*Firmware Engineer*) | Embedded C99 / MCU Execution | Zero dynamic allocation & deterministic cycle bounds | C99 Static Library & generated headers | Worst-case cycle count & static memory footprint |
+| **Lentina Gigi** (*SecOps Analyst*) | Supervision Console & Analytics | Ante-hoc rule interpretability & shadow discrepancy discovery | `Dashield` Supervision Dashboard | Detection F1-Score & False Negative interception rate |
+| **Zanni Giorgioni** (*Operations Director*) | Plant Governance & Compliance | Operational continuity & regulatory standard alignment | Executive views & compliance dossiers | Uptime percentage & regulatory audit readiness |
 
-*Table 1.4: Synthesis of stakeholder personas, domain invariants, system interfaces, and validation KPIs.*
+*Table 1.4: Detailed synthesis of stakeholder roles, technical constraints, and evaluation metrics.*
 
 ---
 
-## 1.6 References & Normative Bibliography
+## 1.6 References & Technical Bibliography
 
-1. **Koroniotis, N., Moustafa, N., Sitnikova, E., & Turnbull, B.** (2019). *Towards the development of realistic botnet dataset in the Internet of Things for network forensic analytics: Bot-IoT dataset*. Future Generation Computer Systems, 100, 779–796. DOI: `10.1016/j.future.2019.05.041`.
-2. **Ferrag, M. A., Friha, O., Hamouda, D., Maglaras, L., & Janicke, H.** (2022). *Edge-IIoTset: A New Comprehensive Realistic Cyber Security Dataset of IoT and IIoT Applications for Centralized and Federated Learning*. IEEE Access, 10, 40281–40306. DOI: `10.1109/ACCESS.2022.3165809`.
-3. **European Parliament and Council of the European Union** (2024). *Regulation (EU) 2024/2847 on horizontal cybersecurity requirements for products with digital elements (Cyber Resilience Act)*. Official Journal of the European Union, L series.
-4. **European Parliament and Council of the European Union** (2022). *Directive (EU) 2022/2555 on measures for a high common level of cybersecurity across the Union (NIS 2 Directive)*. Official Journal of the European Union, L 333/80.
-5. **International Electrotechnical Commission (IEC)** (2019). *IEC 62443-4-2: Security for industrial automation and control systems — Part 4-2: Technical security requirements for IACS components*. Geneva, Switzerland.
-6. **Breiman, L., Friedman, J., Stone, C. J., & Olshen, R. A.** (1984). *Classification and Regression Trees (CART)*. Chapman and Hall/CRC.
+1. **Koroniotis, N., Moustafa, N., Sitnikova, E., & Turnbull, B.** (2019). *Towards the development of realistic botnet dataset in the Internet of Things for network forensic analytics: Bot-IoT dataset*. Future Generation Computer Systems, 100, 779–796.
+2. **Ferrag, M. A., Friha, O., Hamouda, D., Maglaras, L., & Janicke, H.** (2022). *Edge-IIoTset: A New Comprehensive Realistic Cyber Security Dataset of IoT and IIoT Applications for Centralized and Federated Learning*. IEEE Access, 10, 40281–40306.
+3. **European Parliament and Council of the European Union** (2024). *Regulation (EU) 2024/2847 on horizontal cybersecurity requirements for products with digital elements (Cyber Resilience Act)*. Official Journal of the European Union.
+4. **European Parliament and Council of the European Union** (2022). *Directive (EU) 2022/2555 on measures for a high common level of cybersecurity across the Union (NIS 2 Directive)*. Official Journal of the European Union.
+5. **International Electrotechnical Commission** (2019). *IEC 62443-4-2: Security for industrial automation and control systems — Part 4-2: Technical security requirements for IACS components*.
+6. **Breiman, L., Friedman, J., Stone, C. J., & Olshen, R. A.** (1984). *Classification and Regression Trees*. Wadsworth & Brooks/Cole Advanced Books & Software.
+7. **Cárdenas, A. A., Amin, S., Lin, Z. S., Huang, Y. L., Huang, C. Y., & Sastry, S.** (2011). *Attacks against process control systems: risk assessment, detection, and response*. Proceedings of the 6th ACM Symposium on Information, Computer and Communications Security (ASIACCS), pp. 355–366.
+8. **Urbina, D. I., Giraldo, J. A., Tippenhauer, N. O., Mashima, D., Valente, A., Cárdenas, A. A., & Alvaro, M.** (2016). *Limiting the impact of stealthy attacks on industrial control systems*. Proceedings of the 2016 ACM SIGSAC Conference on Computer and Communications Security (CCS), pp. 1092–1105.
+9. **Morris, T., & Gao, W.** (2014). *Industrial Control System Traffic Data Sets for Intrusion Detection Research*. International Conference on Critical Infrastructure Protection, pp. 65–78.
+10. **Rudin, C.** (2019). *Stop explaining black box machine learning models for high stakes decisions and use interpretable models instead*. Nature Machine Intelligence, 1(5), 206–215.
+11. **Gama, J., Medas, P., Castillo, G., & Rodrigues, P.** (2004). *Learning with drift detection*. Brazilian Symposium on Artificial Intelligence, pp. 286–295.
+12. **Siddiqi, N.** (2006). *Credit Risk Scorecards: Developing and Implementing Intelligent Credit Scoring*. John Wiley & Sons.
+13. **Cybersecurity and Infrastructure Security Agency (CISA)** (2025). *Advisory ICSA-25-140-03: Vulnerabilities in Industrial Refrigeration Controllers (CVE-2025-41450, CVE-2025-41451)*.
+14. **Agenzia per la Cybersicurezza Nazionale (ACN / CSIRT Italia)** (2026). *Bollettino di allerta e indirizzi di mitigazione per apparati industriali e di teleassistenza nella catena del freddo*. Roma, Italia.
