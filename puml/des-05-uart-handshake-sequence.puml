@@ -1,0 +1,85 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName SansSerif
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam roundcorner 6
+skinparam ParticipantPadding 10
+skinparam BoxPadding 10
+
+skinparam sequence {
+    ArrowColor #334155
+    ActorBorderColor #334155
+    LifeLineBorderColor #64748B
+    LifeLineBackgroundColor #F1F5F9
+    ParticipantBorderColor #334155
+    ParticipantBackgroundColor #FFFFFF
+    ParticipantFontSize 11
+    ParticipantFontColor #0F172A
+}
+
+box "Physical Field Operational Plane (Data Plane)" #F8FAFC
+    participant "Industrial Bus / Sensor\n(Modbus RTU / CAN / Eth)" as Fieldbus
+    participant "STM32F407RE MCU\n(libmicroshield C99)" as EdgeNode
+end box
+
+box "Agnostic Out-of-Band Transport" #FFFFFF
+    participant "Physical / Virtual Link\n(UART 8N1 / 4G / LoRa / TCP)" as Transport
+end box
+
+box "Fleet Supervision & MLOps Governance (Control Plane)" #F8FAFC
+    participant "dashield-collector\n(Python Async Bridge)" as Collector
+    participant "ShadowAuditEnsembleService\n(100-Tree Host Random Forest)" as ShadowAuditor
+    participant "Dashield Web Console\n(SecOps Analyst UI :8501)" as UI
+end box
+
+== 1. Channel Synchronization & Protocol Handshake ==
+
+Collector -> Transport : Probe Transport Endpoint (/dev/ttyACM0 or TCP:9999)
+Transport -> EdgeNode : Check Physical Line / Send Sync Ping (0xAA55)
+EdgeNode --> Transport : Emit 24B Node Descriptor (Magic: 0xAA55, NodeID: 0x01, State: NORMAL)
+Transport --> Collector : Stream Validated (CRC-16 OK)
+Collector -> UI : Mark Node 0x01 ONLINE (Physical HIL / Virtual Docker)
+
+== 2. Inline Frame Ingestion & Asymmetric Telemetry Streaming ==
+
+Fieldbus -> EdgeNode : Ingress Frame (Payload, Length, Timestamp)
+activate EdgeNode
+note over EdgeNode : Zero-Copy Inline Inspection:\n1. O(1) Sliding-Window Feature Extraction (Q8)\n2. O(tree_depth) Decision Tree Evaluation\n3. 5-State FSM Mitigation Update
+
+alt Case A: Anomaly Detected (DoS Flood / Command Injection)
+    note over EdgeNode #FEE2E2 : Verdict: ANOMALY_*\nFSM Escalation: SUSPICIOUS -> THROTTLED_L1\nPhysical Action: Immediate Packet DROP
+    EdgeNode -> Transport : TX 24B Binary Alert Frame (msg_type=0x01, Verdict, RuleID, CRC-16)
+    Transport -> Collector : Forward 24B Alert Frame
+    Collector -> Collector : Verify CRC-16 & Write Record to SQLite WAL
+    Collector -> UI : Push Live Anomaly Notification (RuleID, Feature Trace)
+else Case B: Benign Frame & Stratified Shadow Sampling (1:K or Margin < Epsilon)
+    note over EdgeNode #ECFDF5 : Verdict: BENIGN_TRAFFIC\nPhysical Action: Frame Forwarded to Actuator
+    EdgeNode -> Transport : TX 24B Benign Audit Frame (msg_type=0x02, Vector, Margin, CRC-16)
+    Transport -> Collector : Forward 24B Audit Frame
+    Collector -> ShadowAuditor : Evaluate Vector against 100-Tree Reference Ensemble
+    
+    alt Ensemble Agrees: Benign
+        ShadowAuditor -> Collector : No Action (Silently Update Baseline Covariance Metrics)
+    else Ensemble Disagrees: Stealthy False Negative Detected (e.g. Setpoint Tampering)
+        ShadowAuditor -> Collector : Discrepancy Found! (Discordance Score > 0.85)
+        Collector -> Collector : Persist UNMASKED_FN in SQLite WAL Retraining Buffer
+        Collector -> UI : Trigger High-Priority Alert: "Unmasked Stealthy FN (Cold-Chain Setpoint)"
+    end
+end
+deactivate EdgeNode
+
+== 3. Downlink Control & Operator False Positive Override ==
+
+UI -> Collector : Operator Flags Alert as FP & Clicks "Override & Reset Node"
+Collector -> Transport : TX 24B Command Frame (Magic: 0xAA55, msg_type=0x10, CMD_RESET_FSM, CRC-16)
+Transport -> EdgeNode : RX Command Byte Stream
+activate EdgeNode
+EdgeNode -> EdgeNode : Validate CRC-16 & Authenticate Token
+note over EdgeNode #FEF3C7 : FSM Reset Execution:\nTHROTTLED/LOCKDOWN -> NORMAL\nRe-enable RX Interrupt
+EdgeNode --> Transport : TX 24B Ack Frame (FSM_State = NORMAL, CRC-16)
+deactivate EdgeNode
+Transport --> Collector : Forward State Ack
+Collector -> UI : Update Fleet View: Node 0x01 Restored to NORMAL
+
+@enduml

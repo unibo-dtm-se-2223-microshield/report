@@ -130,3 +130,65 @@ In a distributed cyber-physical system, components must discover and authenticat
    * Each edge C99 container is provisioned with a deterministic node identifier (`MS_NODE_ID = 1..N`) and hostname (`edge-node-01`, `edge-node-02`, `edge-node-03`) via environment variables. Upon startup, `ms_edge_node_daemon` resolves `dashield-orchestrator:9999` via standard POSIX `getaddrinfo()` and establishes a persistent full-duplex byte-stream connection that emulates a physical UART wire (`PySerial` `socket://` protocol handler).
 2. **Physical Hardware-in-the-Loop (`STM32F407RE`) Auto-Detection:**
    When the physical **STM32F407RE** board is connected via USB ST-Link Virtual COM Port, the Linux udev subsystem maps it to `/dev/ttyACM0` (or `/dev/ttyUSB0`). The `TelemetryTransportPort` in **`Dashield`** implements an automatic discovery probe: if `/dev/ttyACM0` is present and responds with the MicroShield `0xAA55` sync handshake, it attaches a `PhysicalUartTransport` worker alongside the virtualized Docker nodes, allowing physical and simulated nodes to be monitored side-by-side on Tab 1.
+
+---
+
+## 3.3 Wire-Speed Telemetry Protocol, 24-Byte Binary Framing & Cross-Tier Handshake
+
+In distributed cyber-physical systems engineering, defining the cross-tier boundary contract is a fundamental software design obligation. Rather than adopting heavyweight, serialized data interchange formats (such as JSON or Protobuf) that would mandate dynamic heap allocations and non-deterministic parsing routines on bare-metal microcontrollers, MicroShield defines a bespoke, **naturally aligned 24-byte binary telemetry protocol**.
+
+This protocol serves as the formal boundary contract between the low-level ANSI C99 edge inspection engine (`libmicroshield`) and the auxiliary Python OOP supervision suite (`Dashield`).
+
+[![MicroShield 24-Byte Binary Frame Layout](../../puml/des-04-binary-frame-layout.svg)](../../puml/des-04-binary-frame-layout.svg)  
+*(Click on the diagram to open the full-resolution vector graphic in a new tab)*  
+*Figure 3.4: Memory-aligned binary layout of the MicroShield 24-byte telemetry frame, illustrating 32-bit boundary alignment, fixed-width fields, and CRC-16-CCITT integrity block.*
+
+### 3.3.1 Binary Frame Architecture & Memory Alignment Invariants
+
+The binary frame is structured to adhere to strict hardware execution constraints and object serialization contracts:
+1. **Natural 32-Bit Word Alignment:**  
+   The total frame length is exactly $24\text{ Bytes}$ ($192\text{ bits}$), which is an exact multiple of 4 and 8 bytes. All internal 32-bit fields (`seq_ts`, `feat_iat`) and 16-bit fields (`sync_word`, `rule_id`, `feat_len`, `aux_meta`, `crc16`) reside on naturally aligned byte boundaries. This layout permits single-cycle, unaligned-fault-free load/store memory operations (`LDR`/`STR`) on ARM Cortex-M4 architectures and standard memory packing across POSIX C compilers (`#pragma pack(push, 1)`).
+2. **Zero-Allocation Stack Serialization:**  
+   The frame is serialized and deserialized directly within fixed-size stack buffers (`uint8_t buffer[24]`), completely eliminating dynamic heap allocations (`malloc`/`free`) and preventing memory fragmentation.
+3. **Payload Structure:**
+   * **`sync_word` (`0x00..0x01` - uint16):** Two-byte magic sequence (`0xAA55`) used for frame demarcation, boundary recovery, and deserializer synchronization.
+   * **`msg_type` (`0x02` - uint8):** Distinguishes operational message types (`0x01 = ANOMALY_ALERT`, `0x02 = SHADOW_SAMPLE`, `0x10 = CMD_RESET_FSM`).
+   * **`node_id` (`0x03` - uint8):** Logical source/target edge node identifier (`0x01 .. 0xFF`).
+   * **`seq_ts` (`0x04..0x07` - uint32):** Monotonically increasing sequence number or hardware millisecond timestamp for ordering and replay-attack detection.
+   * **`verdict` (`0x08` - uint8):** Classification decision (`0 = BENIGN`, `1 = DOS_FLOOD`, `2 = SCAN_PROBE`, `3 = INJECTION`).
+   * **`fsm_state` (`0x09` - uint8):** Current mitigation FSM operational state (`NORMAL`, `SUSPICIOUS`, `THROTTLED_L1`, `QUARANTINED_L2`, `LOCKDOWN_L3`).
+   * **`rule_id` (`0x0A..0x0B` - uint16):** Ante-hoc Explainable AI (XAI) identifier specifying the exact decision tree leaf path traversed.
+   * **`feat_iat`, `feat_len`, `feat_ent`, `feat_rate` (`0x0C..0x13`):** Compact representation of extracted frame telemetry for out-of-band auditability and drift calculation.
+   * **`aux_meta` (`0x14..0x15` - uint16):** Sub-threshold decision distance ($\epsilon$) or command argument.
+   * **`crc16` (`0x16..0x17` - uint16):** ITU-T CRC-16-CCITT checksum (polynomial `0x1021`, initial value `0xFFFF`) computed over bytes `0x00` through `0x15`.
+
+---
+
+### 3.3.2 Physical Transport Agnosticism & Plane Decoupling
+
+A critical architectural property of MicroShield is the strict decoupling between the **Operational Data Plane** and the **Supervisory Telemetry/Control Plane**:
+
+* **Operational Field Data Plane:**  
+  The industrial communication bus (e.g., Modbus RTU over RS-485, CAN bus, or Ethernet) transports primary operational payload packets directly between physical plant sensors, refrigeration controllers, and actuators. `libmicroshield` inspects these frames inline with strictly zero-copy memory overhead.
+* **Out-of-Band Supervisory Plane:**  
+  The 24-byte binary telemetry frames travel over a dedicated secondary channel. While physical bench testing implements this channel over a USB-CDC Virtual COM Port (UART at $115,200\text{ bps}$, 8N1), the transport interface in both C99 and Python is engineered to be **hardware- and medium-agnostic**. The byte stream can be mapped transparently across:
+  * Cellular modems (4G LTE-M / NB-IoT / 5G) via AT command tunnels.
+  * Long-range industrial radio links (LoRaWAN, Zigbee, WirelessHART).
+  * Standard TCP/IP sockets for containerized virtual testbeds (`socket://dashield-orchestrator:9999`).
+
+[![Cross-Tier Handshake and Streaming Sequence](../../puml/des-05-uart-handshake-sequence.svg)](../../puml/des-05-uart-handshake-sequence.svg)  
+*(Click on the diagram to open the full-resolution vector graphic in a new tab)*  
+*Figure 3.5: UML Sequence Diagram documenting cross-tier channel synchronization, asymmetric dual-path streaming (Alerts vs. Shadow Audit samples), and downlink operator quarantine override.*
+
+---
+
+### 3.3.3 Communication Protocol Dynamics & Handshake Sequence
+
+The protocol lifecycle, documented in Figure 3.5, enforces a robust state machine across both endpoints:
+1. **Channel Discovery & Sync Handshake:**  
+   The Python supervision daemon (`dashield-collector`) probes the transport endpoint. The edge node acknowledges synchronization by emitting its 24-byte descriptor frame with `sync_word = 0xAA55`. The Python ingestion service verifies the CRC-16 checksum; if valid, the node is registered into the active fleet state as `ONLINE`.
+2. **Asymmetric Ingress Streaming:**  
+   * **Incident Alerts (`msg_type = 0x01`):** Every detected anomaly triggers instantaneous serialization of a 24-byte alert frame. Ingestion workers parse the frame, log the incident into the transactional SQLite WAL store, and notify the web UI via asynchronous event callbacks.
+   * **Stratified Shadow Auditing (`msg_type = 0x02`):** Benign frames are sampled at a configurable ratio ($1:K$, with priority given to boundary-adjacent vectors where $|\text{feature} - \text{split}| < \epsilon$). These samples are routed to the Python `ShadowAuditEnsembleService` to evaluate potential False Negatives against a high-capacity reference model without saturating the channel.
+3. **Downlink Override Command Dispatch:**  
+   When an operator overrides a False Positive via the web console, `dashield-collector` dispatches an authenticated 24-byte command frame (`msg_type = 0x10`, `CMD_RESET_FSM`). The edge firmware validates the frame checksum, executes the state transition from `LOCKDOWN_L3` or `QUARANTINED_L2` back to `NORMAL`, re-enables the hardware receiver interrupt, and transmits a confirmation acknowledgment.
