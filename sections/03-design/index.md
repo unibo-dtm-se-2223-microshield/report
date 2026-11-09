@@ -189,6 +189,89 @@ The protocol lifecycle, documented in Figure 3.5, enforces a robust state machin
    The Python supervision daemon (`dashield-collector`) probes the transport endpoint. The edge node acknowledges synchronization by emitting its 24-byte descriptor frame with `sync_word = 0xAA55`. The Python ingestion service verifies the CRC-16 checksum; if valid, the node is registered into the active fleet state as `ONLINE`.
 2. **Asymmetric Ingress Streaming:**  
    * **Incident Alerts (`msg_type = 0x01`):** Every detected anomaly triggers instantaneous serialization of a 24-byte alert frame. Ingestion workers parse the frame, log the incident into the transactional SQLite WAL store, and notify the web UI via asynchronous event callbacks.
-   * **Stratified Shadow Auditing (`msg_type = 0x02`):** Benign frames are sampled at a configurable ratio ($1:K$, with priority given to boundary-adjacent vectors where $|\text{feature} - \text{split}| < \epsilon$). These samples are routed to the Python `ShadowAuditEnsembleService` to evaluate potential False Negatives against a high-capacity reference model without saturating the channel.
+   * **Stratified Shadow Auditing (`msg_type = 0x02`):** Benign frames are sampled at a configurable ratio (1:K, with priority given to boundary-adjacent vectors where $|feature - split| < \epsilon$). These samples are routed to the Python `ShadowAuditEnsembleService` to evaluate potential False Negatives against a high-capacity reference model without saturating the channel.
 3. **Downlink Override Command Dispatch:**  
    When an operator overrides a False Positive via the web console, `dashield-collector` dispatches an authenticated 24-byte command frame (`msg_type = 0x10`, `CMD_RESET_FSM`). The edge firmware validates the frame checksum, executes the state transition from `LOCKDOWN_L3` or `QUARANTINED_L2` back to `NORMAL`, re-enables the hardware receiver interrupt, and transmits a confirmation acknowledgment.
+
+---
+
+## 3.4 Embedded C99 Edge Architecture & Micro-Engine Design (`libmicroshield`)
+
+The primary engineering artifact deployed on resource-constrained field nodes is `libmicroshield.a`, a freestanding, zero-dependency ANSI C99 static library. Engineered strictly under MISRA-C safety guidelines and the **Zero-Malloc Invariant** (`IR-01`, `IR-02`, `NFR-02`), the library provides deterministic real-time intrusion detection and autonomous local mitigation without utilizing dynamic heap allocation (`0 Bytes` `malloc`/`free`).
+
+[![Deterministic C99 Inspection Pipeline](../../puml/des-07-c99-pipeline-flow.svg)](../../puml/des-07-c99-pipeline-flow.svg)  
+*(Click on the diagram to open the full-resolution vector graphic in a new tab)*  
+*Figure 3.6: Activity flow of the ANSI C99 edge engine, illustrating zero-copy frame ingestion, O(1) Q8 fixed-point feature extraction via Flash LUT, deterministic decision tree traversal, and FSM mitigation dispatch.*
+
+### 3.4.1 Zero-Copy Ingestion & Static State Memory Layout
+
+Traditional network intrusion detection systems buffer multi-packet streams into dynamic heap queues, incurring memory fragmentation and non-deterministic allocation latency. On an ARM Cortex-M4F microcontroller operating bare-metal or under an RTOS, memory must be allocated statically at compile time.
+
+`libmicroshield` implements a zero-copy frame ingestion model:
+1. **Pass-by-Reference Interface:**  
+   The primary entry point `ms_ingest_frame(ms_context_t *ctx, const uint8_t *payload, uint16_t len, uint32_t ts_us)` receives a raw pointer to the network frame in the hardware receive buffer. The payload is inspected in-place without duplicating bytes into intermediate SRAM buffers.
+2. **Context Memory Footprint (`<= 128 Bytes`):**  
+   Per-interface state is strictly encapsulated within a statically allocated structure `ms_context_t`. It contains only fixed-width sliding accumulators:
+   * Previous arrival timestamp (`uint32_t prev_ts_us`) for inter-arrival delta tracking.
+   * Rolling window packet counter (`uint8_t win_pkt_count`) and jitter accumulator (`uint16_t win_jitter_accum`).
+   * Connection cardinality bitmask (`uint32_t active_conn_mask`).
+   * Leaky Bucket penalty level and exponential backoff cooldown timestamps.
+   The total static SRAM footprint per protected interface is bounded to **96 Bytes**, well within the 128-byte ceiling mandated by `NFR-02`.
+
+---
+
+### 3.4.2 Constant-Time Feature Extraction & Flash LUT Fixed-Point Entropy
+
+To guarantee hard real-time execution bounds (`WCET <= 1,500 CPU clock cycles`, `NFR-01`), feature extraction must complete in strictly constant time ($O(1)$) independently of packet contents:
+
+1. **Eight-Dimensional Telemetry Vector:**  
+   For every frame, the engine evaluates eight physical and statistical dimensions packed into a 12-byte naturally aligned layout:
+   * `feat_iat_delta_us` (32-bit integer): Inter-arrival time difference ($\Delta t = t_i - t_{i-1}$) in microseconds.
+   * `feat_payload_len` (16-bit integer): Frame byte length.
+   * `feat_proto_id` (8-bit integer): Transport protocol identifier (e.g., Modbus/TCP, CAN).
+   * `feat_transport_flags` (8-bit integer): Bitwise flags (SYN, ACK, RST, URG).
+   * `feat_pkt_rate` (8-bit integer): Sliding-window packet frequency.
+   * `feat_jitter` (8-bit integer): Arrival variance relative to expected industrial polling intervals.
+   * `feat_conn_fan_in` (8-bit integer): Source address cardinality.
+   * `feat_payload_entropy_q8` (8-bit unsigned fixed-point integer): Normalized Shannon byte entropy.
+
+2. **Flash Look-Up Table (LUT) for Shannon Entropy in Q8 Arithmetic:**  
+   Standard Shannon entropy requires computing transcendental logarithms:
+   $$H(X) = -\sum_{i=1}^{n} p(x_i) \log_2 p(x_i)$$
+   Calling floating-point `log2()` or math libraries on microcontrollers introduces non-deterministic execution jitter and code bloat. `libmicroshield` replaces runtime logarithmic calculations with a precomputed 256-entry Look-Up Table stored in Flash (`const uint8_t ms_entropy_lut[256]`):
+   * Each entry stores the pre-scaled fixed-point product $p \cdot \log_2(p)$ in $Q8$ format ($0$ to $255$ representing $[0.0, 1.0]$).
+   * Byte frequencies are sampled across the ingress payload in a single linear pass ($O(\text{payload\_len})$).
+   * Total entropy is accumulated using 16-bit integer addition and right-shifted back to $Q8$, executing in $< 350$ clock cycles with zero floating-point operations.
+
+
+### 3.4.3 Transpiled Compact Decision Tree Runtime & Deterministic Inference
+
+Once the 8-feature vector is assembled, it is evaluated by the inference engine against an immutable node array stored directly in Flash memory (const ms_tree_node_t ms_model_nodes[]).
+
+#### Epistemological & Engineering Justification for the Decision Tree
+In edge-tier cyber-physical systems engineering, deploying opaque black-box models (such as deep artificial neural networks or recurrent architectures) introduces severe operational hazards:
+1. **Mathematical Determinism (O(tree_depth)):** A Decision Tree of maximum depth D guarantees that any classification completes in at most D conditional integer comparisons. With D <= 8, traversal requires at most 8 branch evaluations, ensuring mathematically bounded cycle consumption regardless of adversarial input.
+2. **Intrinsic Ante-Hoc Explainability (Rudin, 2019):** Every decision maps to an exact boolean rule path composed of physical threshold splits. When an edge node quarantines an interface, operators can inspect the exact clause triggered (matched_rule_id), eliminating post-hoc approximation uncertainty.
+3. **Hardware Efficiency on Cortex-M4F:** Unlike neural networks requiring thousands of multiply-accumulate (MAC) operations, weight quantization scratchpads, and matrix tensor arenas, a transpiled tree executes entirely within standard CPU registers without floating-point emulation overhead.
+
+#### Node Array Layout & Branch Traversal
+The node data structure is packed into a compact 8-byte layout containing the 8-bit feature selector (feature_index), the leaf flag (is_leaf), the 16-bit glass-box rule identifier (rule_id), the 32-bit fixed-point comparison split threshold (threshold), and the 16-bit indices of the left and right child nodes (left_child, right_child).
+
+Traversal begins at root index 0. At each internal node, the evaluated feature is compared against threshold: if strictly less, execution jumps to left_child; otherwise, it proceeds to right_child. Upon encountering is_leaf == 1, traversal terminates, returning the classification verdict and the unique rule_id.
+
+---
+
+### 3.4.4 Multi-Stage Containment FSM (Leaky Bucket & Exponential Backoff)
+
+To prevent brittle binary tripwires—such as the operational paralysis seen in the November 2026 civil aviation alert-storm incidents—mitigation logic is decoupled from raw instantaneous verdicts. The engine executes a 5-state Finite-State Machine combining a Leaky Bucket filter with Binary Exponential Backoff.
+
+[![Multi-Stage Mitigation FSM](../../puml/des-06-edge-mitigation-fsm.svg)](../../puml/des-06-edge-mitigation-fsm.svg)  
+*(Click on the diagram to open the full-resolution vector graphic in a new tab)*  
+*Figure 3.7: Deterministic 5-state edge mitigation FSM, illustrating proportional escalation from transient anomaly drops to hardware interrupt isolation.*
+
+1. **NORMAL (Operational Pass-Through):** Ingress frames pass unrestricted (ALLOW). Stratified benign telemetry samples (1:K) are queued for out-of-band shadow auditing.
+2. **SUSPICIOUS (Transient Anomaly Filtering):** Isolated anomalies drop the offending packet (DROP) and increment the Leaky Bucket penalty counter by +1. If no further violations occur before the leak interval (T_leak) elapses, the penalty decrements back to zero, returning the interface to NORMAL.
+3. **THROTTLED_L1 (Burst Rate-Limiting):** If consecutive violations exceed threshold L1, the interface enters micro-throttling (MICRO_BLOCK), applying a 50% duty cycle on incoming frames for T_hold = 200 ms.
+4. **QUARANTINED_L2 (Subsystem Isolation):** Persistent anomalies exceeding threshold L2 trigger full algorithmic isolation (EXP_BLOCK), dropping all ingress frames for T_hold = 2,000 ms.
+5. **LOCKDOWN_L3 (Hardware Receiver Perimeter Severance):** Sustained volumetric floods or lateral scanning sweeps (the BBT SE scenario) escalate to hardware lockdown (HW_LOCKDOWN). The engine explicitly disables the peripheral receive interrupt (e.g., clearing the RXNEIE bit in the STM32 USART Control Register), physically severing the compromised interface from the processor bus until an authenticated downlink command (CMD_RESET_FSM) is received from the supervision console.
+

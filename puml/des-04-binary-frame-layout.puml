@@ -3,29 +3,49 @@ skinparam backgroundColor #FFFFFF
 skinparam defaultFontName SansSerif
 skinparam defaultFontSize 11
 skinparam shadowing false
-
-class "MicroShield 24-Byte Binary Frame (Naturally 32-bit Aligned)" as Frame {
-    + [Byte 0x00 - 0x01] uint16_t sync_word = 0xAA55 (Magic Synchronization Header)
-    + [Byte 0x02]        uint8_t  msg_type  (0x01: Alert Anomaly, 0x02: Shadow Sample, 0x10: CMD_RESET)
-    + [Byte 0x03]        uint8_t  node_id   (Logical Edge Identifier: 0x01..0xFF)
-    + [Byte 0x04 - 0x07] uint32_t seq_ts    (Monotonic Packet Sequence / Uptime Timestamp in ms)
-    + [Byte 0x08]        uint8_t  verdict   (0: Benign, 1: DoS Flood, 2: Scan Probe, 3: Injection)
-    + [Byte 0x09]        uint8_t  fsm_state (0: Normal, 1: Suspicious, 2: Throttled, 3: Quarantined, 4: Lockdown)
-    + [Byte 0x0A - 0x0B] uint16_t rule_id   (Glass-Box Ante-Hoc Leaf Rule Identifier)
-    + [Byte 0x0C - 0x0F] uint32_t feat_iat  (Extracted Feature: Inter-Arrival Time delta in us)
-    + [Byte 0x10 - 0x11] uint16_t feat_len  (Extracted Feature: Ingress Frame Byte Length)
-    + [Byte 0x12]        uint8_t  feat_ent  (Extracted Feature: Shannon Byte Entropy in Q8 fixed-point)
-    + [Byte 0x13]        uint8_t  feat_rate (Extracted Feature: Sliding Window Packet Rate)
-    + [Byte 0x14 - 0x15] uint16_t aux_meta  (Sub-threshold margin epsilon / Command parameter)
-    + [Byte 0x16 - 0x17] uint16_t crc16     (CRC-16-CCITT Polynomial 0x1021 across Bytes 0..21)
+skinparam rectangle {
+    BackgroundColor #F8FAFC
+    BorderColor #334155
+    FontColor #0F172A
 }
 
-note bottom of Frame
-  Design Invariants & Physical Channel Agnosticism:
-  - Exact 24-Byte footprint: word-aligned for ARM Cortex-M4F single-cycle LDR/STR.
-  - Zero heap allocation: serialized directly from static stack/registers.
-  - Transport agnostic: streamed via UART, RS-485, or mapped over 4G/5G, LoRaWAN, and TCP sockets.
-  - Bandwidth consumption at 115,200 bps: <= 2.08% overhead at 10 frames/sec (NFR-05 verified).
-end note
+title MicroShield 24-Byte Binary Frame Layout (32-bit Aligned)
+
+rectangle "Byte Offset 00 - 03 (Header & Routing)" {
+    [Bytes 00-01: sync_word (0xAA55)] as b1 #E2E8F0
+    [Byte 02: msg_type (0x01/02/10)] as b2 #E2E8F0
+    [Byte 03: node_id (0x01..0xFF)] as b3 #E2E8F0
+}
+
+rectangle "Byte Offset 04 - 0B (Timestamp, Verdict & Rule)" {
+    [Bytes 04-07: seq_ts (Monotonic Timestamp ms)] as b4 #FEF3C7
+    [Byte 08: verdict (0=Benign, 1..3=Anomaly)] as b5 #FEE2E2
+    [Byte 09: fsm_state (0..4 FSM Level)] as b6 #FEE2E2
+    [Bytes 10-11: rule_id (CART Leaf ID)] as b7 #FEF3C7
+}
+
+rectangle "Byte Offset 0C - 13 (Extracted 8-Feature Vector Q8)" {
+    [Bytes 12-15 (Offset 0C-0F): feat_iat (Inter-Arrival Δ us)] as b8 #ECFDF5
+    [Bytes 16-17 (Offset 10-11): feat_len (Frame Length)] as b9 #ECFDF5
+    [Byte 18 (Offset 12): feat_ent (Shannon Entropy Q8)] as b10 #ECFDF5
+    [Byte 19 (Offset 13): feat_rate (Sliding Rate)] as b11 #ECFDF5
+}
+
+rectangle "Byte Offset 14 - 17 (Metadata & Integrity)" {
+    [Bytes 20-21 (Offset 14-15): aux_meta (Margin / Cmd Arg)] as b12 #F1F5F9
+    [Bytes 22-23 (Offset 16-17): crc16 (ITU-T CRC-16-CCITT 0x1021)] as b13 #DCFCE7
+}
+
+b1 --> b4 : 32-bit Word Alignment
+b4 --> b8
+b8 --> b12
+
+legend right
+  **Design Invariants:**
+  * Exact footprint: 24 Bytes (Multiple of 4 & 8)
+  * Zero Heap Allocation (Stack serialized)
+  * Transport Agnostic (UART, 4G/5G, LoRa, TCP)
+  * Bandwidth overhead: <= 2.08% at 115,200 bps
+end legend
 
 @enduml
