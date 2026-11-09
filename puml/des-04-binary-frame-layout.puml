@@ -1,0 +1,31 @@
+@startuml
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName SansSerif
+skinparam defaultFontSize 11
+skinparam shadowing false
+
+class "MicroShield 24-Byte Binary Frame (Naturally 32-bit Aligned)" as Frame {
+    + [Byte 0x00 - 0x01] uint16_t sync_word = 0xAA55 (Magic Synchronization Header)
+    + [Byte 0x02]        uint8_t  msg_type  (0x01: Alert Anomaly, 0x02: Shadow Sample, 0x10: CMD_RESET)
+    + [Byte 0x03]        uint8_t  node_id   (Logical Edge Identifier: 0x01..0xFF)
+    + [Byte 0x04 - 0x07] uint32_t seq_ts    (Monotonic Packet Sequence / Uptime Timestamp in ms)
+    + [Byte 0x08]        uint8_t  verdict   (0: Benign, 1: DoS Flood, 2: Scan Probe, 3: Injection)
+    + [Byte 0x09]        uint8_t  fsm_state (0: Normal, 1: Suspicious, 2: Throttled, 3: Quarantined, 4: Lockdown)
+    + [Byte 0x0A - 0x0B] uint16_t rule_id   (Glass-Box Ante-Hoc Leaf Rule Identifier)
+    + [Byte 0x0C - 0x0F] uint32_t feat_iat  (Extracted Feature: Inter-Arrival Time delta in us)
+    + [Byte 0x10 - 0x11] uint16_t feat_len  (Extracted Feature: Ingress Frame Byte Length)
+    + [Byte 0x12]        uint8_t  feat_ent  (Extracted Feature: Shannon Byte Entropy in Q8 fixed-point)
+    + [Byte 0x13]        uint8_t  feat_rate (Extracted Feature: Sliding Window Packet Rate)
+    + [Byte 0x14 - 0x15] uint16_t aux_meta  (Sub-threshold margin epsilon / Command parameter)
+    + [Byte 0x16 - 0x17] uint16_t crc16     (CRC-16-CCITT Polynomial 0x1021 across Bytes 0..21)
+}
+
+note bottom of Frame
+  Design Invariants & Physical Channel Agnosticism:
+  - Exact 24-Byte footprint: word-aligned for ARM Cortex-M4F single-cycle LDR/STR.
+  - Zero heap allocation: serialized directly from static stack/registers.
+  - Transport agnostic: streamed via UART, RS-485, or mapped over 4G/5G, LoRaWAN, and TCP sockets.
+  - Bandwidth consumption at 115,200 bps: <= 2.08% overhead at 10 frames/sec (NFR-05 verified).
+end note
+
+@enduml
